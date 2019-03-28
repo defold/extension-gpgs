@@ -22,8 +22,11 @@ shared_state = 1
 
 [android]
 manifest = /AndroidManifest.xml
-package = com.defoldtest.gpgs
+package = com.bringmecakes
 
 [ios]
 bundle_identifier = com.defoldtest.gpgs
+
+[native_extension]
+app_manifest = /game.appmanifest
 

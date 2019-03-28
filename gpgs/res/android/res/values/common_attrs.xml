@@ -5,17 +5,6 @@
 
     <!-- Attributes for LoadingImageView -->
     <declare-styleable name="LoadingImageView">
-
-        <!--
-        What kind of aspect ratio adjustment to do.  It must be one of "none", "adjust_width",
-        or "adjust_height".
-        -->
-        <attr name="imageAspectRatioAdjust" format="enum">
-            <enum name="none" value="0" />
-            <enum name="adjust_width" value="1" />
-            <enum name="adjust_height" value="2" />
-        </attr>
-
         <!--
         The fixed aspect ratio to use in aspect ratio adjustments.
         -->

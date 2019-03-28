@@ -88,12 +88,12 @@ function final(self)
 end
 
 function update(self, dt)
-    local authorized = gpg.is_authorized()
+    --[[local authorized = gpg.is_authorized()
     if self.logged_in ~= authorized then
         self.logged_in = authorized
         set_auth_status(self)
         set_login_button_status(self)
-    end
+    end]]--
 end
 
 function on_message(self, message_id, message, sender)

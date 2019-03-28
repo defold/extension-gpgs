@@ -24,11 +24,6 @@
     #include <android_native_app_glue.h>
 #endif
 
-extern "C"
-{
-    #include <lua/lauxlib.h>
-    #include <lua/lualib.h>
-}
 
 #ifdef DLIB_LOG_DOMAIN
 #undef DLIB_LOG_DOMAIN
