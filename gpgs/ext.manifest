@@ -1,6 +1,1 @@
 name: GpgExt
-
-platforms:
-    armv7-android:
-        context:
-            flags: ["-std=c++11"]
