@@ -1,3 +1,4 @@
 function init(self)
     pprint(_G.gpg)
+    gpg.auth.silent_login()
 end

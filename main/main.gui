@@ -135,7 +135,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 320.0
+    x: 300.0
     y: 88.0
     z: 0.0
     w: 1.0
@@ -167,7 +167,6 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
-  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
 }
@@ -204,7 +203,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "Login"
+  text: "Dirty Larry"
   font: "larryfont"
   id: "login/larrylabel"
   xanchor: XANCHOR_NONE
@@ -230,7 +229,6 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
-  overridden_fields: 8
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -356,7 +354,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 320.0
+    x: 300.0
     y: 88.0
     z: 0.0
     w: 1.0
@@ -388,7 +386,6 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
-  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
 }
@@ -425,7 +422,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "Show High Scores"
+  text: "Dirty Larry"
   font: "larryfont"
   id: "show_highscore/larrylabel"
   xanchor: XANCHOR_NONE
@@ -451,7 +448,6 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
-  overridden_fields: 8
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -577,7 +573,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 320.0
+    x: 300.0
     y: 88.0
     z: 0.0
     w: 1.0
@@ -609,7 +605,6 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
-  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
 }
@@ -646,7 +641,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "Publish Score"
+  text: "Dirty Larry"
   font: "larryfont"
   id: "publish_score/larrylabel"
   xanchor: XANCHOR_NONE
@@ -672,7 +667,6 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
-  overridden_fields: 8
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0
@@ -736,7 +730,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 320.0
+    x: 300.0
     y: 88.0
     z: 0.0
     w: 1.0
@@ -768,7 +762,6 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
-  overridden_fields: 4
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
 }
@@ -805,7 +798,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: "Increase Score"
+  text: "Dirty Larry"
   font: "larryfont"
   id: "increase_score/larrylabel"
   xanchor: XANCHOR_NONE
@@ -831,7 +824,6 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
-  overridden_fields: 8
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0

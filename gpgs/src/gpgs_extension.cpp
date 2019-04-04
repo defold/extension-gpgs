@@ -42,9 +42,15 @@ static void LuaInit(lua_State* L)
     lua_pop(L,  1);
 }
 
+static void InitializeJNI()
+{
+    GpgAuth_Init();
+}
+
 static dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
     LuaInit(params->m_L);
+    InitializeJNI();
     dmLogInfo("Initializing extension Gpg");
     return dmExtension::RESULT_OK;
 }
