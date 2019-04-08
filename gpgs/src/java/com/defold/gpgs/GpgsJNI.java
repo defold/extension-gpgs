@@ -47,9 +47,9 @@ public class GpgsJNI {
                                             if (task.isSuccessful()) {
                                                 // The signed in account is stored in the task's result.
                                                 signedInAccount = task.getResult();
-                                                Log.d(TAG, "silent sign in success");
+                                                Log.d(TAG, "silent sign-in success");
                                             } else {
-                                                Log.d(TAG, "silent sign in failed");
+                                                Log.d(TAG, "silent sign-in failed");
                                                 // Player will need to sign-in explicitly using via UI.
                                                 // See [sign-in best practices](http://developers.google.com/games/services/checklist) for guidance on how and when to implement Interactive Sign-in,
                                                 // and [Performing Interactive Sign-in](http://developers.google.com/games/services/android/signin#performing_interactive_sign-in) for details on how to implement
@@ -66,7 +66,19 @@ public class GpgsJNI {
         GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
         Intent intent = signInClient.getSignInIntent();
         this.activity.startActivityForResult(intent, RC_SIGN_IN);
-        Log.d(TAG, "simple login");
+        Log.d(TAG, "simple login tap");
+    }
+
+    private void logout() {
+        GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
+                GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+        signInClient.signOut().addOnCompleteListener(this.activity,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d(TAG, "logged out");
+                    }
+                });
     }
 
 

@@ -15,4 +15,10 @@ function on_input(self, action_id, action)
             gpg.auth.login()
         end
     end)
+    dirtylarry:button("logout", action_id, action, function ()
+        print("LOGOUT was pressed")
+        if gpg then
+            gpg.auth.logout()
+        end
+    end)
 end
