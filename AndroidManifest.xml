@@ -15,12 +15,6 @@
         android:label="{{project.title}}" android:hasCode="true"
         android:name="android.support.multidex.MultiDexApplication">
 
-        <!-- For Google Play Game Services -->
-       <meta-data android:name="com.google.android.gms.games.APP_ID"
-            android:value="@string/app_id" />
-       <meta-data android:name="com.google.android.gms.version"
-           android:value="@integer/google_play_services_version"/>
-
         <!-- For Local Notifications -->
         <receiver android:name="com.defold.push.LocalNotificationReceiver" >
         </receiver>
@@ -29,6 +23,20 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <!-- GPGS -->
+       <meta-data android:name="com.google.android.gms.games.APP_ID"
+        android:value="\ {{gpgs.app_id}}" />
+        <!--android.arch.lifecycle-->
+        <meta-data android:name="android.arch.lifecycle.VERSION" android:value="27.0.0-SNAPSHOT"/>
+        <!--com.google.android.gms.base-->
+        <activity android:exported="false" android:name="com.google.android.gms.common.api.GoogleApiActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <!--android.support.v4-->
+        <meta-data android:name="android.support.VERSION" android:value="26.1.0"/>
+        <!--com.google.android.gms.auth.api-->
+        <activity android:excludeFromRecents="true" android:exported="false" android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+        <!--com.google.android.gms.auth.api-->
+        <service android:exported="true" android:name="com.google.android.gms.auth.api.signin.RevocationBoundService" android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"/>
 
         <!-- Disable Firebase Analytics -->
         <meta-data android:name="firebase_analytics_collection_deactivated" android:value="true" />

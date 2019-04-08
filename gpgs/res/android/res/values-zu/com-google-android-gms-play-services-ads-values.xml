@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-zu/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"Londoloza isithombe"</string>
+<string name="s2" msgid="4550830452390689489">"Vumela isikhangiso ukugcina isithombe kwigalari yesithombe?"</string>
+<string name="s3" msgid="2435407834265420668">"Yamukela"</string>
+<string name="s4" msgid="9167523597401839819">"Yenqaba"</string>
+<string name="s5" msgid="1566682516266724847">"Dala umcimbi wekhalenda"</string>
+<string name="s6" msgid="5996672174517137271">"Vumela Isikhangiso ukudala umcimbi wekhalenda?"</string>
+<string name="s7" msgid="7163549807207034258">"Hlola isikhangiso"</string>
+</resources>

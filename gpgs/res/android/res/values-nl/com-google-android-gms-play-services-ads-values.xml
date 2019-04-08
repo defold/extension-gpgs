@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-nl/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"Afbeelding opslaan"</string>
+<string name="s2" msgid="4550830452390689489">"Advertentie toestaan om afbeelding op te slaan in fotogalerij?"</string>
+<string name="s3" msgid="2435407834265420668">"Accepteren"</string>
+<string name="s4" msgid="9167523597401839819">"Weigeren"</string>
+<string name="s5" msgid="1566682516266724847">"Agenda-afspraak maken"</string>
+<string name="s6" msgid="5996672174517137271">"Advertentie toestaan om een agenda-afspraak te maken?"</string>
+<string name="s7" msgid="7163549807207034258">"Testadvertentie"</string>
+</resources>

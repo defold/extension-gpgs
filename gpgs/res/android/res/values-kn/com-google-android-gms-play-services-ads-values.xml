@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-kn/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"ಚಿತ್ರ ಉಳಿಸಿ"</string>
+<string name="s2" msgid="4550830452390689489">"ಚಿತ್ರದ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಚಿತ್ರ ಸಂಗ್ರಹಿಸಿಡಲು ಜಾಹೀರಾತಿಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
+<string name="s3" msgid="2435407834265420668">"ಸಮ್ಮತಿಸಿ"</string>
+<string name="s4" msgid="9167523597401839819">"ನಿರಾಕರಿಸಿ"</string>
+<string name="s5" msgid="1566682516266724847">"ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್ ರಚಿಸಿ"</string>
+<string name="s6" msgid="5996672174517137271">"ಕ್ಯಾಲೆಂಡರ್ ಈವೆಂಟ್ ರಚಿಸಲು ಜಾಹೀರಾತಿಗೆ ಅನುಮತಿಸುವುದೇ?"</string>
+<string name="s7" msgid="7163549807207034258">"ಪರೀಕ್ಷಾ ಜಾಹೀರಾತು"</string>
+</resources>

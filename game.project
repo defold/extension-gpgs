@@ -30,3 +30,6 @@ bundle_identifier = com.defoldtest.gpgs
 [native_extension]
 app_manifest = /game.appmanifest
 
+[gpgs]
+app_id = 218655263167
+

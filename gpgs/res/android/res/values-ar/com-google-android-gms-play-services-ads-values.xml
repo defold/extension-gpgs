@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-ar/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"حفظ الصورة"</string>
+<string name="s2" msgid="4550830452390689489">"هل تريد السماح للإعلان بتخزين الصورة في معرض الصور؟"</string>
+<string name="s3" msgid="2435407834265420668">"قبول"</string>
+<string name="s4" msgid="9167523597401839819">"رفض"</string>
+<string name="s5" msgid="1566682516266724847">"إنشاء حدث تقويم"</string>
+<string name="s6" msgid="5996672174517137271">"هل تريد السماح للإعلان بإنشاء حدث تقويم؟"</string>
+<string name="s7" msgid="7163549807207034258">"إعلان تجريبي"</string>
+</resources>

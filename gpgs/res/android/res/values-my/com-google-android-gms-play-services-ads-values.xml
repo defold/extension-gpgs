@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-my/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"ဓာတ်ပုံကို သိမ်းရန်"</string>
+<string name="s2" msgid="4550830452390689489">"ကြော်ငြာအား ဓာတ်ပုံပြခန်းတွင် ပုံကိုသိမ်းဆည်းခွင့် ပြုလိုပါသလား။"</string>
+<string name="s3" msgid="2435407834265420668">"လက်ခံရန်"</string>
+<string name="s4" msgid="9167523597401839819">"ငြင်းပယ်ရန်"</string>
+<string name="s5" msgid="1566682516266724847">"ပြက္ခဒိန်တွင် အစီအစဉ်ထည့်သွင်းရန်"</string>
+<string name="s6" msgid="5996672174517137271">"ကြော်ငြာအား ပြက္ခဒိန်တွင် အစီအစဉ်ထည့်သွင်းခွင့် ပြုပါသလား။"</string>
+<string name="s7" msgid="7163549807207034258">"စမ်းသပ်ကြော်ငြာ"</string>
+</resources>

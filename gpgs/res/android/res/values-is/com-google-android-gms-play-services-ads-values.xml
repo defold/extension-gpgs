@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding='utf-8' standalone='no'?>
+<resources>
+<!-- blaze-out/k8-opt/genfiles/java/com/google/android/gmscore/integ/client/admob-impl/res/values-is/strings.xml -->
+<eat-comment/>
+<string name="s1" msgid="368094699078615544">"Vista mynd"</string>
+<string name="s2" msgid="4550830452390689489">"Leyfa auglýsingu að vista mynd í myndasafninu?"</string>
+<string name="s3" msgid="2435407834265420668">"Samþykkja"</string>
+<string name="s4" msgid="9167523597401839819">"Hafna"</string>
+<string name="s5" msgid="1566682516266724847">"Búa til dagatalsviðburð"</string>
+<string name="s6" msgid="5996672174517137271">"Leyfa auglýsingu að búa til dagatalsviðburð?"</string>
+<string name="s7" msgid="7163549807207034258">"Prófa auglýsingu"</string>
+</resources>
