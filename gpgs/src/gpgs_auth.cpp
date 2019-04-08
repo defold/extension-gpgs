@@ -11,13 +11,18 @@
 struct AuthState
 {
     jobject                 m_GpgsJNI;
+    
     jmethodID               m_silentLogin;
+    jmethodID               m_login;
 };
 
 AuthState g_Auth;
 
 int GpgAuth_Login(lua_State* L)
 {
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    env->CallVoidMethod(g_Auth.m_GpgsJNI, g_Auth.m_login);
     return 0;
 }
 
@@ -42,6 +47,7 @@ void GpgAuth_Init()
     jclass cls = class_loader.load("com.defold.gpgs.GpgsJNI");
 
     g_Auth.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
+    g_Auth.m_login = env->GetMethodID(cls, "login", "()V");
     
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;)V");
     g_Auth.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));

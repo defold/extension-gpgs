@@ -1,4 +1,18 @@
+local dirtylarry = require "dirtylarry/dirtylarry"
+
 function init(self)
+    msg.post(".", "acquire_input_focus")
     pprint(_G.gpg)
-    gpg.auth.silent_login()
+    if gpg then
+        gpg.auth.silent_login()
+    end
+end
+
+function on_input(self, action_id, action)
+    dirtylarry:button("login", action_id, action, function ()
+        print("LOGIN was pressed")
+        if gpg then
+            gpg.auth.login()
+        end
+    end)
 end

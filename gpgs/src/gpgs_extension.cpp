@@ -69,17 +69,17 @@ DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg,
 
 #else
 
-dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
+dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
     dmLogInfo("Registered extension Gpg (null)");
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result AppFinalizeGpg(dmExtension::AppParams* params)
+dmExtension::Result FinalizeGpg(dmExtension::Params* params)
 {
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg, 0, 0, 0, 0)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, InitializeGpg, 0, 0, FinalizeGpg)
 
 #endif
