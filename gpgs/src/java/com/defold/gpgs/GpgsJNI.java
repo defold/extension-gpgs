@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -21,8 +22,32 @@ public class GpgsJNI {
 
 
     //--------------------------------------------------
+
+     private String mPlayerId;
+
+      // The currently signed in account, used to check the account has changed outside of this activity when resuming.
+      GoogleSignInAccount mSignedInAccount = null;
+
     public GpgsJNI(Activity activity) {
         this.activity = activity;
+    }
+
+    public void activityResult(int requestCode, int resultCode, Intent intent) {
+        Log.d(TAG, "activityResult: "+requestCode+" "+resultCode);
+        if (requestCode == RC_SIGN_IN) {
+
+              Task<GoogleSignInAccount> task =
+                  GoogleSignIn.getSignedInAccountFromIntent(intent);
+
+              try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                //onConnected(account);
+                Log.d(TAG, "onConnected");
+              } catch (ApiException apiException) {
+                String message = apiException.getMessage();
+                Log.d(TAG, "can't connect " + message);
+              }
+        }
     }
 
     public void silentLogin() {

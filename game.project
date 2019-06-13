@@ -22,7 +22,7 @@ shared_state = 1
 
 [android]
 manifest = /AndroidManifest.xml
-package = com.bringmecakes
+package = com.potatojam.onet_paradise.match_two_tiles
 
 [ios]
 bundle_identifier = com.defoldtest.gpgs
@@ -31,5 +31,5 @@ bundle_identifier = com.defoldtest.gpgs
 app_manifest = /game.appmanifest
 
 [gpgs]
-app_id = 218655263167
+app_id = 567627510591
 
