@@ -5,12 +5,17 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.games.Games;
+import com.google.android.gms.games.Player;
+import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 
 public class GpgsJNI {
@@ -23,30 +28,54 @@ public class GpgsJNI {
 
     //--------------------------------------------------
 
-     private String mPlayerId;
+    private String mPlayerId;
 
-      // The currently signed in account, used to check the account has changed outside of this activity when resuming.
-      GoogleSignInAccount mSignedInAccount = null;
+    // The currently signed in account, used to check the account has changed outside of this activity when resuming.
+    GoogleSignInAccount mSignedInAccount = null;
+
+    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+        Log.d(TAG, "onConnected(): connected to Google APIs");
+        if (mSignedInAccount != googleSignInAccount) {
+
+            mSignedInAccount = googleSignInAccount;
+
+            // get the playerId from the PlayersClient
+            PlayersClient playersClient = Games.getPlayersClient(activity, googleSignInAccount);
+            playersClient.getCurrentPlayer()
+                    .addOnSuccessListener(new OnSuccessListener<Player>() {
+                        @Override
+                        public void onSuccess(Player player) {
+                            mPlayerId = player.getPlayerId();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "There was a problem getting the player id! Code");
+                        }
+                    });
+        }
+    }
 
     public GpgsJNI(Activity activity) {
         this.activity = activity;
     }
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
-        Log.d(TAG, "activityResult: "+requestCode+" "+resultCode);
+        Log.d(TAG, "activityResult: " + requestCode + " " + resultCode);
         if (requestCode == RC_SIGN_IN) {
 
-              Task<GoogleSignInAccount> task =
-                  GoogleSignIn.getSignedInAccountFromIntent(intent);
+            Task<GoogleSignInAccount> task =
+                    GoogleSignIn.getSignedInAccountFromIntent(intent);
 
-              try {
+            try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                //onConnected(account);
                 Log.d(TAG, "onConnected");
-              } catch (ApiException apiException) {
+                onConnected(account);
+            } catch (ApiException apiException) {
                 String message = apiException.getMessage();
-                Log.d(TAG, "can't connect " + message);
-              }
+                Log.d(TAG, "can't connect: " + message);
+            }
         }
     }
 
@@ -73,6 +102,7 @@ public class GpgsJNI {
                                                 // The signed in account is stored in the task's result.
                                                 signedInAccount = task.getResult();
                                                 Log.d(TAG, "silent sign-in success");
+                                                onConnected(task.getResult());
                                             } else {
                                                 Log.d(TAG, "silent sign-in failed");
                                                 // Player will need to sign-in explicitly using via UI.
