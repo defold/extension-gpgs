@@ -27,9 +27,6 @@ package = com.potatojam.onet_paradise.match_two_tiles
 [ios]
 bundle_identifier = com.defoldtest.gpgs
 
-[native_extension]
-app_manifest = /game.appmanifest
-
 [gpgs]
 app_id = 567627510591
 
