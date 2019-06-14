@@ -11,11 +11,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.Player;
 import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 public class GpgsJNI {
@@ -46,6 +47,7 @@ public class GpgsJNI {
                         @Override
                         public void onSuccess(Player player) {
                             mPlayerId = player.getPlayerId();
+                            Log.d(TAG, "Player ID: " + mPlayerId);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -55,6 +57,9 @@ public class GpgsJNI {
                         }
                     });
         }
+        GamesClient gamesClient = Games.getGamesClient(activity, googleSignInAccount);
+        gamesClient.setViewForPopups(activity.findViewById(android.R.id.content));
+
     }
 
     public GpgsJNI(Activity activity) {
@@ -70,8 +75,8 @@ public class GpgsJNI {
 
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Log.d(TAG, "onConnected");
                 onConnected(account);
+                Log.d(TAG, "onConnected");
             } catch (ApiException apiException) {
                 String message = apiException.getMessage();
                 Log.d(TAG, "can't connect: " + message);
