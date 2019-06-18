@@ -1,6 +1,6 @@
 [project]
-title = GooglePlay
-version = 0.1
+title = GPGS
+version = 0.2
 dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
 bundle_resources = /res
 

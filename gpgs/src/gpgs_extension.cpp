@@ -11,12 +11,15 @@
 
 struct GPGS
 {
-    jobject                 m_GpgsJNI;
+    jobject                 GpgsJNI;
 
     jmethodID               m_silentLogin;
     jmethodID               m_login;
     jmethodID               m_logout;
     jmethodID               m_activityResult;
+    jmethodID               m_getDisplayName;
+    jmethodID               m_getId;
+    jmethodID               m_isAuthorized;
 };
 
 GPGS g_gpgs;
@@ -27,33 +30,103 @@ static void OnActivityResult(void *env, void* activity, int32_t request_code, in
 
     ThreadAttacher attacher;
     JNIEnv *_env = attacher.env;
-    _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
+    
+    _env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
 
 // GPGPS autorization 
 
 int GpgAuth_Login(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+    
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_login);
+    
+    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_login);
+    
     return 0;
 }
 
 int GpgAuth_Logout(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+    
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
+    
+    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_logout);
+    
     return 0;
 }
 
 int GpgAuth_SilentLogin(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+    
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
+    
+    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_silentLogin);
+    
     return 0;
+}
+
+int GpgAuth_getDisplayName(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.GpgsJNI, g_gpgs.m_getDisplayName);
+    if (return_value) 
+    {
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    
+    return 1;
+}
+
+int GpgAuth_getId(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.GpgsJNI, g_gpgs.m_getId);
+    if (return_value) 
+    {
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    
+    return 1;
+}
+
+int GpgAuth_isAuthorized(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.GpgsJNI, g_gpgs.m_isAuthorized);
+    
+    lua_pushboolean(L, JNI_TRUE == return_value);
+
+    return 1;
 }
 
 void GpgAuth_Init(jclass cls, JNIEnv *env)
@@ -61,6 +134,8 @@ void GpgAuth_Init(jclass cls, JNIEnv *env)
     g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
     g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
     g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
+    g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
+    g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
 }
 
 //
@@ -77,6 +152,9 @@ static const luaL_reg Gpg_auth[] =
     {"login", GpgAuth_Login},
     {"logout", GpgAuth_Logout},
     {"silent_login", GpgAuth_SilentLogin},
+    {"get_display_name", GpgAuth_getDisplayName},
+    {"get_id", GpgAuth_getId},
+    {"is_authorized", GpgAuth_isAuthorized},
     {0,0}
 };
 
@@ -110,7 +188,7 @@ static void InitializeJNI()
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
     
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;)V");
-    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));
+    g_gpgs.GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));
 }
 
 static dmExtension::Result InitializeGpg(dmExtension::Params* params)

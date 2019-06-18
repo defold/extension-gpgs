@@ -18,25 +18,21 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 public class GpgsJNI {
     private static final int RC_SIGN_IN = 9001;
     final static String TAG = "GPGS_DEFOLD";
 
     private Activity activity;
-    private GoogleSignInAccount signedInAccount;
-
 
     //--------------------------------------------------
-
-    private String mPlayerId;
-
-    // The currently signed in account, used to check the account has changed outside of this activity when resuming.
-    GoogleSignInAccount mSignedInAccount = null;
+    private GoogleSignInAccount mSignedInAccount = null;
+    private Player mPlayer;
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
         Log.d(TAG, "onConnected(): connected to Google APIs");
-        if (mSignedInAccount != googleSignInAccount) {
+        if (mSignedInAccount != googleSignInAccount || mPlayer == null) {
 
             mSignedInAccount = googleSignInAccount;
 
@@ -46,8 +42,8 @@ public class GpgsJNI {
                     .addOnSuccessListener(new OnSuccessListener<Player>() {
                         @Override
                         public void onSuccess(Player player) {
-                            mPlayerId = player.getPlayerId();
-                            Log.d(TAG, "Player ID: " + mPlayerId);
+                            mPlayer = player;
+                            Log.d(TAG, "Player ID: " + mPlayer.getPlayerId());
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -72,14 +68,11 @@ public class GpgsJNI {
 
             Task<GoogleSignInAccount> task =
                     GoogleSignIn.getSignedInAccountFromIntent(intent);
-
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                onConnected(account);
-                Log.d(TAG, "onConnected");
-            } catch (ApiException apiException) {
-                String message = apiException.getMessage();
-                Log.d(TAG, "can't connect: " + message);
+            if (task.isSuccessful()) {
+                Log.d(TAG, "sign-in success");
+                onConnected(task.getResult());
+            } else {
+                Log.d(TAG, "sign-in failed");
             }
         }
     }
@@ -91,9 +84,7 @@ public class GpgsJNI {
                 GoogleSignInOptions signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
                 if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
-                    // Already signed in.
-                    // The signed in account is stored in the 'account' variable.
-                    signedInAccount = account;
+                    onConnected(account);
                 } else {
                     // Haven't been signed-in before. Try the silent sign-in first.
                     GoogleSignInClient signInClient = GoogleSignIn.getClient(activity, signInOptions);
@@ -105,7 +96,6 @@ public class GpgsJNI {
                                         public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
                                             if (task.isSuccessful()) {
                                                 // The signed in account is stored in the task's result.
-                                                signedInAccount = task.getResult();
                                                 Log.d(TAG, "silent sign-in success");
                                                 onConnected(task.getResult());
                                             } else {
@@ -126,19 +116,40 @@ public class GpgsJNI {
         GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
         Intent intent = signInClient.getSignInIntent();
         this.activity.startActivityForResult(intent, RC_SIGN_IN);
-        Log.d(TAG, "simple login tap");
     }
 
-    private void logout() {
+    public void logout() {
         GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
                 GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
         signInClient.signOut().addOnCompleteListener(this.activity,
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        Log.d(TAG, "logged out");
+                        mSignedInAccount = null;
+                        mPlayer = null;
                     }
                 });
+    }
+
+    public String getDisplayName() {
+        if (mPlayer == null) {
+            return null;
+        }
+        return mPlayer.getDisplayName();
+    }
+
+    public String getId() {
+        if (mPlayer == null) {
+            return null;
+        }
+        return mPlayer.getPlayerId();
+    }
+
+    public boolean isAuthorized() {
+        if (mPlayer == null) {
+            return false;
+        }
+        return true;
     }
 
 
