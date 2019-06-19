@@ -11,8 +11,8 @@
 
 struct GPGS
 {
-    jobject                 GpgsJNI;
-
+    jobject                 m_GpgsJNI;
+    //autorization
     jmethodID               m_silentLogin;
     jmethodID               m_login;
     jmethodID               m_logout;
@@ -20,19 +20,10 @@ struct GPGS
     jmethodID               m_getDisplayName;
     jmethodID               m_getId;
     jmethodID               m_isAuthorized;
+    jmethodID               m_setGravityForPopups;
 };
 
 GPGS g_gpgs;
-
-static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
-{
-    dmLogInfo("OnActivityResult: env: %p  activity: %p  request_code: %d  result_code: %d  result: %p", env, activity, request_code, result_code, result);
-
-    ThreadAttacher attacher;
-    JNIEnv *_env = attacher.env;
-    
-    _env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
-}
 
 // GPGPS autorization 
 
@@ -43,7 +34,7 @@ int GpgAuth_Login(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_login);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_login);
     
     return 0;
 }
@@ -55,7 +46,7 @@ int GpgAuth_Logout(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_logout);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
     
     return 0;
 }
@@ -67,7 +58,7 @@ int GpgAuth_SilentLogin(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    env->CallVoidMethod(g_gpgs.GpgsJNI, g_gpgs.m_silentLogin);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
     
     return 0;
 }
@@ -78,7 +69,7 @@ int GpgAuth_getDisplayName(lua_State* L)
     
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.GpgsJNI, g_gpgs.m_getDisplayName);
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getDisplayName);
     if (return_value) 
     {
         const char* new_char = env->GetStringUTFChars(return_value, 0);
@@ -100,7 +91,7 @@ int GpgAuth_getId(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.GpgsJNI, g_gpgs.m_getId);
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getId);
     if (return_value) 
     {
         const char* new_char = env->GetStringUTFChars(return_value, 0);
@@ -122,39 +113,60 @@ int GpgAuth_isAuthorized(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.GpgsJNI, g_gpgs.m_isAuthorized);
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_isAuthorized);
     
     lua_pushboolean(L, JNI_TRUE == return_value);
 
     return 1;
 }
 
-void GpgAuth_Init(jclass cls, JNIEnv *env)
+enum PopupPositions
 {
-    g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
-    g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
-    g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
-    g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
-    g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
-}
-
-//
-
-//gpg.methods()
-static const luaL_reg Gpg_methods[] =
-{
-    {0,0}
+    POPUP_POS_TOP_LEFT =           48 | 3,
+    POPUP_POS_TOP_CENTER =         48 | 1,
+    POPUP_POS_TOP_RIGHT =          48 | 5,
+    POPUP_POS_CENTER_LEFT =        16 | 3,
+    POPUP_POS_CENTER =             16 | 1,
+    POPUP_POS_CENTER_RIGHT =       16 | 5,
+    POPUP_POS_BOTTOM_LEFT =        80 | 3,
+    POPUP_POS_BOTTOM_CENTER =      80 | 1,
+    POPUP_POS_BOTTOM_RIGHT =       80 | 5
 };
 
-//gpg.auth.methods()
-static const luaL_reg Gpg_auth[] =
+int GpgAuth_setGravityForPopups(lua_State* L)
 {
+    DM_LUA_STACK_CHECK(L, 0);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int position_lua = luaL_checknumber(L, 1);
+
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_setGravityForPopups, position_lua);
+
+    return 0;
+}
+
+// Extention methods
+
+static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
+{
+    ThreadAttacher attacher;
+    JNIEnv *_env = attacher.env;
+
+    _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
+}
+
+static const luaL_reg Gpg_methods[] =
+{
+    //autorization
     {"login", GpgAuth_Login},
     {"logout", GpgAuth_Logout},
     {"silent_login", GpgAuth_SilentLogin},
     {"get_display_name", GpgAuth_getDisplayName},
     {"get_id", GpgAuth_getId},
     {"is_authorized", GpgAuth_isAuthorized},
+    {"set_popup_position", GpgAuth_setGravityForPopups},
     {0,0}
 };
 
@@ -169,10 +181,22 @@ static void LuaInit(lua_State* L)
     DM_LUA_STACK_CHECK(L, 0);
     luaL_register(L, MODULE_NAME, Gpg_methods);
 
-    lua_newtable(L);
-    luaL_register(L, NULL, Gpg_auth);
-    lua_setfield(L, -2, "auth");
+#define SETCONSTANT(name) \
+    lua_pushnumber(L, (lua_Number) name); \
+    lua_setfield(L, -2, #name); \
 
+    SETCONSTANT(POPUP_POS_TOP_LEFT)
+    SETCONSTANT(POPUP_POS_TOP_CENTER)
+    SETCONSTANT(POPUP_POS_TOP_RIGHT)
+    SETCONSTANT(POPUP_POS_CENTER_LEFT)
+    SETCONSTANT(POPUP_POS_CENTER)
+    SETCONSTANT(POPUP_POS_CENTER_RIGHT)
+    SETCONSTANT(POPUP_POS_BOTTOM_LEFT)
+    SETCONSTANT(POPUP_POS_BOTTOM_CENTER)
+    SETCONSTANT(POPUP_POS_BOTTOM_RIGHT)
+    
+#undef SETCONSTANT
+    
     lua_pop(L,  1);
 }
 
@@ -183,12 +207,19 @@ static void InitializeJNI()
     ClassLoader class_loader = ClassLoader(env);
     jclass cls = class_loader.load("com.defold.gpgs.GpgsJNI");
 
-    GpgAuth_Init(cls, env);
-
+    //authorization
+    g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
+    g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
+    g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
+    g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
+    g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
+    g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
+    
+    //private methods
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
     
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;)V");
-    g_gpgs.GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));
+    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));
 }
 
 static dmExtension::Result InitializeGpg(dmExtension::Params* params)
@@ -196,7 +227,6 @@ static dmExtension::Result InitializeGpg(dmExtension::Params* params)
     LuaInit(params->m_L);
     InitializeJNI();
     dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
-    dmLogInfo("Initializing extension Gpg");
     return dmExtension::RESULT_OK;
 }
 

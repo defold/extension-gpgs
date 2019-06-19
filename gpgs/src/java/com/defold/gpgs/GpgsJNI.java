@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.Gravity;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -29,6 +30,7 @@ public class GpgsJNI {
     //--------------------------------------------------
     private GoogleSignInAccount mSignedInAccount = null;
     private Player mPlayer;
+    private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
         Log.d(TAG, "onConnected(): connected to Google APIs");
@@ -54,6 +56,7 @@ public class GpgsJNI {
                     });
         }
         GamesClient gamesClient = Games.getGamesClient(activity, googleSignInAccount);
+        gamesClient.setGravityForPopups(mGravity);
         gamesClient.setViewForPopups(activity.findViewById(android.R.id.content));
 
     }
@@ -150,6 +153,10 @@ public class GpgsJNI {
             return false;
         }
         return true;
+    }
+
+    public void setGravityForPopups(int gravity) {
+        mGravity = gravity;
     }
 
 
