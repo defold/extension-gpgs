@@ -21,7 +21,6 @@ scale = 0.02
 shared_state = 1
 
 [android]
-manifest = /AndroidManifest.xml
 package = com.potatojam.onet_paradise.match_two_tiles
 
 [ios]
