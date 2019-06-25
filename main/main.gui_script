@@ -12,10 +12,18 @@ local positions = {
     "POPUP_POS_BOTTOM_RIGHT"
 }
 
+function gpg_callback(self, message_id, message)
+    print("---------")
+    print(message_id)
+    pprint(message)
+    print("---------")
+end
+
 function init(self)
     msg.post(".", "acquire_input_focus")
     pprint(_G.gpg)
     if gpg then
+        gpg.set_callback(gpg_callback)
         gpg.silent_login()
     end
 end

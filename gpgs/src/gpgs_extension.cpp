@@ -8,6 +8,7 @@
 #if defined(DM_PLATFORM_ANDROID)
 
 #include "gpgs_jni.h"
+#include "private_gpgs_callback.h"
 
 struct GPGS
 {
@@ -147,6 +148,12 @@ int GpgAuth_setGravityForPopups(lua_State* L)
     return 0;
 }
 
+int Gpg_callback(lua_State* L)
+{
+    gpgs_set_callback(L, 1);
+    return 0;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -167,6 +174,7 @@ static const luaL_reg Gpg_methods[] =
     {"get_id", GpgAuth_getId},
     {"is_authorized", GpgAuth_isAuthorized},
     {"set_popup_position", GpgAuth_setGravityForPopups},
+    {"set_callback", Gpg_callback},
     {0,0}
 };
 
@@ -227,6 +235,7 @@ static dmExtension::Result InitializeGpg(dmExtension::Params* params)
     LuaInit(params->m_L);
     InitializeJNI();
     dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
+    gpgs_callback_initialize();
     return dmExtension::RESULT_OK;
 }
 
@@ -235,13 +244,20 @@ static dmExtension::Result AppFinalizeGpg(dmExtension::AppParams* params)
     return dmExtension::RESULT_OK;
 }
 
+static dmExtension::Result UpdateGpg(dmExtension::Params* params)
+{
+    gpgs_callback_update();
+    return dmExtension::RESULT_OK;
+}
+
 static dmExtension::Result FinalizeGpg(dmExtension::Params* params)
 {
+    gpgs_callback_finalize();
     dmExtension::UnregisterAndroidOnActivityResultListener(OnActivityResult);
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg, InitializeGpg, 0, 0, FinalizeGpg)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg, InitializeGpg, UpdateGpg, 0, FinalizeGpg)
 
 #else
 
