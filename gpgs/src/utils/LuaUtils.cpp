@@ -14,14 +14,14 @@ bool luaL_checkbool(lua_State *L, int numArg)
   return b;
 }
 
-void luaL_push_pair_str_num(lua_State *L, char *key, int value)
+void luaL_push_pair_str_num(lua_State *L, const char *key, int value)
 {
   lua_pushstring(L, key);
   lua_pushnumber(L, value);
   lua_settable(L, -3);
 }
 
-void luaL_push_pair_str_str(lua_State *L, char *key, char *value)
+void luaL_push_pair_str_str(lua_State *L, const char *key, const char *value)
 {
   lua_pushstring(L, key);
   lua_pushstring(L, value);

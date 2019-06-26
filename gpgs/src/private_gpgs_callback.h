@@ -4,7 +4,15 @@
 
 enum message_id
 {
-	MSG_SIGN_IN
+	MSG_SIGN_IN = 1,
+	MSG_SILENT_SIGN_IN = 2,
+	MSG_SIGN_OUT = 3
+};
+
+enum status
+{
+	STATUS_SUCCESS = 1,
+	STATUS_FAILED = 2
 };
 
 struct GPGS_callback
@@ -17,14 +25,15 @@ struct GPGS_callback
 
 struct CallbackData
 {
-	int msg_type;
+	int msg;
 	char* key_1;
-	char* value_1;
+	int value_1;
 	char* key_2;
-	int value_2;
+	char* value_2;
 };
 
 void gpgs_set_callback(lua_State* L, int pos);
 void gpgs_callback_initialize();
 void gpgs_callback_finalize();
 void gpgs_callback_update();
+void gpgs_add_to_queue(int msg, const char*key_1, int value_1, const char*key_2, const char*value_2);

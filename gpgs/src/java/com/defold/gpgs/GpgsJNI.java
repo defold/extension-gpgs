@@ -22,9 +22,23 @@ import com.google.android.gms.tasks.Task;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 public class GpgsJNI {
-    private static final int RC_SIGN_IN = 9001;
-    final static String TAG = "GPGS_DEFOLD";
+    //Internal constants:
 
+    private static final int RC_SIGN_IN = 9001;
+
+    private final static String TAG = "GPGS_DEFOLD";
+
+    //Duplicate of ENUMS:
+    private static final int MSG_SIGN_IN = 1;
+    private static final int MSG_SILENT_SIGN_IN = 2;
+    private static final int MSG_SIGN_OUT = 3;
+
+    private static final int STATUS_SUCCESS = 1;
+    private static final int STATUS_FAILED = 2;
+    //--------------------------------------------------
+    public static native void gpgsAddToQueue(int msg, String key_1, int value_1, String key_2, String value_2);
+    public static native void gpgsAddToQueueFirstArg(int msg, String key_1, int value_1);
+    //--------------------------------------------------
     private Activity activity;
 
     //--------------------------------------------------
@@ -32,20 +46,18 @@ public class GpgsJNI {
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
-    private void onConnected(GoogleSignInAccount googleSignInAccount) {
-        Log.d(TAG, "onConnected(): connected to Google APIs");
+    private void onConnected(GoogleSignInAccount googleSignInAccount, final int msg) {
         if (mSignedInAccount != googleSignInAccount || mPlayer == null) {
 
             mSignedInAccount = googleSignInAccount;
 
-            // get the playerId from the PlayersClient
             PlayersClient playersClient = Games.getPlayersClient(activity, googleSignInAccount);
             playersClient.getCurrentPlayer()
                     .addOnSuccessListener(new OnSuccessListener<Player>() {
                         @Override
                         public void onSuccess(Player player) {
                             mPlayer = player;
-                            Log.d(TAG, "Player ID: " + mPlayer.getPlayerId());
+                            gpgsAddToQueueFirstArg(msg, "status", STATUS_SUCCESS);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -72,10 +84,9 @@ public class GpgsJNI {
             Task<GoogleSignInAccount> task =
                     GoogleSignIn.getSignedInAccountFromIntent(intent);
             if (task.isSuccessful()) {
-                Log.d(TAG, "sign-in success");
-                onConnected(task.getResult());
+                onConnected(task.getResult(), MSG_SIGN_IN);
             } else {
-                Log.d(TAG, "sign-in failed");
+                gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED, "error", "Sign-in failed");
             }
         }
     }
@@ -87,7 +98,7 @@ public class GpgsJNI {
                 GoogleSignInOptions signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
                 if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
-                    onConnected(account);
+                    onConnected(account, MSG_SILENT_SIGN_IN);
                 } else {
                     // Haven't been signed-in before. Try the silent sign-in first.
                     GoogleSignInClient signInClient = GoogleSignIn.getClient(activity, signInOptions);
@@ -98,15 +109,9 @@ public class GpgsJNI {
                                         @Override
                                         public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
                                             if (task.isSuccessful()) {
-                                                // The signed in account is stored in the task's result.
-                                                Log.d(TAG, "silent sign-in success");
-                                                onConnected(task.getResult());
+                                                onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
                                             } else {
-                                                Log.d(TAG, "silent sign-in failed");
-                                                // Player will need to sign-in explicitly using via UI.
-                                                // See [sign-in best practices](http://developers.google.com/games/services/checklist) for guidance on how and when to implement Interactive Sign-in,
-                                                // and [Performing Interactive Sign-in](http://developers.google.com/games/services/android/signin#performing_interactive_sign-in) for details on how to implement
-                                                // Interactive Sign-in.
+                                                gpgsAddToQueue(MSG_SILENT_SIGN_IN, "status", STATUS_FAILED, "error", "Silent sign-in failed");
                                             }
                                         }
                                     });
@@ -130,6 +135,7 @@ public class GpgsJNI {
                     public void onComplete(@NonNull Task<Void> task) {
                         mSignedInAccount = null;
                         mPlayer = null;
+                        gpgsAddToQueueFirstArg(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
                     }
                 });
     }

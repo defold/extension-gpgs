@@ -9,6 +9,7 @@
 
 #include "gpgs_jni.h"
 #include "private_gpgs_callback.h"
+#include "com_defold_gpgs_GpgsJNI.h"
 
 struct GPGS
 {
@@ -164,6 +165,25 @@ static void OnActivityResult(void *env, void* activity, int32_t request_code, in
     _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
 
+JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env, jclass cls, jint jmsg, jstring jkey_1, jint jvalue_1, jstring jkey_2, jstring jvalue_2)
+{
+    const char* key_1 = env->GetStringUTFChars(jkey_1, 0);
+    const char* key_2 = env->GetStringUTFChars(jkey_2, 0);
+    const char* value_2 = env->GetStringUTFChars(jvalue_2, 0);
+    gpgs_add_to_queue((int)jmsg, key_1, (int)jvalue_1, key_2, value_2);
+    env->ReleaseStringUTFChars(jkey_1, key_1);
+    env->ReleaseStringUTFChars(jkey_2, key_2);
+    env->ReleaseStringUTFChars(jvalue_2, value_2);
+}
+
+JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueueFirstArg(JNIEnv * env, jclass cls, jint jmsg, jstring jkey_1, jint jvalue_1)
+{
+    const char* key_1 = env->GetStringUTFChars(jkey_1, 0);
+    gpgs_add_to_queue((int)jmsg, key_1, (int)jvalue_1, NULL, NULL);
+    env->ReleaseStringUTFChars(jkey_1, key_1);
+}
+//-----
+
 static const luaL_reg Gpg_methods[] =
 {
     //autorization
@@ -202,6 +222,13 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(POPUP_POS_BOTTOM_LEFT)
     SETCONSTANT(POPUP_POS_BOTTOM_CENTER)
     SETCONSTANT(POPUP_POS_BOTTOM_RIGHT)
+
+    SETCONSTANT(MSG_SIGN_IN)
+    SETCONSTANT(MSG_SILENT_SIGN_IN)
+    SETCONSTANT(MSG_SIGN_OUT)
+
+    SETCONSTANT(STATUS_SUCCESS)
+    SETCONSTANT(STATUS_FAILED)
     
 #undef SETCONSTANT
     

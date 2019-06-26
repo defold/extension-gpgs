@@ -36,7 +36,7 @@ static void UnregisterCallback()
     }
 }
 
-static void gpgs_invoke_callback(int type, char*key_1, char*value_1, char*key_2, int value_2)
+static void gpgs_invoke_callback(int type, char*key_1, int value_1, char*key_2, char*value_2)
 {
     GPGS_callback *cbk = &m_callback;
     if(cbk->m_Callback == LUA_NOREF)
@@ -52,7 +52,8 @@ static void gpgs_invoke_callback(int type, char*key_1, char*value_1, char*key_2,
     lua_pushvalue(L, -1);
     dmScript::SetInstance(L);
 
-    if (!dmScript::IsInstanceValid(L)) {
+    if (!dmScript::IsInstanceValid(L))
+    {
         UnregisterCallback();
         dmLogError("Could not run GPGS callback because the instance has been deleted.");
         lua_pop(L, 2);
@@ -60,18 +61,24 @@ static void gpgs_invoke_callback(int type, char*key_1, char*value_1, char*key_2,
     else {
         lua_pushnumber(L, type);
         int count_table_elements = 1;
-        if (key_2 != NULL) {
+        if (key_2 != NULL & key_1 != NULL)
+        {
             count_table_elements = 2;
         }
         lua_createtable(L, 0, count_table_elements);
-        luaL_push_pair_str_str(L, key_1, value_1);
-        if (key_2 != NULL) {
-            luaL_push_pair_str_num(L, key_2, value_2);
+        if (key_1 != NULL)
+        {
+            luaL_push_pair_str_num(L, key_1, value_1);
+        }
+        if (key_2 != NULL)
+        {
+            luaL_push_pair_str_str(L, key_2, value_2);
         }
 
         int number_of_arguments = 3;
         int ret = lua_pcall(L, number_of_arguments, 0, 0);
-        if(ret != 0) {
+        if(ret != 0)
+        {
             dmLogError("Error running callback: %s", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
@@ -79,45 +86,52 @@ static void gpgs_invoke_callback(int type, char*key_1, char*value_1, char*key_2,
     assert(top == lua_gettop(L));
 }
 
-void gpgs_callback_initialize(){
+void gpgs_callback_initialize()
+{
     m_mutex = dmMutex::New();
 }
 
-void gpgs_callback_finalize(){
+void gpgs_callback_finalize()
+{
     dmMutex::Delete(m_mutex);
     UnregisterCallback();
 }
 
-void gpgs_set_callback(lua_State* L, int pos){
+void gpgs_set_callback(lua_State* L, int pos)
+{
     int type = lua_type(L, pos);
-    if (type == LUA_TNONE || type == LUA_TNIL) {
+    if (type == LUA_TNONE || type == LUA_TNIL)
+    {
         UnregisterCallback();
     }
-    else{
+    else
+    {
         RegisterCallback(L, pos);
     }
 }
 
-void gpgs_add_to_queue(int type, char*key_1, char*value_1, char*key_2, int value_2){
+void gpgs_add_to_queue(int msg, const char*key_1, int value_1, const char*key_2, const char*value_2)
+{
     DM_MUTEX_SCOPED_LOCK(m_mutex);
 
     CallbackData data;
-    data.msg_type = type;
-    data.key_1 = key_1;
-    data.value_1 = value_1 ? strdup(value_1) : NULL;
-    data.key_2 = key_2;
-    data.value_2 = value_2;
+    data.msg = msg;
+    data.key_1 = key_1 ? strdup(key_1) : NULL;
+    data.value_1 = value_1;
+    data.key_2 = key_2 ? strdup(key_2) : NULL;
+    data.value_2 = value_2 ? strdup(value_2) : NULL;
 
     if(m_callbacksQueue.Full())
     {
         m_callbacksQueue.OffsetCapacity(1);
     }
     m_callbacksQueue.Push(data);
-
 }
 
-void gpgs_callback_update(){
-    if (m_callbacksQueue.Empty()) {
+void gpgs_callback_update()
+{
+    if (m_callbacksQueue.Empty())
+    {
         return;
     }
 
@@ -126,10 +140,19 @@ void gpgs_callback_update(){
     for(uint32_t i = 0; i != m_callbacksQueue.Size(); ++i)
     {
         CallbackData* data = &m_callbacksQueue[i];
-        gpgs_invoke_callback(data->msg_type, data->key_1, data->value_1, data->key_2, data->value_2);
-        if(data->value_1)
-            free(data->value_1);
-        data->value_1 = 0;
+        gpgs_invoke_callback(data->msg, data->key_1, data->value_1, data->key_2, data->value_2);
+        if(data->key_1)
+        {
+            free(data->key_1);
+            data->key_1 = 0;
+        }
+        if(data->key_2)
+        {
+            free(data->key_2);
+            free(data->value_2);
+            data->key_2 = 0;
+            data->value_1 = 0;
+        }
         m_callbacksQueue.EraseSwap(i--);
     }
     
