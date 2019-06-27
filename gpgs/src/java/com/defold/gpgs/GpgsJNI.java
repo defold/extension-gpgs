@@ -26,8 +26,6 @@ public class GpgsJNI {
 
     private static final int RC_SIGN_IN = 9001;
 
-    private final static String TAG = "GPGS_DEFOLD";
-
     //Duplicate of ENUMS:
     private static final int MSG_SIGN_IN = 1;
     private static final int MSG_SILENT_SIGN_IN = 2;
@@ -63,7 +61,7 @@ public class GpgsJNI {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "There was a problem getting the player id! Code");
+                            gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED, "error", "There was a problem getting the player id!");
                         }
                     });
         }
@@ -78,7 +76,6 @@ public class GpgsJNI {
     }
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
-        Log.d(TAG, "activityResult: " + requestCode + " " + resultCode);
         if (requestCode == RC_SIGN_IN) {
 
             Task<GoogleSignInAccount> task =
