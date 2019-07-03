@@ -10,6 +10,20 @@
 #include "gpgs_jni.h"
 #include "private_gpgs_callback.h"
 #include "com_defold_gpgs_GpgsJNI.h"
+#include "utils/LuaUtils.h"
+
+enum PopupPositions
+{
+    POPUP_POS_TOP_LEFT =           48 | 3,
+    POPUP_POS_TOP_CENTER =         48 | 1,
+    POPUP_POS_TOP_RIGHT =          48 | 5,
+    POPUP_POS_CENTER_LEFT =        16 | 3,
+    POPUP_POS_CENTER =             16 | 1,
+    POPUP_POS_CENTER_RIGHT =       16 | 5,
+    POPUP_POS_BOTTOM_LEFT =        80 | 3,
+    POPUP_POS_BOTTOM_CENTER =      80 | 1,
+    POPUP_POS_BOTTOM_RIGHT =       80 | 5
+};
 
 struct GPGS
 {
@@ -25,11 +39,19 @@ struct GPGS
     jmethodID               m_setGravityForPopups;
 };
 
-GPGS g_gpgs;
+struct GPGS_Disk
+{
+    bool                   is_using;
+    
+    jmethodID              m_showSavedGamesUI;
+};
+
+static GPGS         g_gpgs;
+static GPGS_Disk    g_gpgs_disk;
 
 // GPGPS autorization 
 
-int GpgAuth_Login(lua_State* L)
+static int GpgAuth_Login(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
     
@@ -41,7 +63,7 @@ int GpgAuth_Login(lua_State* L)
     return 0;
 }
 
-int GpgAuth_Logout(lua_State* L)
+static int GpgAuth_Logout(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
     
@@ -53,7 +75,7 @@ int GpgAuth_Logout(lua_State* L)
     return 0;
 }
 
-int GpgAuth_SilentLogin(lua_State* L)
+static int GpgAuth_SilentLogin(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
     
@@ -65,7 +87,7 @@ int GpgAuth_SilentLogin(lua_State* L)
     return 0;
 }
 
-int GpgAuth_getDisplayName(lua_State* L)
+static int GpgAuth_getDisplayName(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
     
@@ -86,7 +108,7 @@ int GpgAuth_getDisplayName(lua_State* L)
     return 1;
 }
 
-int GpgAuth_getId(lua_State* L)
+static int GpgAuth_getId(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
     
@@ -108,7 +130,7 @@ int GpgAuth_getId(lua_State* L)
     return 1;
 }
 
-int GpgAuth_isAuthorized(lua_State* L)
+static int GpgAuth_isAuthorized(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
 
@@ -122,20 +144,7 @@ int GpgAuth_isAuthorized(lua_State* L)
     return 1;
 }
 
-enum PopupPositions
-{
-    POPUP_POS_TOP_LEFT =           48 | 3,
-    POPUP_POS_TOP_CENTER =         48 | 1,
-    POPUP_POS_TOP_RIGHT =          48 | 5,
-    POPUP_POS_CENTER_LEFT =        16 | 3,
-    POPUP_POS_CENTER =             16 | 1,
-    POPUP_POS_CENTER_RIGHT =       16 | 5,
-    POPUP_POS_BOTTOM_LEFT =        80 | 3,
-    POPUP_POS_BOTTOM_CENTER =      80 | 1,
-    POPUP_POS_BOTTOM_RIGHT =       80 | 5
-};
-
-int GpgAuth_setGravityForPopups(lua_State* L)
+static int GpgAuth_setGravityForPopups(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
 
@@ -149,9 +158,75 @@ int GpgAuth_setGravityForPopups(lua_State* L)
     return 0;
 }
 
-int Gpg_callback(lua_State* L)
+static int Gpg_set_callback(lua_State* L)
 {
     gpgs_set_callback(L, 1);
+    return 0;
+}
+
+// GPGPS disk
+
+static bool is_disk_avaliable()
+{
+    if (g_gpgs_disk.is_using)
+    {
+        return true;
+    }
+    else
+    {
+        dmLogWarning("GPGS Disk wasn't activated. Please check your game.project settings.");
+        return false;
+    }
+}
+
+static int Gpg_disk_display_saved_snapshots(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    int type = lua_type(L, 1);
+    char* popupTitle = "Game Saves";
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        popupTitle = (char*)luaL_checkstring(L, 1);
+    }
+
+    type = lua_type(L, 2);
+    bool allowAddButton = true;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        allowAddButton = luaL_checkbool(L, 2);
+    }
+
+    type = lua_type(L, 3);
+    bool allowDelete = true;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        allowDelete = luaL_checkbool(L, 3);
+    }
+
+    type = lua_type(L, 4);
+    int maxNumberOfSavedGamesToShow = 5;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        maxNumberOfSavedGamesToShow = luaL_checknumber(L, 4);
+    }
+    
+    jstring jpopupTitle = env->NewStringUTF(popupTitle);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_showSavedGamesUI, jpopupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
+    env->DeleteLocalRef(jpopupTitle);
+
     return 0;
 }
 
@@ -194,7 +269,9 @@ static const luaL_reg Gpg_methods[] =
     {"get_id", GpgAuth_getId},
     {"is_authorized", GpgAuth_isAuthorized},
     {"set_popup_position", GpgAuth_setGravityForPopups},
-    {"set_callback", Gpg_callback},
+    {"set_callback", Gpg_set_callback},
+    //disk
+    {"display_saved_snapshots", Gpg_disk_display_saved_snapshots},
     {0,0}
 };
 
@@ -249,17 +326,30 @@ static void InitializeJNI()
     g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
     g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
     g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
+
+    //disk
+    if (g_gpgs_disk.is_using) 
+    {
+        g_gpgs_disk.m_showSavedGamesUI = env->GetMethodID(cls, "showSavedGamesUI", "(Ljava/lang/String;ZZI)V");
+    }
     
     //private methods
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
     
-    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;)V");
-    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity()));
+    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;Z)V");
+    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_gpgs_disk.is_using));
 }
 
 static dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
     LuaInit(params->m_L);
+
+    int is_using = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.use_disk", 0);
+    if (is_using > 0)
+    {
+        g_gpgs_disk.is_using = true;
+    }
+    
     InitializeJNI();
     dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
     gpgs_callback_initialize();

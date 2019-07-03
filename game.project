@@ -2,7 +2,6 @@
 title = GPGS
 version = 0.2
 dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
-bundle_resources = /res
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -28,4 +27,5 @@ bundle_identifier = com.defoldtest.gpgs
 
 [gpgs]
 app_id = 567627510591
+use_disk = 1
 

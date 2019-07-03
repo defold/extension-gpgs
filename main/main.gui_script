@@ -60,4 +60,11 @@ function on_input(self, action_id, action)
     dirtylarry:button("popup_pos", action_id, action, function ()
         change_popup_pos(self)
     end)
+
+    dirtylarry:button("show_snapshots", action_id, action, function ()
+        if gpg then
+            gpg.display_saved_snapshots("My cool saves", true, true, 3)
+        end
+    end)
+    
 end

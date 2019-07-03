@@ -21,12 +21,25 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.games.SnapshotsClient;
+
 public class GpgsJNI {
     //Internal constants:
 
+    // Request code used to invoke sign in user interactions.
     private static final int RC_SIGN_IN = 9001;
+    // Request code for listing saved games
+    private static final int RC_LIST_SAVED_GAMES = 9002;
+    // Request code for selecting a snapshot
+    private static final int RC_SELECT_SNAPSHOT = 9003;
+    // Request code for saving the game to a snapshot.
+    private static final int RC_SAVE_SNAPSHOT = 9004;
 
-    //Duplicate of ENUMS:
+    private static final int RC_LOAD_SNAPSHOT = 9005;
+    private static final int RC_SAVED_GAMES = 9009;
+
+    //Duplicate of ENUMS from С:
     private static final int MSG_SIGN_IN = 1;
     private static final int MSG_SILENT_SIGN_IN = 2;
     private static final int MSG_SIGN_OUT = 3;
@@ -38,9 +51,13 @@ public class GpgsJNI {
     public static native void gpgsAddToQueueFirstArg(int msg, String key_1, int value_1);
     //--------------------------------------------------
     private Activity activity;
+    private boolean is_disk_active;
 
     //--------------------------------------------------
+    // Autorization
+
     private GoogleSignInAccount mSignedInAccount = null;
+    private GoogleSignInOptions mSignInOptions;
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
@@ -55,13 +72,17 @@ public class GpgsJNI {
                         @Override
                         public void onSuccess(Player player) {
                             mPlayer = player;
-                            gpgsAddToQueueFirstArg(msg, "status", STATUS_SUCCESS);
+                            gpgsAddToQueueFirstArg(msg,
+                                    "status", STATUS_SUCCESS);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED, "error", "There was a problem getting the player id!");
+                            gpgsAddToQueue(MSG_SIGN_IN,
+                                    "status", STATUS_FAILED,
+                                    "error",
+                                    "There was a problem getting the player id!");
                         }
                     });
         }
@@ -71,8 +92,22 @@ public class GpgsJNI {
 
     }
 
-    public GpgsJNI(Activity activity) {
+    private GoogleSignInOptions getSignInOptions() {
+        if (mSignInOptions == null) {
+            if (is_disk_active) {
+                mSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                        .requestScopes(Drive.SCOPE_APPFOLDER)
+                        .build();
+            } else {
+                mSignInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
+            }
+        }
+        return  mSignInOptions;
+    }
+
+    public GpgsJNI(Activity activity, boolean is_disk_active) {
         this.activity = activity;
+        this.is_disk_active = is_disk_active;
     }
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
@@ -83,8 +118,11 @@ public class GpgsJNI {
             if (task.isSuccessful()) {
                 onConnected(task.getResult(), MSG_SIGN_IN);
             } else {
-                gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED, "error", "Sign-in failed");
+                gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED,
+                        "error", "Sign-in failed");
             }
+        } else if(requestCode == RC_SAVED_GAMES) {
+
         }
     }
 
@@ -92,7 +130,7 @@ public class GpgsJNI {
         this.activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                GoogleSignInOptions signInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
+                GoogleSignInOptions signInOptions = getSignInOptions();
                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
                 if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
                     onConnected(account, MSG_SILENT_SIGN_IN);
@@ -108,7 +146,10 @@ public class GpgsJNI {
                                             if (task.isSuccessful()) {
                                                 onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
                                             } else {
-                                                gpgsAddToQueue(MSG_SILENT_SIGN_IN, "status", STATUS_FAILED, "error", "Silent sign-in failed");
+                                                gpgsAddToQueue(MSG_SILENT_SIGN_IN,
+                                                        "status", STATUS_FAILED,
+                                                        "error",
+                                                        "Silent sign-in failed");
                                             }
                                         }
                                     });
@@ -118,14 +159,15 @@ public class GpgsJNI {
     }
 
     public void login() {
-        GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity, GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+        GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
+                getSignInOptions());
         Intent intent = signInClient.getSignInIntent();
         this.activity.startActivityForResult(intent, RC_SIGN_IN);
     }
 
     public void logout() {
         GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
-                GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+                getSignInOptions());
         signInClient.signOut().addOnCompleteListener(this.activity,
                 new OnCompleteListener<Void>() {
                     @Override
@@ -162,5 +204,24 @@ public class GpgsJNI {
         mGravity = gravity;
     }
 
+    //--------------------------------------------------
+    // GoogleDrive (Snapshots)
+
+
+    public void showSavedGamesUI(String popupTitle, boolean allowAddButton,
+                                 boolean allowDelete, int maxNumberOfSavedGamesToShow) {
+        SnapshotsClient snapshotsClient =
+                Games.getSnapshotsClient(activity, GoogleSignIn.getLastSignedInAccount(activity));
+
+        Task<Intent> intentTask = snapshotsClient.getSelectSnapshotIntent(
+                popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
+
+        intentTask.addOnSuccessListener(new OnSuccessListener<Intent>() {
+            @Override
+            public void onSuccess(Intent intent) {
+                activity.startActivityForResult(intent, RC_SAVED_GAMES);
+            }
+        });
+    }
 
 }
