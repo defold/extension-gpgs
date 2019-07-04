@@ -2,9 +2,9 @@
 #include "private_gpgs_callback.h"
 #include "utils/LuaUtils.h"
 
-GPGS_callback            m_callback;
-dmArray<CallbackData>    m_callbacksQueue;
-dmMutex::HMutex          m_mutex;
+static GPGS_callback            m_callback;
+static dmArray<CallbackData>    m_callbacksQueue;
+static dmMutex::HMutex          m_mutex;
 
 static void RegisterCallback(lua_State* L, int index)
 {

@@ -23,6 +23,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.SnapshotsClient;
+import com.google.android.gms.games.snapshot.SnapshotMetadata;
 
 public class GpgsJNI {
     //Internal constants:
@@ -58,8 +59,16 @@ public class GpgsJNI {
 
     private GoogleSignInAccount mSignedInAccount = null;
     private GoogleSignInOptions mSignInOptions;
+    private GoogleSignInClient  mGoogleSignInClient;
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+
+    public GpgsJNI(Activity activity, boolean is_disk_active) {
+        this.activity = activity;
+        this.is_disk_active = is_disk_active;
+
+        mGoogleSignInClient = GoogleSignIn.getClient(activity, getSignInOptions());
+    }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount, final int msg) {
         if (mSignedInAccount != googleSignInAccount || mPlayer == null) {
@@ -105,11 +114,6 @@ public class GpgsJNI {
         return  mSignInOptions;
     }
 
-    public GpgsJNI(Activity activity, boolean is_disk_active) {
-        this.activity = activity;
-        this.is_disk_active = is_disk_active;
-    }
-
     public void activityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == RC_SIGN_IN) {
 
@@ -122,7 +126,25 @@ public class GpgsJNI {
                         "error", "Sign-in failed");
             }
         } else if(requestCode == RC_SAVED_GAMES) {
+            if (intent != null) {
+                if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
+                    SnapshotMetadata snapshotMetadata =
+                            intent.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA);
+                    //mCurrentSaveName = snapshotMetadata.getUniqueName();
 
+                    // Load the game data from the Snapshot
+                    // ...
+                } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
+                    // Create a new snapshot named with a unique string
+                    //String unique = new BigInteger(281, new Random()).toString(13);
+                    //mCurrentSaveName = "snapshotTemp-" + unique;
+
+                    // Create the new snapshot
+                    // ...
+                }
+            } else {
+                // Error message
+            }
         }
     }
 
@@ -130,53 +152,44 @@ public class GpgsJNI {
         this.activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                GoogleSignInOptions signInOptions = getSignInOptions();
                 GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(activity);
-                if (GoogleSignIn.hasPermissions(account, signInOptions.getScopeArray())) {
+                if (GoogleSignIn.hasPermissions(account, getSignInOptions().getScopeArray())) {
                     onConnected(account, MSG_SILENT_SIGN_IN);
                 } else {
-                    // Haven't been signed-in before. Try the silent sign-in first.
-                    GoogleSignInClient signInClient = GoogleSignIn.getClient(activity, signInOptions);
-                    signInClient
-                            .silentSignIn()
-                            .addOnCompleteListener(activity,
-                                    new OnCompleteListener<GoogleSignInAccount>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                                            if (task.isSuccessful()) {
-                                                onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
-                                            } else {
-                                                gpgsAddToQueue(MSG_SILENT_SIGN_IN,
-                                                        "status", STATUS_FAILED,
-                                                        "error",
-                                                        "Silent sign-in failed");
-                                            }
-                                        }
-                                    });
+                    mGoogleSignInClient.silentSignIn().addOnCompleteListener(activity,
+                        new OnCompleteListener<GoogleSignInAccount>() {
+                            @Override
+                            public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                                if (task.isSuccessful()) {
+                                    onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
+                                } else {
+                                    gpgsAddToQueue(MSG_SILENT_SIGN_IN,
+                                            "status", STATUS_FAILED,
+                                            "error",
+                                            "Silent sign-in failed");
+                                }
+                            }
+                        });
                 }
             }
         });
     }
 
     public void login() {
-        GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
-                getSignInOptions());
-        Intent intent = signInClient.getSignInIntent();
+        Intent intent = mGoogleSignInClient.getSignInIntent();
         this.activity.startActivityForResult(intent, RC_SIGN_IN);
     }
 
     public void logout() {
-        GoogleSignInClient signInClient = GoogleSignIn.getClient(this.activity,
-                getSignInOptions());
-        signInClient.signOut().addOnCompleteListener(this.activity,
-                new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        mSignedInAccount = null;
-                        mPlayer = null;
-                        gpgsAddToQueueFirstArg(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
-                    }
-                });
+        mGoogleSignInClient.signOut().addOnCompleteListener(this.activity,
+            new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    mSignedInAccount = null;
+                    mPlayer = null;
+                    gpgsAddToQueueFirstArg(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
+                }
+            });
     }
 
     public String getDisplayName() {
