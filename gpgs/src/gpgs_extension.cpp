@@ -25,6 +25,16 @@ enum PopupPositions
     POPUP_POS_BOTTOM_RIGHT =       80 | 5
 };
 
+enum ResolutionPolicy
+{
+    RESOLUTION_POLICY_MANUAL =                    -1,
+    RESOLUTION_POLICY_LONGEST_PLAYTIME =           1,
+    RESOLUTION_POLICY_LAST_KNOWN_GOOD =            2,
+    RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED =     3,
+    RESOLUTION_POLICY_HIGHEST_PROGRESS =           4
+};
+
+
 struct GPGS
 {
     jobject                 m_GpgsJNI;
@@ -44,6 +54,7 @@ struct GPGS_Disk
     bool                   is_using;
     
     jmethodID              m_showSavedGamesUI;
+    jmethodID              m_loadSnapshot;
 };
 
 static GPGS         g_gpgs;
@@ -230,6 +241,43 @@ static int Gpg_disk_display_saved_snapshots(lua_State* L)
     return 0;
 }
 
+static int Gpg_disk_open_snapshot(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    const char* saveName = luaL_checkstring(L, 1);
+
+    int type = lua_type(L, 2);
+    bool createIfNotFound = false;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        createIfNotFound = luaL_checkbool(L, 2);
+    }
+
+    type = lua_type(L, 3);
+    int conflictPolicy = RESOLUTION_POLICY_LAST_KNOWN_GOOD;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        conflictPolicy = luaL_checknumber(L, 3);
+    }
+
+    jstring jsaveName = env->NewStringUTF(saveName);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadSnapshot, jsaveName, createIfNotFound, conflictPolicy);
+    env->DeleteLocalRef(jsaveName);
+    
+    return 0;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -272,6 +320,7 @@ static const luaL_reg Gpg_methods[] =
     {"set_callback", Gpg_set_callback},
     //disk
     {"display_saved_snapshots", Gpg_disk_display_saved_snapshots},
+    {"open_snapshot", Gpg_disk_open_snapshot},
     {0,0}
 };
 
@@ -306,6 +355,18 @@ static void LuaInit(lua_State* L)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_COMMIT_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_CONFLICT_MISSING)
+    SETCONSTANT(STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE)
+    SETCONSTANT(STATUS_SNAPSHOT_CREATION_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_FOLDER_UNAVAILABLE)
+    SETCONSTANT(STATUS_SNAPSHOT_NOT_FOUND)
+
+    SETCONSTANT(RESOLUTION_POLICY_MANUAL)
+    SETCONSTANT(RESOLUTION_POLICY_LONGEST_PLAYTIME)
+    SETCONSTANT(RESOLUTION_POLICY_LAST_KNOWN_GOOD)
+    SETCONSTANT(RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
+    SETCONSTANT(RESOLUTION_POLICY_HIGHEST_PROGRESS)
     
 #undef SETCONSTANT
     
@@ -331,6 +392,7 @@ static void InitializeJNI()
     if (g_gpgs_disk.is_using) 
     {
         g_gpgs_disk.m_showSavedGamesUI = env->GetMethodID(cls, "showSavedGamesUI", "(Ljava/lang/String;ZZI)V");
+        g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
     }
     
     //private methods

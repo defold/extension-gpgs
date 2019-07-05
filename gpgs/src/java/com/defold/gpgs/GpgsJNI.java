@@ -19,11 +19,15 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.SnapshotsClient;
 import com.google.android.gms.games.snapshot.SnapshotMetadata;
+import com.google.android.gms.games.snapshot.Snapshot;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.common.api.ApiException;
+
+import java.io.IOException;
 
 public class GpgsJNI {
     //Internal constants:
@@ -38,12 +42,13 @@ public class GpgsJNI {
     private static final int RC_SAVE_SNAPSHOT = 9004;
 
     private static final int RC_LOAD_SNAPSHOT = 9005;
-    private static final int RC_SAVED_GAMES = 9009;
 
     //Duplicate of ENUMS from С:
     private static final int MSG_SIGN_IN = 1;
     private static final int MSG_SILENT_SIGN_IN = 2;
     private static final int MSG_SIGN_OUT = 3;
+    private static final int MSG_SHOW_SNAPSHOTS = 4;
+    private static final int MSG_LOAD_SNAPSHOT = 5;
 
     private static final int STATUS_SUCCESS = 1;
     private static final int STATUS_FAILED = 2;
@@ -63,6 +68,7 @@ public class GpgsJNI {
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
+
     public GpgsJNI(Activity activity, boolean is_disk_active) {
         this.activity = activity;
         this.is_disk_active = is_disk_active;
@@ -70,11 +76,17 @@ public class GpgsJNI {
         mGoogleSignInClient = GoogleSignIn.getClient(activity, getSignInOptions());
     }
 
+    private void onAccountChanged(GoogleSignInAccount googleSignInAccount) {
+        if (this.is_disk_active) {
+            mSnapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
+        }
+    }
+
     private void onConnected(GoogleSignInAccount googleSignInAccount, final int msg) {
         if (mSignedInAccount != googleSignInAccount || mPlayer == null) {
 
             mSignedInAccount = googleSignInAccount;
-
+            onAccountChanged(googleSignInAccount);
             PlayersClient playersClient = Games.getPlayersClient(activity, googleSignInAccount);
             playersClient.getCurrentPlayer()
                     .addOnSuccessListener(new OnSuccessListener<Player>() {
@@ -116,16 +128,20 @@ public class GpgsJNI {
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == RC_SIGN_IN) {
-
-            Task<GoogleSignInAccount> task =
-                    GoogleSignIn.getSignedInAccountFromIntent(intent);
-            if (task.isSuccessful()) {
-                onConnected(task.getResult(), MSG_SIGN_IN);
+            if (intent != null) {
+                Task<GoogleSignInAccount> task =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent);
+                if (task.isSuccessful()) {
+                    onConnected(task.getResult(), MSG_SIGN_IN);
+                } else {
+                    gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED,
+                        "error", "Sign-in failed");
+                }
             } else {
                 gpgsAddToQueue(MSG_SIGN_IN, "status", STATUS_FAILED,
-                        "error", "Sign-in failed");
+                    "error", "Sign-in failed. Intent do not exist.");
             }
-        } else if(requestCode == RC_SAVED_GAMES) {
+        } else if(requestCode == RC_LIST_SAVED_GAMES) {
             if (intent != null) {
                 if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
                     SnapshotMetadata snapshotMetadata =
@@ -220,21 +236,74 @@ public class GpgsJNI {
     //--------------------------------------------------
     // GoogleDrive (Snapshots)
 
+    // Client used to interact with Google Snapshots.
+    private SnapshotsClient mSnapshotsClient = null;
 
     public void showSavedGamesUI(String popupTitle, boolean allowAddButton,
                                  boolean allowDelete, int maxNumberOfSavedGamesToShow) {
-        SnapshotsClient snapshotsClient =
-                Games.getSnapshotsClient(activity, GoogleSignIn.getLastSignedInAccount(activity));
 
-        Task<Intent> intentTask = snapshotsClient.getSelectSnapshotIntent(
+        Task<Intent> intentTask = mSnapshotsClient.getSelectSnapshotIntent(
                 popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
 
-        intentTask.addOnSuccessListener(new OnSuccessListener<Intent>() {
-            @Override
-            public void onSuccess(Intent intent) {
-                activity.startActivityForResult(intent, RC_SAVED_GAMES);
-            }
+        intentTask
+            .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                @Override
+                public void onSuccess(Intent intent) {
+                        activity.startActivityForResult(intent, RC_LIST_SAVED_GAMES);
+                    }
+                 })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    gpgsAddToQueue(MSG_SHOW_SNAPSHOTS,
+                            "status", STATUS_FAILED,
+                            "error",
+                            "Can't start activity for showing saved games.");
+                }
         });
+    }
+
+    public void loadSnapshot(String saveName, boolean createIfNotFound, int conflictPolicy) {
+        int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
+
+        mSnapshotsClient.open(saveName, createIfNotFound, conflictPolicy)
+            .continueWith(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, byte[]>() {
+                @Override
+                public byte[] then(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) throws Exception {
+                    Snapshot snapshot = task.getResult().getData();
+                    try {
+                        return snapshot.getSnapshotContents().readFully();
+                    } catch (IOException e) {
+                        gpgsAddToQueue(MSG_LOAD_SNAPSHOT,
+                            "status", STATUS_FAILED,
+                            "error",
+                            "Error while reading Snapshot." + e.toString());
+                    }
+                    return null;
+                }
+            }).addOnCompleteListener(new OnCompleteListener<byte[]>() {
+                @Override
+                public void onComplete(@NonNull Task<byte[]> task) {
+                    // Dismiss progress dialog and reflect the changes in the UI when complete.
+                    // ...
+                    if (task.isSuccessful()) {
+                        // Task completed successfully
+                        Log.e("GPGS", "LOADED");
+                        byte[] result = task.getResult();
+                    } else {
+                        int status = STATUS_FAILED;
+                        Exception e = task.getException();
+                        if (e instanceof ApiException) {
+                            ApiException apiException = (ApiException) e;
+                            status = apiException.getStatusCode();
+                        }
+                        gpgsAddToQueue(MSG_LOAD_SNAPSHOT,
+                                "status", status,
+                                "error",
+                                "Error while opening Snapshot. " + e.toString());
+                    }
+                }
+            });
     }
 
 }
