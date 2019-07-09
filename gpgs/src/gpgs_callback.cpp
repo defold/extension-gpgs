@@ -36,7 +36,7 @@ static void UnregisterCallback()
     }
 }
 
-static void gpgs_invoke_callback(int type, char*key_1, int value_1, char*key_2, char*value_2)
+static void gpgs_invoke_callback(MESSAGE_ID type, char*json)
 {
     GPGS_callback *cbk = &m_callback;
     if(cbk->m_Callback == LUA_NOREF)
@@ -61,18 +61,24 @@ static void gpgs_invoke_callback(int type, char*key_1, int value_1, char*key_2, 
     else {
         lua_pushnumber(L, type);
         int count_table_elements = 1;
-        if (key_2 != NULL & key_1 != NULL)
-        {
-            count_table_elements = 2;
+        bool is_fail = false;
+        dmJson::Document doc;
+        dmJson::Result r = dmJson::Parse(json, &doc);
+        if (r == dmJson::RESULT_OK && doc.m_NodeCount > 0) {
+            char error_str_out[128];
+            if (dmScript::JsonToLua(L, &doc, 0, error_str_out, sizeof(error_str_out)) < 0) {
+                dmLogError("Failed converting object JSON to Lua; %s", error_str_out);
+                is_fail = true;
+            }
+        } else {
+            dmLogError("Failed to parse JSON object(%d): (%s)", r, json);
+            is_fail = true;
         }
-        lua_createtable(L, 0, count_table_elements);
-        if (key_1 != NULL)
-        {
-            luaL_push_pair_str_num(L, key_1, value_1);
-        }
-        if (key_2 != NULL)
-        {
-            luaL_push_pair_str_str(L, key_2, value_2);
+        dmJson::Free(&doc);
+        if (is_fail) {
+            lua_pop(L, 2);
+            assert(top == lua_gettop(L));
+            return;
         }
 
         int number_of_arguments = 3;
@@ -110,16 +116,13 @@ void gpgs_set_callback(lua_State* L, int pos)
     }
 }
 
-void gpgs_add_to_queue(int msg, const char*key_1, int value_1, const char*key_2, const char*value_2)
+void gpgs_add_to_queue(MESSAGE_ID msg, const char*json)
 {
     DM_MUTEX_SCOPED_LOCK(m_mutex);
 
     CallbackData data;
     data.msg = msg;
-    data.key_1 = key_1 ? strdup(key_1) : NULL;
-    data.value_1 = value_1;
-    data.key_2 = key_2 ? strdup(key_2) : NULL;
-    data.value_2 = value_2 ? strdup(value_2) : NULL;
+    data.json = json ? strdup(json) : NULL;
 
     if(m_callbacksQueue.Full())
     {
@@ -140,18 +143,11 @@ void gpgs_callback_update()
     for(uint32_t i = 0; i != m_callbacksQueue.Size(); ++i)
     {
         CallbackData* data = &m_callbacksQueue[i];
-        gpgs_invoke_callback(data->msg, data->key_1, data->value_1, data->key_2, data->value_2);
-        if(data->key_1)
+        gpgs_invoke_callback(data->msg, data->json);
+        if(data->json)
         {
-            free(data->key_1);
-            data->key_1 = 0;
-        }
-        if(data->key_2)
-        {
-            free(data->key_2);
-            free(data->value_2);
-            data->key_2 = 0;
-            data->value_1 = 0;
+            free(data->json);
+            data->json = 0;
         }
         m_callbacksQueue.EraseSwap(i--);
     }

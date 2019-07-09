@@ -288,22 +288,11 @@ static void OnActivityResult(void *env, void* activity, int32_t request_code, in
     _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
 
-JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env, jclass cls, jint jmsg, jstring jkey_1, jint jvalue_1, jstring jkey_2, jstring jvalue_2)
+JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env, jclass cls, jint jmsg, jstring jjson)
 {
-    const char* key_1 = env->GetStringUTFChars(jkey_1, 0);
-    const char* key_2 = env->GetStringUTFChars(jkey_2, 0);
-    const char* value_2 = env->GetStringUTFChars(jvalue_2, 0);
-    gpgs_add_to_queue((int)jmsg, key_1, (int)jvalue_1, key_2, value_2);
-    env->ReleaseStringUTFChars(jkey_1, key_1);
-    env->ReleaseStringUTFChars(jkey_2, key_2);
-    env->ReleaseStringUTFChars(jvalue_2, value_2);
-}
-
-JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueueFirstArg(JNIEnv * env, jclass cls, jint jmsg, jstring jkey_1, jint jvalue_1)
-{
-    const char* key_1 = env->GetStringUTFChars(jkey_1, 0);
-    gpgs_add_to_queue((int)jmsg, key_1, (int)jvalue_1, NULL, NULL);
-    env->ReleaseStringUTFChars(jkey_1, key_1);
+    const char* json = env->GetStringUTFChars(jjson, 0);
+    gpgs_add_to_queue((MESSAGE_ID)jmsg, json);
+    env->ReleaseStringUTFChars(jjson, json);
 }
 //-----
 
