@@ -15,6 +15,7 @@ enum STATUS
 {
     STATUS_SUCCESS =                        1,
     STATUS_FAILED =                         2,
+    STATUS_CREATE_NEW =                     3,
     STATUS_SNAPSHOT_NOT_FOUND =             26570,
     STATUS_SNAPSHOT_CREATION_FAILED =       26571,
     STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE =  26572,

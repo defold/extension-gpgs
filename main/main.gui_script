@@ -77,5 +77,16 @@ function on_input(self, action_id, action)
             gpg.open_snapshot("my_save", true)
         end
     end)
+
+    dirtylarry:button("get_snapshot", action_id, action, function ()
+        if gpg then
+            local bytes, error_message = gpg.get_snapshot()
+            if not bytes then
+                print(error_message)
+            else
+                print("bytes:",bytes)
+            end
+        end
+    end)
     
 end

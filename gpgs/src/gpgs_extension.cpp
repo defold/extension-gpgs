@@ -55,6 +55,7 @@ struct GPGS_Disk
     
     jmethodID              m_showSavedGamesUI;
     jmethodID              m_loadSnapshot;
+    jmethodID              m_getSave;
 };
 
 static GPGS         g_gpgs;
@@ -278,6 +279,57 @@ static int Gpg_disk_open_snapshot(lua_State* L)
     return 0;
 }
 
+static int Gpg_disk_save_snapshot(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+    
+    return 0;
+}
+
+static int Gpg_disk_get_snapshot(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int lenght = 0;
+    jbyte* cookie = NULL;
+
+    jbyteArray cookieBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getSave);
+
+    if(cookieBArray != NULL)
+    {
+        DM_LUA_STACK_CHECK(L, 1);
+        lenght = env->GetArrayLength(cookieBArray);
+        cookie = env->GetByteArrayElements(cookieBArray, NULL);
+        lua_pushlstring(L, (const char *)cookie, lenght);
+        env->ReleaseByteArrayElements(cookieBArray, cookie, 0);
+        return 1;
+    }
+    DM_LUA_STACK_CHECK(L, 2);
+
+    lua_pushnil(L);
+    lua_pushfstring(L, "Failed to load snapshot.");
+    return 2;
+}
+
+static int Gpg_disk_set_snapshot(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+    
+    return 0;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -310,6 +362,9 @@ static const luaL_reg Gpg_methods[] =
     //disk
     {"display_saved_snapshots", Gpg_disk_display_saved_snapshots},
     {"open_snapshot", Gpg_disk_open_snapshot},
+    {"save_snapshot", Gpg_disk_save_snapshot},
+    {"get_snapshot", Gpg_disk_get_snapshot},
+    {"set_snapshot", Gpg_disk_set_snapshot},
     {0,0}
 };
 
@@ -382,6 +437,7 @@ static void InitializeJNI()
     {
         g_gpgs_disk.m_showSavedGamesUI = env->GetMethodID(cls, "showSavedGamesUI", "(Ljava/lang/String;ZZI)V");
         g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
+        g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
     }
     
     //private methods
