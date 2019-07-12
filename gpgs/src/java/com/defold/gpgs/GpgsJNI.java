@@ -342,4 +342,13 @@ public class GpgsJNI {
         return currentplayerSave;
     }
 
+    public String setSave(byte[] bytes) {
+        if (mPlayerSnapshot != null) {
+            mPlayerSnapshot.getSnapshotContents().writeBytes(bytes);
+            currentplayerSave = bytes;
+            return null;
+        }
+        return "Can't write data to the snapshot. The snapshot wasn't open.";
+    }
+
 }

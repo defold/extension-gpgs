@@ -82,9 +82,18 @@ function on_input(self, action_id, action)
         if gpg then
             local bytes, error_message = gpg.get_snapshot()
             if not bytes then
-                print(error_message)
+                print("get_snapshot ERROR:", error_message)
             else
-                print("bytes:",bytes)
+                print("get_snapshot",bytes)
+            end
+        end
+    end)
+
+    dirtylarry:button("set_snapshot", action_id, action, function ()
+        if gpg then
+            local error_message = gpg.set_snapshot("MyCustomBytesForSnapshot")
+            if error_message then
+                print("set_snapshot ERROR:", error_message)
             end
         end
     end)
