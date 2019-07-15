@@ -58,6 +58,7 @@ struct GPGS_Disk
     jmethodID              m_loadAndCloseSnapshot;
     jmethodID              m_getSave;
     jmethodID              m_setSave;
+    jmethodID              m_isSnapshotOpened;
 };
 
 static GPGS         g_gpgs;
@@ -399,6 +400,25 @@ static int Gpg_disk_set_snapshot(lua_State* L)
     return 2;
 }
 
+static int Gpg_disk_is_snapshot_opened(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_isSnapshotOpened);
+
+    lua_pushboolean(L, JNI_TRUE == return_value);
+
+    return 1;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -434,6 +454,7 @@ static const luaL_reg Gpg_methods[] =
     {"save_and_close_snapshot", Gpg_disk_save_and_close_snapshot},
     {"get_snapshot", Gpg_disk_get_snapshot},
     {"set_snapshot", Gpg_disk_set_snapshot},
+    {"is_snapshot_opened", Gpg_disk_is_snapshot_opened},
     {0,0}
 };
 
@@ -497,6 +518,7 @@ static void InitializeJNI()
     g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
     g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
     g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
+    g_gpgs.m_isAuthorized = env->GetMethodID(cls, "isAuthorized", "()Z");
     g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
     g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
     g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
@@ -509,6 +531,8 @@ static void InitializeJNI()
         g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
         g_gpgs_disk.m_loadAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;Ljava/lang/String;)V");
+        g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
+        g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
     }
     
     //private methods

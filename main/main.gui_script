@@ -35,6 +35,21 @@ function init(self)
     end
 end
 
+function update(self, dt)
+    if gpg then
+        if self.is_authorized ~= gpg.is_authorized() then
+            self.is_authorized = gpg.is_authorized()
+            print("self.is_authorized")
+            gui.set_text(gui.get_node("autorized"), "is_authorized: "..tostring(gpg.is_authorized()))
+        end
+        
+        if self.is_snapshot_opened ~= gpg.is_snapshot_opened() then
+            self.is_snapshot_opened = gpg.is_snapshot_opened()
+            gui.set_text(gui.get_node("snapshotOpened"), "is_snapshot_opened: "..tostring(gpg.is_snapshot_opened()))
+        end
+    end
+end
+
 local function change_popup_pos(self)
     if not self.pos then
         self.pos = 3

@@ -397,4 +397,10 @@ public class GpgsJNI {
         return "Can't write data to the snapshot. The snapshot wasn't open.";
     }
 
+    public boolean isSnapshotOpened() {
+        if (mPlayerSnapshot == null) {
+            return false;
+        }
+        return !mPlayerSnapshot.getSnapshotContents().isClosed();
+    }
 }
