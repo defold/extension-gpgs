@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.SnapshotsClient;
 import com.google.android.gms.games.snapshot.SnapshotMetadata;
+import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
 import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.common.api.ApiException;
@@ -52,6 +53,7 @@ public class GpgsJNI {
     private static final int MSG_SIGN_OUT = 3;
     private static final int MSG_SHOW_SNAPSHOTS = 4;
     private static final int MSG_LOAD_SNAPSHOT = 5;
+    private static final int MSG_SAVE_SNAPSHOT = 5;
 
     private static final int STATUS_SUCCESS = 1;
     private static final int STATUS_FAILED = 2;
@@ -269,7 +271,8 @@ public class GpgsJNI {
             obj.put("status", STATUS_SUCCESS);
             message = obj.toString();
         } catch(JSONException e) {
-            message = "{ error:'Error while converting snapshot message to JSON: " + e.getMessage() + "'";
+            message = "{ error:'Error while converting snapshot message to JSON: " + e.getMessage() + ", " +
+                    "' status:"+STATUS_FAILED;
         }
         gpgsAddToQueue(msg, message);
     }
@@ -336,6 +339,49 @@ public class GpgsJNI {
                     }
                 }
             });
+    }
+
+    public void saveAndCloseSnapshot(long playedTime, long progressValue, String description, String coverImageUri) {
+        SnapshotMetadataChange.Builder builder = new SnapshotMetadataChange.Builder();
+        if (playedTime != -1) {
+            builder.setPlayedTimeMillis(playedTime);
+        }
+        if (progressValue != -1) {
+            builder.setProgressValue(progressValue);
+        }
+        if (description != null) {
+            builder.setDescription(description);
+        }
+        if (coverImageUri != null) {
+            builder.setDescription(coverImageUri);
+        }
+
+        if (mPlayerSnapshot == null) {
+            sendSimpleMessage(MSG_SAVE_SNAPSHOT,
+                    "status", STATUS_FAILED,
+                    "error",
+                    "A snapshot wasn't opened.");
+            return;
+        }
+
+        mPlayerSnapshotsClient.commitAndClose(mPlayerSnapshot, builder.build())
+                .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
+            @Override
+            public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+                if (task.isSuccessful()) {
+                    mPlayerSnapshot = null;
+                    currentplayerSave = null;
+                    sendSimpleMessage(MSG_SAVE_SNAPSHOT,
+                            "status", STATUS_SUCCESS, null, null);
+                } else {
+                    Exception e = task.getException();
+                    sendSimpleMessage(MSG_SAVE_SNAPSHOT,
+                            "status", STATUS_FAILED,
+                            "error",
+                            "Failed to save a snapshot. "+ e.toString());
+                }
+            }
+        });
     }
 
     public byte[] getSave() {

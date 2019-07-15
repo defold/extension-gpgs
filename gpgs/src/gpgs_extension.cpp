@@ -55,6 +55,7 @@ struct GPGS_Disk
     
     jmethodID              m_showSavedGamesUI;
     jmethodID              m_loadSnapshot;
+    jmethodID              m_loadAndCloseSnapshot;
     jmethodID              m_getSave;
     jmethodID              m_setSave;
 };
@@ -286,6 +287,49 @@ static int Gpg_disk_save_and_close_snapshot(lua_State* L)
     {
         return 0;
     }
+
+    DM_LUA_STACK_CHECK(L, 0);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    //coverImageUri, description, playedTime, progressValue
+    long playedTime = -1;
+    long progressValue = -1;
+    char* coverImageUri = NULL;
+    char* description = NULL;
+
+    if(lua_istable(L, 1)){
+        lua_getfield(L, 1, "playedTime");
+        if(!lua_isnil(L, -1)){
+            playedTime = luaL_checknumber(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "progressValue");
+        if(!lua_isnil(L, -1)){
+            progressValue = luaL_checknumber(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "description");
+        if(!lua_isnil(L, -1)){
+            description = (char*)luaL_checkstring(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "coverImageUri");
+        if(!lua_isnil(L, -1)){
+            coverImageUri = (char*)luaL_checkstring(L, -1);
+        }
+        lua_pop(L, 1);
+    }
+
+    jstring jdescription = env->NewStringUTF(description);
+    jstring jcoverImageUri = env->NewStringUTF(coverImageUri);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImageUri);
+    env->DeleteLocalRef(jdescription);
+    env->DeleteLocalRef(jcoverImageUri);
     
     return 0;
 }
@@ -328,7 +372,7 @@ static int Gpg_disk_set_snapshot(lua_State* L)
         return 0;
     }
     
-    DM_LUA_STACK_CHECK(L, 1);
+    DM_LUA_STACK_CHECK(L, 2);
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
@@ -342,15 +386,17 @@ static int Gpg_disk_set_snapshot(lua_State* L)
 
     if (return_value) 
     {
+        lua_pushboolean(L, false);
         const char* new_char = env->GetStringUTFChars(return_value, 0);
         env->DeleteLocalRef(return_value);
         lua_pushstring(L, new_char);
     }
     else
     {
+        lua_pushboolean(L, true);
         lua_pushnil(L);
     }
-    return 1;
+    return 2;
 }
 
 // Extention methods
@@ -462,6 +508,7 @@ static void InitializeJNI()
         g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
         g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
+        g_gpgs_disk.m_loadAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;Ljava/lang/String;)V");
     }
     
     //private methods
