@@ -99,9 +99,7 @@ public class GpgsJNI {
     }
 
     private void onAccountChanged(GoogleSignInAccount googleSignInAccount) {
-        if (this.is_disk_active) {
-            mPlayerSnapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
-        }
+        onAccountChangedDisk(googleSignInAccount);
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount, final int msg) {
@@ -254,6 +252,38 @@ public class GpgsJNI {
     private SnapshotsClient mPlayerSnapshotsClient = null;
     private Snapshot mPlayerSnapshot = null;
     private byte[] currentplayerSave = null;
+
+    private int maxCoverImageSize = 819200;
+    private int maxDataSize  = 3145728;
+
+    private void onAccountChangedDisk(GoogleSignInAccount googleSignInAccount) {
+        if (this.is_disk_active) {
+            if (mPlayerSnapshotsClient == null) {
+                mPlayerSnapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
+                mPlayerSnapshotsClient.getMaxCoverImageSize()
+                        .addOnCompleteListener(new OnCompleteListener<Integer>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Integer> task) {
+                                if (task.isSuccessful()) {
+                                    maxCoverImageSize = task.getResult();
+                                }
+                    }
+                });
+
+                mPlayerSnapshotsClient.getMaxDataSize()
+                        .addOnCompleteListener(new OnCompleteListener<Integer>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Integer> task) {
+                                if (task.isSuccessful()) {
+                                    maxDataSize = task.getResult();
+                                }
+                            }
+                        });
+            } else {
+                mPlayerSnapshotsClient = Games.getSnapshotsClient(activity, googleSignInAccount);
+            }
+        }
+    }
     
     public void sendSnapshotMetadataMessage(int msg, SnapshotMetadata snapshot) {
         String message = null;
@@ -402,5 +432,13 @@ public class GpgsJNI {
             return false;
         }
         return !mPlayerSnapshot.getSnapshotContents().isClosed();
+    }
+
+    public int getMaxCoverImageSize() {
+        return maxCoverImageSize;
+    }
+
+    public int getMaxDataSize() {
+        return maxDataSize;
     }
 }

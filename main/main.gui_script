@@ -20,6 +20,8 @@ function gpg_callback(self, message_id, message)
     if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
         if message.status == gpg.STATUS_SUCCESS then
             gui.set_text(gui.get_node("id"), gpg.get_id())
+            print("max_snapshot_image_size: "..gpg.get_max_snapshot_image_size().." bytes",
+                "max_snapshot_size: "..gpg.get_max_snapshot_size().." bytes")
         end
     elseif message_id == gpg.MSG_SIGN_OUT then
         gui.set_text(gui.get_node("id"), "---")

@@ -59,6 +59,8 @@ struct GPGS_Disk
     jmethodID              m_getSave;
     jmethodID              m_setSave;
     jmethodID              m_isSnapshotOpened;
+    jmethodID              m_getMaxCoverImageSize;
+    jmethodID              m_getMaxDataSize;
 };
 
 static GPGS         g_gpgs;
@@ -419,6 +421,44 @@ static int Gpg_disk_is_snapshot_opened(lua_State* L)
     return 1;
 }
 
+static int Gpg_disk_get_max_cover_image_size(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+    
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxCoverImageSize);
+
+    lua_pushnumber(L, return_value);
+    
+    return 1;
+}
+
+static int Gpg_disk_get_max_data_size(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxDataSize);
+
+    lua_pushnumber(L, return_value);
+
+    return 1;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -455,6 +495,8 @@ static const luaL_reg Gpg_methods[] =
     {"get_snapshot", Gpg_disk_get_snapshot},
     {"set_snapshot", Gpg_disk_set_snapshot},
     {"is_snapshot_opened", Gpg_disk_is_snapshot_opened},
+    {"get_max_snapshot_image_size", Gpg_disk_get_max_cover_image_size},
+    {"get_max_snapshot_size", Gpg_disk_get_max_data_size},
     {0,0}
 };
 
@@ -533,6 +575,8 @@ static void InitializeJNI()
         g_gpgs_disk.m_loadAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;Ljava/lang/String;)V");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
         g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
+        g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");
+        g_gpgs_disk.m_getMaxDataSize = env->GetMethodID(cls, "getMaxDataSize", "()I");
     }
     
     //private methods
