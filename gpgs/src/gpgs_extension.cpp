@@ -348,17 +348,17 @@ static int Gpg_disk_get_snapshot(lua_State* L)
     JNIEnv *env = attacher.env;
 
     int lenght = 0;
-    jbyte* cookie = NULL;
+    jbyte* snapshot = NULL;
 
-    jbyteArray cookieBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getSave);
+    jbyteArray snapshotBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getSave);
 
-    if(cookieBArray != NULL)
+    if(snapshotBArray != NULL)
     {
         DM_LUA_STACK_CHECK(L, 1);
-        lenght = env->GetArrayLength(cookieBArray);
-        cookie = env->GetByteArrayElements(cookieBArray, NULL);
-        lua_pushlstring(L, (const char *)cookie, lenght);
-        env->ReleaseByteArrayElements(cookieBArray, cookie, 0);
+        lenght = env->GetArrayLength(snapshotBArray);
+        snapshot = env->GetByteArrayElements(snapshotBArray, NULL);
+        lua_pushlstring(L, (const char*)snapshot, lenght);
+        env->ReleaseByteArrayElements(snapshotBArray, snapshot, 0);
         return 1;
     }
     DM_LUA_STACK_CHECK(L, 2);
