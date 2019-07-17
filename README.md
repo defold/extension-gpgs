@@ -28,7 +28,7 @@ Add the following section into your `game.project` file:
 app_id = 1234567890
 use_disk = 1
 ```
-Where `app_id` app id from Google Play Console for your Play Services and `use_disk` option for turn-on turn-off using of the Game Saves.
+Where `app_id` app id from Google Play Console for your Play Services and `use_disk` option for using of the Game Saves (`0` is turned-off disk, `1` is turned-on disk).
 
 ## Signed .apk
 
