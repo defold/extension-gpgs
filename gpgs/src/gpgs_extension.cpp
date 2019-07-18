@@ -45,7 +45,7 @@ struct GPGS
     jmethodID               m_activityResult;
     jmethodID               m_getDisplayName;
     jmethodID               m_getId;
-    jmethodID               m_isAuthorized;
+    jmethodID               m_isLoggedIn;
     jmethodID               m_setGravityForPopups;
 };
 
@@ -147,14 +147,14 @@ static int GpgAuth_getId(lua_State* L)
     return 1;
 }
 
-static int GpgAuth_isAuthorized(lua_State* L)
+static int GpgAuth_isLoggedIn(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     
-    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_isAuthorized);
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_isLoggedIn);
     
     lua_pushboolean(L, JNI_TRUE == return_value);
 
@@ -196,7 +196,7 @@ static bool is_disk_avaliable()
     }
 }
 
-static int Gpg_disk_display_saved_snapshots(lua_State* L)
+static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
 
@@ -247,7 +247,7 @@ static int Gpg_disk_display_saved_snapshots(lua_State* L)
     return 0;
 }
 
-static int Gpg_disk_open_snapshot(lua_State* L)
+static int GpgDisk_SnapshotOpen(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
 
@@ -284,7 +284,7 @@ static int Gpg_disk_open_snapshot(lua_State* L)
     return 0;
 }
 
-static int Gpg_disk_save_and_close_snapshot(lua_State* L)
+static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -337,7 +337,7 @@ static int Gpg_disk_save_and_close_snapshot(lua_State* L)
     return 0;
 }
 
-static int Gpg_disk_get_snapshot(lua_State* L)
+static int GpgDisk_SnapshotGetData(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -368,7 +368,7 @@ static int Gpg_disk_get_snapshot(lua_State* L)
     return 2;
 }
 
-static int Gpg_disk_set_snapshot(lua_State* L)
+static int GpgDisk_SnapshotSetData(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -402,7 +402,7 @@ static int Gpg_disk_set_snapshot(lua_State* L)
     return 2;
 }
 
-static int Gpg_disk_is_snapshot_opened(lua_State* L)
+static int GpgDisk_SnapshotIsOpened(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -421,7 +421,7 @@ static int Gpg_disk_is_snapshot_opened(lua_State* L)
     return 1;
 }
 
-static int Gpg_disk_get_max_cover_image_size(lua_State* L)
+static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -440,7 +440,7 @@ static int Gpg_disk_get_max_cover_image_size(lua_State* L)
     return 1;
 }
 
-static int Gpg_disk_get_max_data_size(lua_State* L)
+static int GpgDisk_GetMaxDataSize(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -485,18 +485,18 @@ static const luaL_reg Gpg_methods[] =
     {"silent_login", GpgAuth_SilentLogin},
     {"get_display_name", GpgAuth_getDisplayName},
     {"get_id", GpgAuth_getId},
-    {"is_authorized", GpgAuth_isAuthorized},
+    {"is_logged_in", GpgAuth_isLoggedIn},
     {"set_popup_position", GpgAuth_setGravityForPopups},
     {"set_callback", Gpg_set_callback},
     //disk
-    {"display_saved_snapshots", Gpg_disk_display_saved_snapshots},
-    {"open_snapshot", Gpg_disk_open_snapshot},
-    {"save_and_close_snapshot", Gpg_disk_save_and_close_snapshot},
-    {"get_snapshot", Gpg_disk_get_snapshot},
-    {"set_snapshot", Gpg_disk_set_snapshot},
-    {"is_snapshot_opened", Gpg_disk_is_snapshot_opened},
-    {"get_max_snapshot_image_size", Gpg_disk_get_max_cover_image_size},
-    {"get_max_snapshot_size", Gpg_disk_get_max_data_size},
+    {"snapshot_display_saves", GpgDisk_SnapshotDisplaySaves},
+    {"snapshot_open", GpgDisk_SnapshotOpen},
+    {"snapshot_commit_and_close", GpgDisk_SnapshotCommitAndClose},
+    {"snapshot_get_data", GpgDisk_SnapshotGetData},
+    {"snapshot_set_data", GpgDisk_SnapshotSetData},
+    {"snapshot_is_opened", GpgDisk_SnapshotIsOpened},
+    {"snapshot_get_max_image_size", GpgDisk_GetMaxCoverImageSize},
+    {"snapshot_get_max_save_size", GpgDisk_GetMaxDataSize},
     {0,0}
 };
 
@@ -560,7 +560,7 @@ static void InitializeJNI()
     g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
     g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
     g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
-    g_gpgs.m_isAuthorized = env->GetMethodID(cls, "isAuthorized", "()Z");
+    g_gpgs.m_isLoggedIn = env->GetMethodID(cls, "isLoggedIn", "()Z");
     g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
     g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
     g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");

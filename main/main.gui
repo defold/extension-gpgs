@@ -770,7 +770,7 @@ nodes {
     w: 1.0
   }
   type: TYPE_TEMPLATE
-  id: "open_snapshot"
+  id: "snapshot_open"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -811,12 +811,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "button/button_normal"
-  id: "open_snapshot/larrybutton"
+  id: "snapshot_open/larrybutton"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "open_snapshot"
+  parent: "snapshot_open"
   layer: ""
   inherit_alpha: true
   slice9 {
@@ -868,7 +868,7 @@ nodes {
   blend_mode: BLEND_MODE_ALPHA
   text: "Open Snapshot"
   font: "larryfont"
-  id: "open_snapshot/larrylabel"
+  id: "snapshot_open/larrylabel"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
@@ -886,7 +886,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  parent: "open_snapshot/larrybutton"
+  parent: "snapshot_open/larrybutton"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -1141,7 +1141,7 @@ nodes {
     w: 1.0
   }
   type: TYPE_TEMPLATE
-  id: "get_snapshot"
+  id: "snapshot_get_data"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -1182,12 +1182,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "button/button_normal"
-  id: "get_snapshot/larrybutton"
+  id: "snapshot_get_data/larrybutton"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "get_snapshot"
+  parent: "snapshot_get_data"
   layer: ""
   inherit_alpha: true
   slice9 {
@@ -1240,7 +1240,7 @@ nodes {
   blend_mode: BLEND_MODE_ALPHA
   text: "Get Save"
   font: "larryfont"
-  id: "get_snapshot/larrylabel"
+  id: "snapshot_get_data/larrylabel"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
@@ -1258,7 +1258,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  parent: "get_snapshot/larrybutton"
+  parent: "snapshot_get_data/larrybutton"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -1301,7 +1301,7 @@ nodes {
     w: 1.0
   }
   type: TYPE_TEMPLATE
-  id: "set_snapshot"
+  id: "snapshot_set_data"
   layer: ""
   inherit_alpha: true
   alpha: 1.0
@@ -1342,12 +1342,12 @@ nodes {
   type: TYPE_BOX
   blend_mode: BLEND_MODE_ALPHA
   texture: "button/button_normal"
-  id: "set_snapshot/larrybutton"
+  id: "snapshot_set_data/larrybutton"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
   adjust_mode: ADJUST_MODE_FIT
-  parent: "set_snapshot"
+  parent: "snapshot_set_data"
   layer: ""
   inherit_alpha: true
   slice9 {
@@ -1399,7 +1399,7 @@ nodes {
   blend_mode: BLEND_MODE_ALPHA
   text: "Set Save"
   font: "larryfont"
-  id: "set_snapshot/larrylabel"
+  id: "snapshot_set_data/larrylabel"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER
@@ -1417,7 +1417,7 @@ nodes {
   }
   adjust_mode: ADJUST_MODE_FIT
   line_break: false
-  parent: "set_snapshot/larrybutton"
+  parent: "snapshot_set_data/larrybutton"
   layer: ""
   inherit_alpha: true
   alpha: 1.0

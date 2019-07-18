@@ -234,7 +234,7 @@ public class GpgsJNI {
         return mPlayer.getPlayerId();
     }
 
-    public boolean isAuthorized() {
+    public boolean isLoggedIn() {
         if (mPlayer == null) {
             return false;
         }
