@@ -55,7 +55,7 @@ struct GPGS_Disk
     
     jmethodID              m_showSavedGamesUI;
     jmethodID              m_loadSnapshot;
-    jmethodID              m_loadAndCloseSnapshot;
+    jmethodID              m_saveAndCloseSnapshot;
     jmethodID              m_getSave;
     jmethodID              m_setSave;
     jmethodID              m_isSnapshotOpened;
@@ -296,11 +296,11 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
 
-    //coverImageUri, description, playedTime, progressValue
+    //coverImage, description, playedTime, progressValue
     long playedTime = -1;
     long progressValue = -1;
-    char* coverImageUri = NULL;
-    char* description = NULL;
+    jbyteArray jcoverImage = NULL;
+    jstring jdescription = NULL;
 
     if(lua_istable(L, 1)){
         lua_getfield(L, 1, "playedTime");
@@ -317,22 +317,27 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
         
         lua_getfield(L, 1, "description");
         if(!lua_isnil(L, -1)){
-            description = (char*)luaL_checkstring(L, -1);
+            const char* description = luaL_checkstring(L, -1);
+            jdescription = env->NewStringUTF(description);
         }
         lua_pop(L, 1);
         
-        lua_getfield(L, 1, "coverImageUri");
+        lua_getfield(L, 1, "coverImage");
         if(!lua_isnil(L, -1)){
-            coverImageUri = (char*)luaL_checkstring(L, -1);
+            size_t length;
+            const char* bytes = lua_tolstring(L, -1, &length);
+            jcoverImage = env->NewByteArray(length);
+            env->SetByteArrayRegion(jcoverImage, 0, length, (jbyte*)bytes);
         }
         lua_pop(L, 1);
     }
+    
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_saveAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
 
-    jstring jdescription = env->NewStringUTF(description);
-    jstring jcoverImageUri = env->NewStringUTF(coverImageUri);
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImageUri);
-    env->DeleteLocalRef(jdescription);
-    env->DeleteLocalRef(jcoverImageUri);
+    if (jdescription) 
+    {
+        env->DeleteLocalRef(jdescription);
+    }
     
     return 0;
 }
@@ -502,7 +507,7 @@ static const luaL_reg Gpg_methods[] =
 
 static dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
 {
-    dmLogInfo("Registered extension Gpg");
+    dmLogInfo("Registered extension Gpgs");
     return dmExtension::RESULT_OK;
 }
 
@@ -572,7 +577,7 @@ static void InitializeJNI()
         g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
         g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
-        g_gpgs_disk.m_loadAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;Ljava/lang/String;)V");
+        g_gpgs_disk.m_saveAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;[B)V");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
         g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
         g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");

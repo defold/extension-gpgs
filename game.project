@@ -1,7 +1,7 @@
 [project]
 title = GPGS
 version = 0.2
-dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
+dependencies = https://github.com/andsve/dirtylarry/archive/master.zip,https://github.com/britzl/defold-screenshot/archive/master.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc
