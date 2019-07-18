@@ -29,3 +29,6 @@ bundle_identifier = com.defoldtest.gpgs
 app_id = 567627510591
 use_disk = 1
 
+[library]
+include_dirs = gpgs
+
