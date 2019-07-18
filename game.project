@@ -1,8 +1,7 @@
 [project]
-title = GooglePlay
-version = 0.1
+title = GPGS
+version = 0.2
 dependencies = https://github.com/andsve/dirtylarry/archive/master.zip
-bundle_resources = /res
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -21,9 +20,12 @@ scale = 0.02
 shared_state = 1
 
 [android]
-manifest = /AndroidManifest.xml
-package = com.defoldtest.gpgs
+package = com.potatojam.onet_paradise.match_two_tiles
 
 [ios]
 bundle_identifier = com.defoldtest.gpgs
+
+[gpgs]
+app_id = 567627510591
+use_disk = 1
 

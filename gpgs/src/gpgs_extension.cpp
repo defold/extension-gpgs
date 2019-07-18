@@ -1,343 +1,640 @@
-// C++ Documentation
-// https://developers.google.com/games/services/cpp/api/class/gpg/game-services
-// Getting Started
-// https://developers.google.com/games/services/cpp/GettingStartedNativeClient
-
-#include <dmsdk/sdk.h>
-#include <assert.h>
-
-#if defined(DM_PLATFORM_ANDROID)
-
-#include <gpg/android_initialization.h>
-#include <gpg/android_support.h>
-#include <gpg/achievement.h>
-#include <gpg/achievement_manager.h>
-#include <gpg/types.h>
-#include <gpg/builder.h>
-#include <gpg/debug.h>
-#include <gpg/default_callbacks.h>
-#include <gpg/game_services.h>
-#include <gpg/leaderboard_manager.h>
-#include <gpg/achievement_manager.h>
-
-#if defined(DM_PLATFORM_ANDROID)
-    #include <android_native_app_glue.h>
-#endif
-
-extern "C"
-{
-    #include <lua/lauxlib.h>
-    #include <lua/lualib.h>
-}
-
-#ifdef DLIB_LOG_DOMAIN
-#undef DLIB_LOG_DOMAIN
-#define DLIB_LOG_DOMAIN "GPG"
-#endif
-#define LIB_NAME GpgExt
+#define EXTENSION_NAME GpgsExt
+#define LIB_NAME "GpgsExt"
 #define MODULE_NAME "gpg"
 
-struct LuaCallbackInfo
+#define DLIB_LOG_DOMAIN LIB_NAME
+#include <dmsdk/sdk.h>
+
+#if defined(DM_PLATFORM_ANDROID)
+
+#include "gpgs_jni.h"
+#include "private_gpgs_callback.h"
+#include "com_defold_gpgs_GpgsJNI.h"
+#include "utils/LuaUtils.h"
+
+enum PopupPositions
 {
-    LuaCallbackInfo() : m_L(0), m_Callback(LUA_NOREF), m_Self(LUA_NOREF) {
-        dmLogWarning("LuaCallbackInfo constructor");
-    }
-    lua_State* m_L;
-    int        m_Callback;
-    int        m_Self;
+    POPUP_POS_TOP_LEFT =           48 | 3,
+    POPUP_POS_TOP_CENTER =         48 | 1,
+    POPUP_POS_TOP_RIGHT =          48 | 5,
+    POPUP_POS_CENTER_LEFT =        16 | 3,
+    POPUP_POS_CENTER =             16 | 1,
+    POPUP_POS_CENTER_RIGHT =       16 | 5,
+    POPUP_POS_BOTTOM_LEFT =        80 | 3,
+    POPUP_POS_BOTTOM_CENTER =      80 | 1,
+    POPUP_POS_BOTTOM_RIGHT =       80 | 5
 };
 
-struct Gpg
+enum ResolutionPolicy
 {
-    Gpg() : m_AuthInProgress(false) {}
-    bool m_AuthInProgress;
-    LuaCallbackInfo m_Callback;
-    std::unique_ptr<gpg::GameServices> m_GameServices;
+    RESOLUTION_POLICY_MANUAL =                    -1,
+    RESOLUTION_POLICY_LONGEST_PLAYTIME =           1,
+    RESOLUTION_POLICY_LAST_KNOWN_GOOD =            2,
+    RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED =     3,
+    RESOLUTION_POLICY_HIGHEST_PROGRESS =           4
 };
 
-static Gpg* g_Gpg = 0;
 
-#define CHECK_GPG() {if(!g_Gpg || !g_Gpg->m_GameServices) return luaL_error(L, "GPG not initialized!");}
-
-static void RegisterCallback(lua_State* L, int index, LuaCallbackInfo* cbk)
+struct GPGS
 {
-    if(cbk->m_Callback != LUA_NOREF)
-    {
-        dmScript::Unref(cbk->m_L, LUA_REGISTRYINDEX, cbk->m_Callback);
-        dmScript::Unref(cbk->m_L, LUA_REGISTRYINDEX, cbk->m_Self);
-    }
+    jobject                 m_GpgsJNI;
+    //autorization
+    jmethodID               m_silentLogin;
+    jmethodID               m_login;
+    jmethodID               m_logout;
+    jmethodID               m_activityResult;
+    jmethodID               m_getDisplayName;
+    jmethodID               m_getId;
+    jmethodID               m_isLoggedIn;
+    jmethodID               m_setGravityForPopups;
+};
 
-    cbk->m_L = dmScript::GetMainThread(L);
+struct GPGS_Disk
+{
+    bool                   is_using;
+    
+    jmethodID              m_showSavedGamesUI;
+    jmethodID              m_loadSnapshot;
+    jmethodID              m_loadAndCloseSnapshot;
+    jmethodID              m_getSave;
+    jmethodID              m_setSave;
+    jmethodID              m_isSnapshotOpened;
+    jmethodID              m_getMaxCoverImageSize;
+    jmethodID              m_getMaxDataSize;
+};
 
-    luaL_checktype(L, index, LUA_TFUNCTION);
-    lua_pushvalue(L, index);
-    cbk->m_Callback = dmScript::Ref(L, LUA_REGISTRYINDEX);
+static GPGS         g_gpgs;
+static GPGS_Disk    g_gpgs_disk;
 
-    dmScript::GetInstance(L);
-    cbk->m_Self = dmScript::Ref(L, LUA_REGISTRYINDEX);
+// GPGPS autorization 
+
+static int GpgAuth_Login(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_login);
+    
+    return 0;
 }
 
-static void UnregisterCallback(LuaCallbackInfo* cbk)
+static int GpgAuth_Logout(lua_State* L)
 {
-    if(cbk->m_Callback != LUA_NOREF)
+    DM_LUA_STACK_CHECK(L, 0);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
+    
+    return 0;
+}
+
+static int GpgAuth_SilentLogin(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
+    
+    return 0;
+}
+
+static int GpgAuth_getDisplayName(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getDisplayName);
+    if (return_value) 
     {
-        dmScript::Unref(cbk->m_L, LUA_REGISTRYINDEX, cbk->m_Callback);
-        dmScript::Unref(cbk->m_L, LUA_REGISTRYINDEX, cbk->m_Self);
-        cbk->m_Callback = LUA_NOREF;
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    
+    return 1;
+}
+
+static int GpgAuth_getId(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+    
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getId);
+    if (return_value) 
+    {
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    
+    return 1;
+}
+
+static int GpgAuth_isLoggedIn(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_isLoggedIn);
+    
+    lua_pushboolean(L, JNI_TRUE == return_value);
+
+    return 1;
+}
+
+static int GpgAuth_setGravityForPopups(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int position_lua = luaL_checknumber(L, 1);
+
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_setGravityForPopups, position_lua);
+
+    return 0;
+}
+
+static int Gpg_set_callback(lua_State* L)
+{
+    gpgs_set_callback(L, 1);
+    return 0;
+}
+
+// GPGPS disk
+
+static bool is_disk_avaliable()
+{
+    if (g_gpgs_disk.is_using)
+    {
+        return true;
+    }
+    else
+    {
+        dmLogWarning("GPGS Disk wasn't activated. Please check your game.project settings.");
+        return false;
     }
 }
 
-static void InvokeCallbackAuthOperation(LuaCallbackInfo* cbk, gpg::AuthOperation auth_operation, gpg::AuthStatus status)
+static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
 {
-    if(cbk->m_Callback == LUA_NOREF)
-        return;
+    DM_LUA_STACK_CHECK(L, 0);
 
-    lua_State* L = cbk->m_L;
-    int top = lua_gettop(L);
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
 
-    lua_rawgeti(L, LUA_REGISTRYINDEX, cbk->m_Callback);
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    int type = lua_type(L, 1);
+    char* popupTitle = "Game Saves";
 
-    // Setup self (the script instance)
-    lua_rawgeti(L, LUA_REGISTRYINDEX, cbk->m_Self);
-    lua_pushvalue(L, -1);
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        popupTitle = (char*)luaL_checkstring(L, 1);
+    }
 
-    dmScript::SetInstance(L);
+    type = lua_type(L, 2);
+    bool allowAddButton = true;
 
-    dmLogWarning("GPG InvokeCallback: %d %d", auth_operation, status);
-    lua_pushinteger(L, (int)auth_operation);
-    lua_pushinteger(L, (int)status);
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        allowAddButton = luaL_checkbool(L, 2);
+    }
 
-    int number_of_arguments = 3; // instance + 2
-    int ret = lua_pcall(L, number_of_arguments, 0, 0);
-    if(ret != 0) {
-        dmLogError("Error running callback: %s", lua_tostring(L, -1));
+    type = lua_type(L, 3);
+    bool allowDelete = true;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        allowDelete = luaL_checkbool(L, 3);
+    }
+
+    type = lua_type(L, 4);
+    int maxNumberOfSavedGamesToShow = 5;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        maxNumberOfSavedGamesToShow = luaL_checknumber(L, 4);
+    }
+    
+    jstring jpopupTitle = env->NewStringUTF(popupTitle);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_showSavedGamesUI, jpopupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
+    env->DeleteLocalRef(jpopupTitle);
+
+    return 0;
+}
+
+static int GpgDisk_SnapshotOpen(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    const char* saveName = luaL_checkstring(L, 1);
+
+    int type = lua_type(L, 2);
+    bool createIfNotFound = false;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        createIfNotFound = luaL_checkbool(L, 2);
+    }
+
+    type = lua_type(L, 3);
+    int conflictPolicy = RESOLUTION_POLICY_LAST_KNOWN_GOOD;
+
+    if (type != LUA_TNONE && type != LUA_TNIL)
+    {
+        conflictPolicy = luaL_checknumber(L, 3);
+    }
+
+    jstring jsaveName = env->NewStringUTF(saveName);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadSnapshot, jsaveName, createIfNotFound, conflictPolicy);
+    env->DeleteLocalRef(jsaveName);
+    
+    return 0;
+}
+
+static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    DM_LUA_STACK_CHECK(L, 0);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    //coverImageUri, description, playedTime, progressValue
+    long playedTime = -1;
+    long progressValue = -1;
+    char* coverImageUri = NULL;
+    char* description = NULL;
+
+    if(lua_istable(L, 1)){
+        lua_getfield(L, 1, "playedTime");
+        if(!lua_isnil(L, -1)){
+            playedTime = luaL_checknumber(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "progressValue");
+        if(!lua_isnil(L, -1)){
+            progressValue = luaL_checknumber(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "description");
+        if(!lua_isnil(L, -1)){
+            description = (char*)luaL_checkstring(L, -1);
+        }
+        lua_pop(L, 1);
+        
+        lua_getfield(L, 1, "coverImageUri");
+        if(!lua_isnil(L, -1)){
+            coverImageUri = (char*)luaL_checkstring(L, -1);
+        }
         lua_pop(L, 1);
     }
-    assert(top == lua_gettop(L));
+
+    jstring jdescription = env->NewStringUTF(description);
+    jstring jcoverImageUri = env->NewStringUTF(coverImageUri);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImageUri);
+    env->DeleteLocalRef(jdescription);
+    env->DeleteLocalRef(jcoverImageUri);
+    
+    return 0;
 }
 
-
-static void OnAuthActionStarted(gpg::AuthOperation auth_operation)
+static int GpgDisk_SnapshotGetData(lua_State* L)
 {
-    dmLogWarning("GPG OnAuthActionStarted: %d", auth_operation);
-    g_Gpg->m_AuthInProgress = true;
-
-    switch ( auth_operation ) {
-      case gpg::AuthOperation::SIGN_IN:
-        dmLogWarning("Signing In");
-        break;
-      case gpg::AuthOperation::SIGN_OUT:
-        dmLogWarning("Signing Out");
-        break;
+    if (not is_disk_avaliable())
+    {
+        return 0;
     }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int lenght = 0;
+    jbyte* snapshot = NULL;
+
+    jbyteArray snapshotBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getSave);
+
+    if(snapshotBArray != NULL)
+    {
+        DM_LUA_STACK_CHECK(L, 1);
+        lenght = env->GetArrayLength(snapshotBArray);
+        snapshot = env->GetByteArrayElements(snapshotBArray, NULL);
+        lua_pushlstring(L, (const char*)snapshot, lenght);
+        env->ReleaseByteArrayElements(snapshotBArray, snapshot, 0);
+        return 1;
+    }
+    DM_LUA_STACK_CHECK(L, 2);
+
+    lua_pushnil(L);
+    lua_pushfstring(L, "Failed to load snapshot.");
+    return 2;
 }
 
-static void OnAuthActionFinished(gpg::AuthOperation auth_operation, gpg::AuthStatus status)
+static int GpgDisk_SnapshotSetData(lua_State* L)
 {
-    g_Gpg->m_AuthInProgress = false;
-    // TODO: Log warning if status == -3 (NOT_AUTH). Probably wrong certificate
-    // OR maybe NOT! We can this on startup as well the first time (autologin)
-    dmLogWarning("OnAuthActionFinished: %s (%d) %s (%d)", gpg::DebugString(auth_operation).c_str(), auth_operation, gpg::DebugString(status).c_str(), status);
-    dmLogWarning("IsAuthorized: %d", g_Gpg->m_GameServices->IsAuthorized());
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+    
+    DM_LUA_STACK_CHECK(L, 2);
 
-    InvokeCallbackAuthOperation(&g_Gpg->m_Callback, auth_operation, status);
-}
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
 
-/** Login
- * @param callback  The callback of the form "auth_status_callback(self, auth_operation, auth_status)"
- */
-static int Login(lua_State* L)
-{
-    DM_LUA_STACK_CHECK(L, 1);
-    dmLogWarning("LOGIN %p %d %d", g_Gpg->m_Callback.m_L, g_Gpg->m_Callback.m_Self, g_Gpg->m_Callback.m_Callback);
+    size_t bytes_lenght;
+    const char* bytes = luaL_checklstring(L, 1, &bytes_lenght);
 
-    RegisterCallback(L, 1, &g_Gpg->m_Callback);
+    jbyteArray byteArray = env->NewByteArray(bytes_lenght);
+    env->SetByteArrayRegion(byteArray, 0, bytes_lenght, (jbyte*)bytes);
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_setSave, byteArray);
 
-    if (!g_Gpg->m_AuthInProgress) {
-        g_Gpg->m_GameServices->StartAuthorizationUI();
-        lua_pushboolean(L, true);
-    } else {
-        dmLogWarning("Authorization already in progress")
+    if (return_value) 
+    {
         lua_pushboolean(L, false);
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushboolean(L, true);
+        lua_pushnil(L);
+    }
+    return 2;
+}
+
+static int GpgDisk_SnapshotIsOpened(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
     }
 
-    return 1;
-}
-
-static int Logout(lua_State* L)
-{
-    CHECK_GPG();
-    g_Gpg->m_GameServices->SignOut();
-    return 0;
-}
-
-static int IsAuthInProgress(lua_State* L)
-{
     DM_LUA_STACK_CHECK(L, 1);
-    lua_pushboolean(L, g_Gpg ? g_Gpg->m_AuthInProgress : false);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_isSnapshotOpened);
+
+    lua_pushboolean(L, JNI_TRUE == return_value);
+
     return 1;
 }
 
-static int IsAuthorized(lua_State* L)
+static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
 {
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+    
     DM_LUA_STACK_CHECK(L, 1);
-    lua_pushboolean(L, g_Gpg && g_Gpg->m_GameServices ? g_Gpg->m_GameServices->IsAuthorized() : false);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxCoverImageSize);
+
+    lua_pushnumber(L, return_value);
+    
     return 1;
 }
 
-static int ShowLeaderboard(lua_State* L)
+static int GpgDisk_GetMaxDataSize(lua_State* L)
 {
-    CHECK_GPG();
-    const char* leaderboard = luaL_checkstring(L, 1);
-    g_Gpg->m_GameServices->Leaderboards().ShowUI(leaderboard);
-    return 0;
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    DM_LUA_STACK_CHECK(L, 1);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    
+    int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxDataSize);
+
+    lua_pushnumber(L, return_value);
+
+    return 1;
 }
 
-static int SubmitScore(lua_State* L)
-{
-    CHECK_GPG();
-    const char* leaderboard = luaL_checkstring(L, 1);
-    int score = luaL_checkint(L, 2);
-    g_Gpg->m_GameServices->Leaderboards().SubmitScore(leaderboard, (uint64_t) score);
-    return 0;
-}
-
-static int ShowAchievements(lua_State* L)
-{
-    CHECK_GPG();
-    g_Gpg->m_GameServices->Achievements().ShowAllUI();
-    return 0;
-}
-
-static int UnlockAchievement(lua_State* L)
-{
-    CHECK_GPG();
-    const char* achievement = luaL_checkstring(L, 1);
-    g_Gpg->m_GameServices->Achievements().Unlock(achievement);
-    return 0;
-}
-
-static const luaL_reg Gpg_methods[] =
-{
-    {"login", Login},
-    {"logout", Logout},
-    {"is_auth_in_progress", IsAuthInProgress},
-    {"is_authorized", IsAuthorized},
-    {"show_leaderboard", ShowLeaderboard},
-    {"submit_score", SubmitScore},
-    {"show_achievements", ShowAchievements},
-    {"unlock_achievement", UnlockAchievement},
-    {0,0}
-};
-
-static const luaL_reg Gpg_meta[] =
-{
-    {0, 0}
-};
+// Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
 {
-    dmLogInfo("OnActivityResult: env: %p  activity: %p  request_code: %d  result_code: %d  result: %p", env, activity, request_code, result_code, result);
+    ThreadAttacher attacher;
+    JNIEnv *_env = attacher.env;
 
-    gpg::AndroidSupport::OnActivityResult((JNIEnv*) env, (jobject) activity, request_code, result_code, (jobject) result);
+    _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
+
+JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env, jclass cls, jint jmsg, jstring jjson)
+{
+    const char* json = env->GetStringUTFChars(jjson, 0);
+    gpgs_add_to_queue((MESSAGE_ID)jmsg, json);
+    env->ReleaseStringUTFChars(jjson, json);
+}
+//-----
+
+static const luaL_reg Gpg_methods[] =
+{
+    //autorization
+    {"login", GpgAuth_Login},
+    {"logout", GpgAuth_Logout},
+    {"silent_login", GpgAuth_SilentLogin},
+    {"get_display_name", GpgAuth_getDisplayName},
+    {"get_id", GpgAuth_getId},
+    {"is_logged_in", GpgAuth_isLoggedIn},
+    {"set_popup_position", GpgAuth_setGravityForPopups},
+    {"set_callback", Gpg_set_callback},
+    //disk
+    {"snapshot_display_saves", GpgDisk_SnapshotDisplaySaves},
+    {"snapshot_open", GpgDisk_SnapshotOpen},
+    {"snapshot_commit_and_close", GpgDisk_SnapshotCommitAndClose},
+    {"snapshot_get_data", GpgDisk_SnapshotGetData},
+    {"snapshot_set_data", GpgDisk_SnapshotSetData},
+    {"snapshot_is_opened", GpgDisk_SnapshotIsOpened},
+    {"snapshot_get_max_image_size", GpgDisk_GetMaxCoverImageSize},
+    {"snapshot_get_max_save_size", GpgDisk_GetMaxDataSize},
+    {0,0}
+};
 
 static dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
 {
     dmLogInfo("Registered extension Gpg");
-
     return dmExtension::RESULT_OK;
 }
 
 static void LuaInit(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
-
     luaL_register(L, MODULE_NAME, Gpg_methods);
 
-#define SETAUTHOPERATIONCONSTANT(name) \
-    lua_pushinteger(L, (int) gpg::AuthOperation:: name); \
-    lua_setfield(L, -2, "AUTH_OPERATION_" #name); \
+#define SETCONSTANT(name) \
+    lua_pushnumber(L, (lua_Number) name); \
+    lua_setfield(L, -2, #name); \
 
-    SETAUTHOPERATIONCONSTANT(SIGN_IN);
-    SETAUTHOPERATIONCONSTANT(SIGN_OUT);
+    SETCONSTANT(POPUP_POS_TOP_LEFT)
+    SETCONSTANT(POPUP_POS_TOP_CENTER)
+    SETCONSTANT(POPUP_POS_TOP_RIGHT)
+    SETCONSTANT(POPUP_POS_CENTER_LEFT)
+    SETCONSTANT(POPUP_POS_CENTER)
+    SETCONSTANT(POPUP_POS_CENTER_RIGHT)
+    SETCONSTANT(POPUP_POS_BOTTOM_LEFT)
+    SETCONSTANT(POPUP_POS_BOTTOM_CENTER)
+    SETCONSTANT(POPUP_POS_BOTTOM_RIGHT)
 
-#define SETAUTHSTATUSCONSTANT(name) \
-    lua_pushinteger(L, (int) gpg::AuthStatus:: name); \
-    lua_setfield(L, -2, "AUTH_STATUS_" #name); \
+    SETCONSTANT(MSG_SIGN_IN)
+    SETCONSTANT(MSG_SILENT_SIGN_IN)
+    SETCONSTANT(MSG_SIGN_OUT)
 
-    SETAUTHSTATUSCONSTANT(VALID);
-    SETAUTHSTATUSCONSTANT(ERROR_INTERNAL);
-    SETAUTHSTATUSCONSTANT(ERROR_NOT_AUTHORIZED);
-    SETAUTHSTATUSCONSTANT(ERROR_VERSION_UPDATE_REQUIRED);
-    SETAUTHSTATUSCONSTANT(ERROR_TIMEOUT);
-    SETAUTHSTATUSCONSTANT(ERROR_NO_DATA);
-    SETAUTHSTATUSCONSTANT(ERROR_NETWORK_OPERATION_FAILED);
-    SETAUTHSTATUSCONSTANT(ERROR_APP_MISCONFIGURED);
-    SETAUTHSTATUSCONSTANT(ERROR_GAME_NOT_FOUND);
-    SETAUTHSTATUSCONSTANT(ERROR_INTERRUPTED);
+    SETCONSTANT(STATUS_SUCCESS)
+    SETCONSTANT(STATUS_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_COMMIT_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_CONFLICT_MISSING)
+    SETCONSTANT(STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE)
+    SETCONSTANT(STATUS_SNAPSHOT_CREATION_FAILED)
+    SETCONSTANT(STATUS_SNAPSHOT_FOLDER_UNAVAILABLE)
+    SETCONSTANT(STATUS_SNAPSHOT_NOT_FOUND)
 
-    lua_pop(L, 1);
+    SETCONSTANT(RESOLUTION_POLICY_MANUAL)
+    SETCONSTANT(RESOLUTION_POLICY_LONGEST_PLAYTIME)
+    SETCONSTANT(RESOLUTION_POLICY_LAST_KNOWN_GOOD)
+    SETCONSTANT(RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
+    SETCONSTANT(RESOLUTION_POLICY_HIGHEST_PROGRESS)
+    
+#undef SETCONSTANT
+    
+    lua_pop(L,  1);
+}
 
-    #undef SETAUTOOPERATIONCONSTANT
-    #undef SETAUTHSTATUSCONSTANT
+static void InitializeJNI()
+{
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    ClassLoader class_loader = ClassLoader(env);
+    jclass cls = class_loader.load("com.defold.gpgs.GpgsJNI");
+
+    //authorization
+    g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
+    g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
+    g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
+    g_gpgs.m_isLoggedIn = env->GetMethodID(cls, "isLoggedIn", "()Z");
+    g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
+    g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
+    g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
+
+    //disk
+    if (g_gpgs_disk.is_using) 
+    {
+        g_gpgs_disk.m_showSavedGamesUI = env->GetMethodID(cls, "showSavedGamesUI", "(Ljava/lang/String;ZZI)V");
+        g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
+        g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
+        g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
+        g_gpgs_disk.m_loadAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;Ljava/lang/String;)V");
+        g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
+        g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
+        g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");
+        g_gpgs_disk.m_getMaxDataSize = env->GetMethodID(cls, "getMaxDataSize", "()I");
+    }
+    
+    //private methods
+    g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
+    
+    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;Z)V");
+    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_gpgs_disk.is_using));
 }
 
 static dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
-    dmLogInfo("Initializing extension Gpg");
-
-    gpg::AndroidInitialization::android_main(dmGraphics::GetNativeAndroidApp());
-    dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
-
     LuaInit(params->m_L);
 
-    g_Gpg = new Gpg;
-
-    if (!g_Gpg->m_GameServices)
+    int is_using = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.use_disk", 0);
+    if (is_using > 0)
     {
-        gpg::AndroidPlatformConfiguration platform_configuration;
-        platform_configuration.SetActivity(dmGraphics::GetNativeAndroidActivity());
-
-        g_Gpg->m_GameServices = gpg::GameServices::Builder()
-            .SetDefaultOnLog(gpg::LogLevel::VERBOSE)
-            .SetOnAuthActionStarted(OnAuthActionStarted)
-            .SetOnAuthActionFinished(OnAuthActionFinished)
-            .Create(platform_configuration);
+        g_gpgs_disk.is_using = true;
     }
-
+    
+    InitializeJNI();
+    dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
+    gpgs_callback_initialize();
     return dmExtension::RESULT_OK;
 }
 
 static dmExtension::Result AppFinalizeGpg(dmExtension::AppParams* params)
 {
-    dmExtension::UnregisterAndroidOnActivityResultListener(OnActivityResult);
+    return dmExtension::RESULT_OK;
+}
 
-    delete g_Gpg;
-    g_Gpg = 0;
+static dmExtension::Result UpdateGpg(dmExtension::Params* params)
+{
+    gpgs_callback_update();
     return dmExtension::RESULT_OK;
 }
 
 static dmExtension::Result FinalizeGpg(dmExtension::Params* params)
 {
+    gpgs_callback_finalize();
+    dmExtension::UnregisterAndroidOnActivityResultListener(OnActivityResult);
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(LIB_NAME, "Gpg", AppInitializeGpg, AppFinalizeGpg, InitializeGpg, 0, 0, FinalizeGpg)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg, InitializeGpg, UpdateGpg, 0, FinalizeGpg)
 
 #else
 
-dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
+dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
     dmLogInfo("Registered extension Gpg (null)");
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result AppFinalizeGpg(dmExtension::AppParams* params)
+dmExtension::Result FinalizeGpg(dmExtension::Params* params)
 {
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(LIB_NAME, "Gpg", AppInitializeGpg, AppFinalizeGpg, 0, 0, 0, 0)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, InitializeGpg, 0, 0, FinalizeGpg)
 
 #endif

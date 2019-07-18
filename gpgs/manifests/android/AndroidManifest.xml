@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	package="{{android.package}}">
+	<uses-sdk android:minSdkVersion="9"/>
+	<application>
+		<!-- GPGS -->
+		<meta-data android:name="com.google.android.gms.games.APP_ID"
+		android:value="\ {{gpgs.app_id}}" />
+		<!--com.google.android.gms.auth.api-->
+		<activity android:excludeFromRecents="true" android:exported="false" android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+		<!--com.google.android.gms.auth.api-->
+		<service android:exported="true" android:name="com.google.android.gms.auth.api.signin.RevocationBoundService" android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION"/>
+	</application></manifest>

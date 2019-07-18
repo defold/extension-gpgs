@@ -1,149 +1,130 @@
 local dirtylarry = require "dirtylarry/dirtylarry"
 
-local LEADERBOARD_HIGHSCORE = 'CgkIhIG4y_UVEAIQAA'
+local positions = {
+    "POPUP_POS_TOP_LEFT",
+    "POPUP_POS_TOP_CENTER",
+    "POPUP_POS_TOP_RIGHT",
+    "POPUP_POS_CENTER_LEFT",
+    "POPUP_POS_CENTER",
+    "POPUP_POS_CENTER_RIGHT",
+    "POPUP_POS_BOTTOM_LEFT",
+    "POPUP_POS_BOTTOM_CENTER",
+    "POPUP_POS_BOTTOM_RIGHT"
+}
 
-local function set_status(self, text)
-    local n = gui.get_node('status')
-    gui.set_text(n, text)
-end
-
-local function set_score(self, score)
-    local n = gui.get_node('score')
-    gui.set_text(n, string.format("%06d", score))
-end
-
-
-local function set_auth_status(self)
-    if gpg.is_auth_in_progress() then
-        if not self.logged_in then
-            set_status(self, "Logging in...")
-        else
-            set_status(self, "Logging out...")
+function gpg_callback(self, message_id, message)
+    print("---------")
+    print(message_id)
+    pprint(message)
+    print("---------")
+    if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
+        if message.status == gpg.STATUS_SUCCESS then
+            gui.set_text(gui.get_node("id"), gpg.get_id())
+            print("max_snapshot_image_size: "..gpg.snapshot_get_max_image_size().." bytes",
+                "max_snapshot_size: "..gpg.snapshot_get_max_save_size().." bytes")
         end
-    elseif self.logged_in then
-        set_status(self, "Authorized")
-    else
-        set_status(self, "Not logged in")
+    elseif message_id == gpg.MSG_SIGN_OUT then
+        gui.set_text(gui.get_node("id"), "---")
     end
 end
-
-local function set_login_button_status(self)
-    local n = gui.get_node('login/larrylabel')
-    gui.set_color(n, vmath.vector4(1))
-
-    if gpg.is_auth_in_progress() then
-        gui.set_color(n, vmath.vector4(0.5,0.5,0.5,1))
-        if not self.logged_in then
-            gui.set_text(n, "Logging in...")
-        else
-            gui.set_text(n, "Logging out...")
-        end
-    elseif not self.logged_in then
-        gui.set_color(n, vmath.vector4(1,1,1,1))
-        gui.set_text(n, "Login")
-    else
-        gui.set_color(n, vmath.vector4(1,1,1,1))
-        gui.set_text(n, "Logout")
-    end
-end
-
-local function login_callback(self, auth_operation, auth_status)
-    print("LUA callback", auth_operation, auth_status)
-
-    local op = "SIGN_IN"
-    if auth_operation == gpg.AUTH_OPERATION_SIGN_OUT then
-        op = "SIGN_OUT"
-    end
-
-    if auth_status == gpg.AUTH_STATUS_VALID then
-        self.logged_in = auth_operation == gpg.AUTH_OPERATION_SIGN_IN
-    end
-    
-    local status = " went ok"
-    if auth_status ~= gpg.AUTH_STATUS_VALID then
-        status = " failed: " .. auth_status
-        set_status(self, op .. status)
-    else
-        set_auth_status(self)
-    end
-
-    set_login_button_status(self)
-end
-
 
 function init(self)
     msg.post(".", "acquire_input_focus")
-
-    self.logged_in = false
-    self.score = 0
-    self.logged_in = gpg.is_authorized()
-    
-    set_score(self, self.score)
-    set_auth_status(self)
-    set_login_button_status(self)
-end
-
-function final(self)
-    gpg.logout()
-end
-
-function update(self, dt)
-    local authorized = gpg.is_authorized()
-    if self.logged_in ~= authorized then
-        self.logged_in = authorized
-        set_auth_status(self)
-        set_login_button_status(self)
+    pprint(_G.gpg)
+    if gpg then
+        gpg.set_callback(gpg_callback)
+        gpg.silent_login()
     end
 end
 
-function on_message(self, message_id, message, sender)
+function update(self, dt)
+    if gpg then
+        if self.is_logged_in ~= gpg.is_logged_in() then
+            self.is_logged_in = gpg.is_logged_in()
+            gui.set_text(gui.get_node("autorized"), "is_logged_in: "..tostring(gpg.is_logged_in()))
+        end
+        
+        if self.snapshot_is_opened ~= gpg.snapshot_is_opened() then
+            self.snapshot_is_opened = gpg.snapshot_is_opened()
+            gui.set_text(gui.get_node("snapshotOpened"), "snapshot_is_opened: "..tostring(gpg.snapshot_is_opened()))
+        end
+    end
+end
+
+local function change_popup_pos(self)
+    if not self.pos then
+        self.pos = 3
+    end
+    gui.set_text(gui.get_node("popup_pos_value"), positions[self.pos])
+    if gpg then
+        gpg.set_popup_position(gpg[positions[self.pos]])
+    end
+    self.pos = self.pos + 1
+    if self.pos > #positions then
+        self.pos = 1
+    end
 end
 
 function on_input(self, action_id, action)
-
     dirtylarry:button("login", action_id, action, function ()
         print("LOGIN was pressed")
-        local n = gui.get_node('login/larrylabel')
-        gui.set_color(n, vmath.vector4(0.5,0.5,0.5,1))
-
-        if self.logged_in then
-            gui.set_text(n, "Logging out...")
-            set_status(self, "Auth in progress...")
-            gpg.logout()
-        else
-            gui.set_text(n, "Logging in...")
-            set_status(self, "Auth in progress...")
-            gpg.login(login_callback)
+        if gpg then
+            gpg.login()
         end
-
-        set_login_button_status(self)
+    end)
+    
+    dirtylarry:button("logout", action_id, action, function ()
+        print("LOGOUT was pressed")
+        if gpg then
+            gpg.logout()
+        end
     end)
 
-    dirtylarry:button("show_highscore", action_id, action, function ()
-        print("SHOW HIGHSCORE was pressed")
-        local LEADERBOARD_HIGHSCORE = 'CgkIhIG4y_UVEAIQAA'
-        gpg.show_leaderboard(LEADERBOARD_HIGHSCORE)
+    dirtylarry:button("popup_pos", action_id, action, function ()
+        change_popup_pos(self)
     end)
 
-
-    dirtylarry:button("show_highscore", action_id, action, function ()
-        print("SHOW HIGHSCORE was pressed")
-        gpg.show_leaderboard(LEADERBOARD_HIGHSCORE)
+    dirtylarry:button("show_snapshots", action_id, action, function ()
+        if gpg then
+            gpg.snapshot_display_saves("My cool saves", true, true, 3)
+        end
     end)
 
-    dirtylarry:button("increase_score", action_id, action, function ()
-        print("INCREASE SCORE was pressed")
-        self.score = self.score + 250
-        set_score(self, self.score)
+    dirtylarry:button("snapshot_open", action_id, action, function ()
+        if gpg then
+            gpg.snapshot_open("my_save", true)
+        end
     end)
 
-    dirtylarry:button("publish_score", action_id, action, function ()
-        print("PUBLISH SCORE was pressed")
-        gpg.submit_score(LEADERBOARD_HIGHSCORE, self.score)
+    dirtylarry:button("snapshot_get_data", action_id, action, function ()
+        if gpg then
+            local bytes, error_message = gpg.snapshot_get_data()
+            if not bytes then
+                print("snapshot_get_data ERROR:", error_message)
+            else
+                print("snapshot_get_data",bytes)
+            end
+        end
     end)
-end
 
-function on_reload(self)
-    -- Add input-handling code here
-    -- Remove this function if not needed
+    dirtylarry:button("save_snapshot", action_id, action, function ()
+        if gpg then
+            gpg.snapshot_commit_and_close({
+                coverImageUri = "img_url",
+                description = "LEVEL 31, CAVE",
+                playedTime = 1321,
+                progressValue = 246
+            })
+        end
+    end)
+
+    dirtylarry:button("snapshot_set_data", action_id, action, function ()
+        if gpg then
+            local success, error_message = gpg.snapshot_set_data("MyCustomBytesForSnapshot")
+            if not success then
+                print("snapshot_set_data ERROR:", error_message)
+            end
+        end
+    end)
+    
 end
