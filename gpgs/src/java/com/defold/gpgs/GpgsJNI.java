@@ -337,37 +337,31 @@ public class GpgsJNI {
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
 
         mPlayerSnapshotsClient.open(saveName, createIfNotFound, conflictPolicy)
-            .continueWith(new Continuation<SnapshotsClient.DataOrConflict<Snapshot>, byte[]>() {
+            .addOnCompleteListener(new OnCompleteListener<SnapshotsClient.DataOrConflict<Snapshot>>() {
                 @Override
-                public byte[] then(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) throws Exception {
-                    mPlayerSnapshot = task.getResult().getData();
-                    try {
-                        return mPlayerSnapshot.getSnapshotContents().readFully();
-                    } catch (IOException e) {
-                        sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                            "status", STATUS_FAILED,
-                            "error",
-                            "Error while reading Snapshot." + e.toString());
-                    }
-                    return null;
-                }
-            }).addOnCompleteListener(new OnCompleteListener<byte[]>() {
-                @Override
-                public void onComplete(@NonNull Task<byte[]> task) {
-                    if (task.isSuccessful()) {
-                        currentplayerSave = task.getResult();
-                        sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
-                    } else {
+                public void onComplete(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) {
+                    if (!task.isSuccessful()) {
                         int status = STATUS_FAILED;
                         Exception e = task.getException();
                         if (e instanceof ApiException) {
                             ApiException apiException = (ApiException) e;
                             status = apiException.getStatusCode();
                         }
-                        sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                "status", status,
-                                "error",
-                                "Error while opening Snapshot. " + e.toString());
+                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                    "status", status,
+                                    "error",
+                                    "Error while opening Snapshot. " + e.toString());
+                    } else {
+                        mPlayerSnapshot = task.getResult().getData();
+                        try {
+                            currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
+                            sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
+                        } catch (IOException e) {
+                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                    "status", STATUS_FAILED,
+                                    "error",
+                                    "Error while reading Snapshot." + e.toString());
+                        }
                     }
                 }
             });

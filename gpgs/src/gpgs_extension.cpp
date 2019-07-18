@@ -502,7 +502,7 @@ static const luaL_reg Gpg_methods[] =
 
 static dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
 {
-    dmLogInfo("Registered extension Gpg");
+    dmLogInfo("Registered extension Gpgs");
     return dmExtension::RESULT_OK;
 }
 
