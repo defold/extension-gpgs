@@ -111,8 +111,9 @@ function on_input(self, action_id, action)
 
     dirtylarry:button("save_snapshot", action_id, action, function ()
         if gpg then
+            local png, w, h = screenshot.png()
             gpg.snapshot_commit_and_close({
-                coverImageUri = "img_url",
+                coverImage = png,
                 description = "LEVEL 31, CAVE",
                 playedTime = 1321,
                 progressValue = 246

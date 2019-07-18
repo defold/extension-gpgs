@@ -27,6 +27,8 @@ import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
 import com.google.android.gms.games.snapshot.Snapshot;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.common.api.ApiException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import java.io.IOException;
 
@@ -312,6 +314,14 @@ public class GpgsJNI {
     public void showSavedGamesUI(String popupTitle, boolean allowAddButton,
                                  boolean allowDelete, int maxNumberOfSavedGamesToShow) {
 
+        if (mPlayerSnapshotsClient == null) {
+            sendSimpleMessage(MSG_SHOW_SNAPSHOTS,
+                    "status", STATUS_FAILED,
+                    "error",
+                    "Can't start activity for showing saved games. You aren't logged in.");
+            return;
+        }
+
         Task<Intent> intentTask = mPlayerSnapshotsClient.getSelectSnapshotIntent(
                 popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
 
@@ -336,6 +346,13 @@ public class GpgsJNI {
     public void loadSnapshot(String saveName, boolean createIfNotFound, int conflictPolicy) {
         int conflictResolutionPolicy = SnapshotsClient.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED;
 
+        if (mPlayerSnapshotsClient == null) {
+            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                    "status", STATUS_FAILED,
+                    "error",
+                    "Failed to open snapshot. You aren't logged in.");
+            return;
+        }
         mPlayerSnapshotsClient.open(saveName, createIfNotFound, conflictPolicy)
             .addOnCompleteListener(new OnCompleteListener<SnapshotsClient.DataOrConflict<Snapshot>>() {
                 @Override
@@ -352,22 +369,27 @@ public class GpgsJNI {
                                     "error",
                                     "Error while opening Snapshot. " + e.toString());
                     } else {
-                        mPlayerSnapshot = task.getResult().getData();
-                        try {
-                            currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
-                            sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
-                        } catch (IOException e) {
-                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                    "status", STATUS_FAILED,
-                                    "error",
-                                    "Error while reading Snapshot." + e.toString());
+                        SnapshotsClient.DataOrConflict<Snapshot> result = task.getResult();
+                        if (!result.isConflict()) {
+                            mPlayerSnapshot = result.getData();
+                            try {
+                                currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
+                                sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
+                            } catch (IOException e) {
+                                sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                        "status", STATUS_FAILED,
+                                        "error",
+                                        "Error while reading Snapshot." + e.toString());
+                            }
+                        } else {
+
                         }
                     }
                 }
             });
     }
 
-    public void saveAndCloseSnapshot(long playedTime, long progressValue, String description, String coverImageUri) {
+    public void saveAndCloseSnapshot(long playedTime, long progressValue, String description, byte[] coverImage) {
         SnapshotMetadataChange.Builder builder = new SnapshotMetadataChange.Builder();
         if (playedTime != -1) {
             builder.setPlayedTimeMillis(playedTime);
@@ -378,8 +400,9 @@ public class GpgsJNI {
         if (description != null) {
             builder.setDescription(description);
         }
-        if (coverImageUri != null) {
-            builder.setDescription(coverImageUri);
+        if (coverImage != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(coverImage, 0, coverImage.length);
+            builder.setCoverImage(bitmap);
         }
 
         if (mPlayerSnapshot == null) {
