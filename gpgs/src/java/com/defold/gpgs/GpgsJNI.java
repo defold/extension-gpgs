@@ -428,7 +428,7 @@ public class GpgsJNI {
     }
 
     public boolean isSnapshotOpened() {
-        if (mPlayerSnapshot == null) {
+        if (mPlayerSnapshot == null || mPlayerSnapshot.getSnapshotContents() == null) {
             return false;
         }
         return !mPlayerSnapshot.getSnapshotContents().isClosed();

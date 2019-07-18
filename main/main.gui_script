@@ -41,7 +41,6 @@ function update(self, dt)
     if gpg then
         if self.is_logged_in ~= gpg.is_logged_in() then
             self.is_logged_in = gpg.is_logged_in()
-            print("self.is_logged_in")
             gui.set_text(gui.get_node("autorized"), "is_logged_in: "..tostring(gpg.is_logged_in()))
         end
         
