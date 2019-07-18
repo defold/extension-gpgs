@@ -1,5 +1,5 @@
-#define EXTENSION_NAME GpgExt
-#define LIB_NAME "GpgExt"
+#define EXTENSION_NAME GpgsExt
+#define LIB_NAME "GpgsExt"
 #define MODULE_NAME "gpg"
 
 #define DLIB_LOG_DOMAIN LIB_NAME

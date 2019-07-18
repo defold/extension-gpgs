@@ -253,7 +253,9 @@ public class GpgsJNI {
     private Snapshot mPlayerSnapshot = null;
     private byte[] currentplayerSave = null;
 
+    // values from the official docs: https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxCoverImageSize()
     private int maxCoverImageSize = 819200;
+    // https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxDataSize()
     private int maxDataSize  = 3145728;
 
     private void onAccountChangedDisk(GoogleSignInAccount googleSignInAccount) {
