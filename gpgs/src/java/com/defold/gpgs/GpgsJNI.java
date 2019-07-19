@@ -59,7 +59,8 @@ public class GpgsJNI {
 
     private static final int STATUS_SUCCESS = 1;
     private static final int STATUS_FAILED = 2;
-    private static final int STATUS_CREATE_NEW = 3;
+    private static final int STATUS_CREATE_NEW_SAVE = 3;
+    private static final int STATUS_CONFLICT = 4;
 
     //--------------------------------------------------
     public static native void gpgsAddToQueue(int msg, String json);
@@ -76,15 +77,38 @@ public class GpgsJNI {
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
+    private void sendSimpleMessage(int msg, String key_1, int value_1) {
+        String message = null;
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put(key_1, value_1);
+            message = obj.toString();
+        } catch(JSONException e) {
+            message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
+        }
+        gpgsAddToQueue(msg, message);
+    }
+
     private void sendSimpleMessage(int msg, String key_1, int value_1, String key_2, String value_2) {
         String message = null;
         try {
             JSONObject obj = new JSONObject();
             obj.put(key_1, value_1);
-            if (key_2 != null)
-            {
-                obj.put(key_2, value_2);
-            }
+            obj.put(key_2, value_2);
+            message = obj.toString();
+        } catch(JSONException e) {
+            message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
+        }
+        gpgsAddToQueue(msg, message);
+    }
+
+    private void sendSimpleMessage(int msg, String key_1, int value_1, String key_2, int value_2, String key_3, String value_3) {
+        String message = null;
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put(key_1, value_1);
+            obj.put(key_2, value_2);
+            obj.put(key_3, value_3);
             message = obj.toString();
         } catch(JSONException e) {
             message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
@@ -116,7 +140,7 @@ public class GpgsJNI {
                         public void onSuccess(Player player) {
                             mPlayer = player;
                             sendSimpleMessage(msg,
-                                    "status", STATUS_SUCCESS, null, null);
+                                    "status", STATUS_SUCCESS);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -170,7 +194,7 @@ public class GpgsJNI {
                             intent.getParcelableExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA);
                     sendSnapshotMetadataMessage(MSG_SHOW_SNAPSHOTS, snapshotMetadata);
                 } else if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_NEW)) {
-                    sendSimpleMessage(MSG_SHOW_SNAPSHOTS, "status", STATUS_CREATE_NEW, null, null);
+                    sendSimpleMessage(MSG_SHOW_SNAPSHOTS, "status", STATUS_CREATE_NEW_SAVE);
                 }
             } else {
                 // Error message
@@ -217,7 +241,7 @@ public class GpgsJNI {
                 public void onComplete(@NonNull Task<Void> task) {
                     mSignedInAccount = null;
                     mPlayer = null;
-                    sendSimpleMessage(MSG_SIGN_OUT, "status", STATUS_SUCCESS, null, null);
+                    sendSimpleMessage(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
                 }
             });
     }
@@ -358,16 +382,18 @@ public class GpgsJNI {
                 @Override
                 public void onComplete(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) {
                     if (!task.isSuccessful()) {
-                        int status = STATUS_FAILED;
+                        int error_status_code = 0;
                         Exception e = task.getException();
                         if (e instanceof ApiException) {
                             ApiException apiException = (ApiException) e;
-                            status = apiException.getStatusCode();
+                            error_status_code = apiException.getStatusCode();
                         }
                             sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                    "status", status,
+                                    "status", STATUS_FAILED,
+                                    "error_status", error_status_code,
                                     "error",
-                                    "Error while opening Snapshot. " + e.toString());
+                                    "Error while opening Snapshot. " + e.toString()
+                                    );
                     } else {
                         SnapshotsClient.DataOrConflict<Snapshot> result = task.getResult();
                         if (!result.isConflict()) {
@@ -421,7 +447,7 @@ public class GpgsJNI {
                     mPlayerSnapshot = null;
                     currentplayerSave = null;
                     sendSimpleMessage(MSG_SAVE_SNAPSHOT,
-                            "status", STATUS_SUCCESS, null, null);
+                            "status", STATUS_SUCCESS);
                 } else {
                     Exception e = task.getException();
                     sendSimpleMessage(MSG_SAVE_SNAPSHOT,
