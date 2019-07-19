@@ -277,7 +277,9 @@ public class GpgsJNI {
     // Client used to interact with Google Snapshots.
     private SnapshotsClient mPlayerSnapshotsClient = null;
     private Snapshot mPlayerSnapshot = null;
+    private Snapshot mConflictingSnapshot = null;
     private byte[] currentplayerSave = null;
+    private byte[] conflictingSave = null;
 
     // values from the official docs: https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxCoverImageSize()
     private int maxCoverImageSize = 819200;
@@ -312,25 +314,49 @@ public class GpgsJNI {
             }
         }
     }
+
+    private void addSnapshotMetadtaToJson(JSONObject json, String name, SnapshotMetadata metadata) throws JSONException {
+        JSONObject obj = json;
+        if (name != null) {
+            obj = new JSONObject();
+            json.put(name, obj);
+        }
+        obj.put("coverImageAspectRatio", metadata.getCoverImageAspectRatio());
+        obj.put("coverImageUri", metadata.getCoverImageUri());
+        obj.put("description", metadata.getDescription());
+        obj.put("deviceName", metadata.getDeviceName());
+        obj.put("lastModifiedTimestamp", metadata.getLastModifiedTimestamp());
+        obj.put("playedTime", metadata.getPlayedTime());
+        obj.put("progressValue", metadata.getProgressValue());
+        obj.put("snapshotId", metadata.getSnapshotId());
+        obj.put("uniqueName", metadata.getUniqueName());
+    }
     
-    public void sendSnapshotMetadataMessage(int msg, SnapshotMetadata snapshot) {
+    private void sendSnapshotMetadataMessage(int msg, SnapshotMetadata metadata) {
         String message = null;
         try {
             JSONObject obj = new JSONObject();
-            obj.put("coverImageAspectRatio", snapshot.getCoverImageAspectRatio());
-            obj.put("coverImageUri", snapshot.getCoverImageUri());
-            obj.put("description", snapshot.getDescription());
-            obj.put("deviceName", snapshot.getDeviceName());
-            obj.put("lastModifiedTimestamp", snapshot.getLastModifiedTimestamp());
-            obj.put("playedTime", snapshot.getPlayedTime());
-            obj.put("progressValue", snapshot.getProgressValue());
-            obj.put("snapshotId", snapshot.getSnapshotId());
-            obj.put("uniqueName", snapshot.getUniqueName());
             obj.put("status", STATUS_SUCCESS);
+            addSnapshotMetadtaToJson(obj, "metadata", metadata);
             message = obj.toString();
         } catch(JSONException e) {
-            message = "{ error:'Error while converting snapshot message to JSON: " + e.getMessage() + ", " +
-                    "' status:"+STATUS_FAILED;
+            message = "{ 'error':'Error while converting a metadata message to JSON: " + e.getMessage() +
+                    "', 'status': '" + STATUS_FAILED + " }";
+        }
+        gpgsAddToQueue(msg, message);
+    }
+
+    private void sendConflictMessage(int msg, SnapshotMetadata metadata, SnapshotMetadata conflictMetadata) {
+        String message = null;
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("status", STATUS_CONFLICT);
+            addSnapshotMetadtaToJson(obj, "metadata", metadata);
+            addSnapshotMetadtaToJson(obj, "conflictMetadata", conflictMetadata);
+            message = obj.toString();
+        } catch(JSONException e) {
+            message = "{ 'error':'Error while converting a metadata or a conflict metadata message to JSON: " + e.getMessage() +
+                    "', 'status': '" + STATUS_FAILED + " }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -408,7 +434,19 @@ public class GpgsJNI {
                                         "Error while reading Snapshot." + e.toString());
                             }
                         } else {
-
+                            SnapshotsClient.SnapshotConflict conflict = result.getConflict();
+                            mPlayerSnapshot = conflict.getSnapshot();
+                            mConflictingSnapshot = conflict.getConflictingSnapshot();
+                            try {
+                                currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
+                                conflictingSave = mConflictingSnapshot.getSnapshotContents().readFully();
+                                sendConflictMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata(), mConflictingSnapshot.getMetadata());
+                            } catch (IOException e) {
+                                sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                        "status", STATUS_FAILED,
+                                        "error",
+                                        "Error while reading Snapshot." + e.toString());
+                            }
                         }
                     }
                 }
@@ -461,6 +499,10 @@ public class GpgsJNI {
 
     public byte[] getSave() {
         return currentplayerSave;
+    }
+
+    public byte[] getConflictingSave() {
+        return conflictingSave;
     }
 
     public String setSave(byte[] bytes) {

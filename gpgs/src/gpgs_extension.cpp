@@ -61,6 +61,7 @@ struct GPGS_Disk
     jmethodID              m_isSnapshotOpened;
     jmethodID              m_getMaxCoverImageSize;
     jmethodID              m_getMaxDataSize;
+    jmethodID              m_getConflictingSave;
 };
 
 static GPGS         g_gpgs;
@@ -464,6 +465,37 @@ static int GpgDisk_GetMaxDataSize(lua_State* L)
     return 1;
 }
 
+static int GpgDisk_SnapshotGetConflictingData(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int lenght = 0;
+    jbyte* snapshot = NULL;
+
+    jbyteArray snapshotBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getConflictingSave);
+
+    if(snapshotBArray != NULL)
+    {
+        DM_LUA_STACK_CHECK(L, 1);
+        lenght = env->GetArrayLength(snapshotBArray);
+        snapshot = env->GetByteArrayElements(snapshotBArray, NULL);
+        lua_pushlstring(L, (const char*)snapshot, lenght);
+        env->ReleaseByteArrayElements(snapshotBArray, snapshot, 0);
+        return 1;
+    }
+    DM_LUA_STACK_CHECK(L, 2);
+
+    lua_pushnil(L);
+    lua_pushfstring(L, "Failed to load conflicting snapshot.");
+    return 2;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -502,6 +534,7 @@ static const luaL_reg Gpg_methods[] =
     {"snapshot_is_opened", GpgDisk_SnapshotIsOpened},
     {"snapshot_get_max_image_size", GpgDisk_GetMaxCoverImageSize},
     {"snapshot_get_max_save_size", GpgDisk_GetMaxDataSize},
+    {"snapshot_get_conflicting_data", GpgDisk_SnapshotGetConflictingData},
     {0,0}
 };
 
@@ -585,6 +618,7 @@ static void InitializeJNI()
         g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
         g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");
         g_gpgs_disk.m_getMaxDataSize = env->GetMethodID(cls, "getMaxDataSize", "()I");
+        g_gpgs_disk.m_getConflictingSave = env->GetMethodID(cls, "getConflictingSave", "()[B");
     }
     
     //private methods
