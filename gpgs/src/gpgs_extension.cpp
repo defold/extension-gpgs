@@ -12,28 +12,6 @@
 #include "com_defold_gpgs_GpgsJNI.h"
 #include "utils/LuaUtils.h"
 
-enum PopupPositions
-{
-    POPUP_POS_TOP_LEFT =           48 | 3,
-    POPUP_POS_TOP_CENTER =         48 | 1,
-    POPUP_POS_TOP_RIGHT =          48 | 5,
-    POPUP_POS_CENTER_LEFT =        16 | 3,
-    POPUP_POS_CENTER =             16 | 1,
-    POPUP_POS_CENTER_RIGHT =       16 | 5,
-    POPUP_POS_BOTTOM_LEFT =        80 | 3,
-    POPUP_POS_BOTTOM_CENTER =      80 | 1,
-    POPUP_POS_BOTTOM_RIGHT =       80 | 5
-};
-
-enum ResolutionPolicy
-{
-    RESOLUTION_POLICY_MANUAL =                    -1,
-    RESOLUTION_POLICY_LONGEST_PLAYTIME =           1,
-    RESOLUTION_POLICY_LAST_KNOWN_GOOD =            2,
-    RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED =     3,
-    RESOLUTION_POLICY_HIGHEST_PROGRESS =           4
-};
-
 
 struct GPGS
 {
@@ -55,12 +33,14 @@ struct GPGS_Disk
     
     jmethodID              m_showSavedGamesUI;
     jmethodID              m_loadSnapshot;
-    jmethodID              m_saveAndCloseSnapshot;
+    jmethodID              m_commitAndCloseSnapshot;
     jmethodID              m_getSave;
     jmethodID              m_setSave;
     jmethodID              m_isSnapshotOpened;
     jmethodID              m_getMaxCoverImageSize;
     jmethodID              m_getMaxDataSize;
+    jmethodID              m_getConflictingSave;
+    jmethodID              m_resolveConflict;
 };
 
 static GPGS         g_gpgs;
@@ -332,7 +312,7 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
         lua_pop(L, 1);
     }
     
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_saveAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
 
     if (jdescription) 
     {
@@ -464,6 +444,71 @@ static int GpgDisk_GetMaxDataSize(lua_State* L)
     return 1;
 }
 
+static int GpgDisk_SnapshotGetConflictingData(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    int lenght = 0;
+    jbyte* snapshot = NULL;
+
+    jbyteArray snapshotBArray = (jbyteArray)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getConflictingSave);
+
+    if(snapshotBArray != NULL)
+    {
+        DM_LUA_STACK_CHECK(L, 1);
+        lenght = env->GetArrayLength(snapshotBArray);
+        snapshot = env->GetByteArrayElements(snapshotBArray, NULL);
+        lua_pushlstring(L, (const char*)snapshot, lenght);
+        env->ReleaseByteArrayElements(snapshotBArray, snapshot, 0);
+        return 1;
+    }
+    DM_LUA_STACK_CHECK(L, 2);
+
+    lua_pushnil(L);
+    lua_pushfstring(L, "Failed to load conflicting snapshot.");
+    return 2;
+}
+
+static int GpgDisk_SnapshotResolveConflict(lua_State* L)
+{
+    if (not is_disk_avaliable())
+    {
+        return 0;
+    }
+
+    DM_LUA_STACK_CHECK(L, 2);
+
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+
+    const char* conflictId = luaL_checkstring(L, 1);
+    int snapshotId = luaL_checknumber(L, 2);
+    
+    jstring jconflictId = env->NewStringUTF(conflictId);
+    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_resolveConflict, jconflictId, snapshotId);
+    env->DeleteLocalRef(jconflictId);
+
+    if (return_value) 
+    {
+        lua_pushboolean(L, false);
+        const char* new_char = env->GetStringUTFChars(return_value, 0);
+        env->DeleteLocalRef(return_value);
+        lua_pushstring(L, new_char);
+    }
+    else
+    {
+        lua_pushboolean(L, true);
+        lua_pushnil(L);
+    }
+    return 2;
+}
+
 // Extention methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -502,6 +547,8 @@ static const luaL_reg Gpg_methods[] =
     {"snapshot_is_opened", GpgDisk_SnapshotIsOpened},
     {"snapshot_get_max_image_size", GpgDisk_GetMaxCoverImageSize},
     {"snapshot_get_max_save_size", GpgDisk_GetMaxDataSize},
+    {"snapshot_get_conflicting_data", GpgDisk_SnapshotGetConflictingData},
+    {"snapshot_resolve_conflict", GpgDisk_SnapshotResolveConflict},
     {0,0}
 };
 
@@ -533,21 +580,29 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(MSG_SIGN_IN)
     SETCONSTANT(MSG_SILENT_SIGN_IN)
     SETCONSTANT(MSG_SIGN_OUT)
+    SETCONSTANT(MSG_SHOW_SNAPSHOTS)
+    SETCONSTANT(MSG_LOAD_SNAPSHOT)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
-    SETCONSTANT(STATUS_SNAPSHOT_COMMIT_FAILED)
-    SETCONSTANT(STATUS_SNAPSHOT_CONFLICT_MISSING)
-    SETCONSTANT(STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE)
-    SETCONSTANT(STATUS_SNAPSHOT_CREATION_FAILED)
-    SETCONSTANT(STATUS_SNAPSHOT_FOLDER_UNAVAILABLE)
-    SETCONSTANT(STATUS_SNAPSHOT_NOT_FOUND)
+    SETCONSTANT(STATUS_CREATE_NEW_SAVE)
+    SETCONSTANT(STATUS_CONFLICT)
+    
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_COMMIT_FAILED)
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING)
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE)
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_CREATION_FAILED)
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE)
+    SETCONSTANT(ERROR_STATUS_SNAPSHOT_NOT_FOUND)
 
     SETCONSTANT(RESOLUTION_POLICY_MANUAL)
     SETCONSTANT(RESOLUTION_POLICY_LONGEST_PLAYTIME)
     SETCONSTANT(RESOLUTION_POLICY_LAST_KNOWN_GOOD)
     SETCONSTANT(RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED)
     SETCONSTANT(RESOLUTION_POLICY_HIGHEST_PROGRESS)
+
+    SETCONSTANT(SNAPSHOT_CURRENT)
+    SETCONSTANT(SNAPSHOT_CONFLICTING)
     
 #undef SETCONSTANT
     
@@ -577,11 +632,12 @@ static void InitializeJNI()
         g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
         g_gpgs_disk.m_getSave = env->GetMethodID(cls, "getSave", "()[B");
         g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
-        g_gpgs_disk.m_saveAndCloseSnapshot = env->GetMethodID(cls, "saveAndCloseSnapshot", "(JJLjava/lang/String;[B)V");
-        g_gpgs_disk.m_setSave = env->GetMethodID(cls, "setSave", "([B)Ljava/lang/String;");
+        g_gpgs_disk.m_commitAndCloseSnapshot = env->GetMethodID(cls, "commitAndCloseSnapshot", "(JJLjava/lang/String;[B)V");
         g_gpgs_disk.m_isSnapshotOpened = env->GetMethodID(cls, "isSnapshotOpened", "()Z");
         g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");
         g_gpgs_disk.m_getMaxDataSize = env->GetMethodID(cls, "getMaxDataSize", "()I");
+        g_gpgs_disk.m_getConflictingSave = env->GetMethodID(cls, "getConflictingSave", "()[B");
+        g_gpgs_disk.m_resolveConflict = env->GetMethodID(cls, "resolveConflict", "(Ljava/lang/String;I)Ljava/lang/String;");
     }
     
     //private methods
