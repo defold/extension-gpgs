@@ -62,6 +62,9 @@ public class GpgsJNI {
     private static final int STATUS_CREATE_NEW_SAVE = 3;
     private static final int STATUS_CONFLICT = 4;
 
+    private static final int SNAPSHOT_CURRENT = 1;
+    private static final int SNAPSHOT_CONFLICTING = 2;
+
     //--------------------------------------------------
     public static native void gpgsAddToQueue(int msg, String json);
     //--------------------------------------------------
@@ -277,8 +280,9 @@ public class GpgsJNI {
     // Client used to interact with Google Snapshots.
     private SnapshotsClient mPlayerSnapshotsClient = null;
     private Snapshot mPlayerSnapshot = null;
-    private Snapshot mConflictingSnapshot = null;
     private byte[] currentplayerSave = null;
+
+    private Snapshot mConflictingSnapshot = null;
     private byte[] conflictingSave = null;
 
     // values from the official docs: https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxCoverImageSize()
@@ -346,11 +350,12 @@ public class GpgsJNI {
         gpgsAddToQueue(msg, message);
     }
 
-    private void sendConflictMessage(int msg, SnapshotMetadata metadata, SnapshotMetadata conflictMetadata) {
+    private void sendConflictMessage(int msg, SnapshotMetadata metadata, SnapshotMetadata conflictMetadata, String conflictId) {
         String message = null;
         try {
             JSONObject obj = new JSONObject();
             obj.put("status", STATUS_CONFLICT);
+            obj.put("conflictId", conflictId);
             addSnapshotMetadtaToJson(obj, "metadata", metadata);
             addSnapshotMetadtaToJson(obj, "conflictMetadata", conflictMetadata);
             message = obj.toString();
@@ -359,6 +364,57 @@ public class GpgsJNI {
                     "', 'status': '" + STATUS_FAILED + " }";
         }
         gpgsAddToQueue(msg, message);
+    }
+
+    private OnCompleteListener getOnLoadCompleteListener() {
+        return new OnCompleteListener<SnapshotsClient.DataOrConflict<Snapshot>>() {
+            @Override
+            public void onComplete(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) {
+                if (!task.isSuccessful()) {
+                    int error_status_code = 0;
+                    Exception e = task.getException();
+                    if (e instanceof ApiException) {
+                        ApiException apiException = (ApiException) e;
+                        error_status_code = apiException.getStatusCode();
+                    }
+                    sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                            "status", STATUS_FAILED,
+                            "error_status", error_status_code,
+                            "error",
+                            "Error while opening Snapshot. " + e.toString()
+                    );
+                } else {
+                    SnapshotsClient.DataOrConflict<Snapshot> result = task.getResult();
+                    if (!result.isConflict()) {
+                        mPlayerSnapshot = result.getData();
+                        try {
+                            currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
+                            sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
+                        } catch (IOException e) {
+                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                    "status", STATUS_FAILED,
+                                    "error",
+                                    "Error while reading Snapshot." + e.toString());
+                        }
+                    } else {
+                        SnapshotsClient.SnapshotConflict conflict = result.getConflict();
+                        mPlayerSnapshot = conflict.getSnapshot();
+                        mConflictingSnapshot = conflict.getConflictingSnapshot();
+                        try {
+                            currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
+                            conflictingSave = mConflictingSnapshot.getSnapshotContents().readFully();
+                            sendConflictMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata(),
+                                    mConflictingSnapshot.getMetadata(), conflict.getConflictId());
+                        } catch (IOException e) {
+                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
+                                    "status", STATUS_FAILED,
+                                    "error",
+                                    "Error while reading Snapshot or Conflict." + e.toString());
+                        }
+                    }
+                }
+            }
+        };
     }
 
     public void showSavedGamesUI(String popupTitle, boolean allowAddButton,
@@ -403,57 +459,12 @@ public class GpgsJNI {
                     "Failed to open snapshot. You aren't logged in.");
             return;
         }
+
         mPlayerSnapshotsClient.open(saveName, createIfNotFound, conflictPolicy)
-            .addOnCompleteListener(new OnCompleteListener<SnapshotsClient.DataOrConflict<Snapshot>>() {
-                @Override
-                public void onComplete(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) {
-                    if (!task.isSuccessful()) {
-                        int error_status_code = 0;
-                        Exception e = task.getException();
-                        if (e instanceof ApiException) {
-                            ApiException apiException = (ApiException) e;
-                            error_status_code = apiException.getStatusCode();
-                        }
-                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                    "status", STATUS_FAILED,
-                                    "error_status", error_status_code,
-                                    "error",
-                                    "Error while opening Snapshot. " + e.toString()
-                                    );
-                    } else {
-                        SnapshotsClient.DataOrConflict<Snapshot> result = task.getResult();
-                        if (!result.isConflict()) {
-                            mPlayerSnapshot = result.getData();
-                            try {
-                                currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
-                                sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
-                            } catch (IOException e) {
-                                sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                        "status", STATUS_FAILED,
-                                        "error",
-                                        "Error while reading Snapshot." + e.toString());
-                            }
-                        } else {
-                            SnapshotsClient.SnapshotConflict conflict = result.getConflict();
-                            mPlayerSnapshot = conflict.getSnapshot();
-                            mConflictingSnapshot = conflict.getConflictingSnapshot();
-                            try {
-                                currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
-                                conflictingSave = mConflictingSnapshot.getSnapshotContents().readFully();
-                                sendConflictMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata(), mConflictingSnapshot.getMetadata());
-                            } catch (IOException e) {
-                                sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                        "status", STATUS_FAILED,
-                                        "error",
-                                        "Error while reading Snapshot." + e.toString());
-                            }
-                        }
-                    }
-                }
-            });
+            .addOnCompleteListener(getOnLoadCompleteListener());
     }
 
-    public void saveAndCloseSnapshot(long playedTime, long progressValue, String description, byte[] coverImage) {
+    public void commitAndCloseSnapshot(long playedTime, long progressValue, String description, byte[] coverImage) {
         SnapshotMetadataChange.Builder builder = new SnapshotMetadataChange.Builder();
         if (playedTime != -1) {
             builder.setPlayedTimeMillis(playedTime);
@@ -495,6 +506,19 @@ public class GpgsJNI {
                 }
             }
         });
+    }
+
+    public String resolveConflict(String conflictId, int metadataId) {
+        Snapshot snapshot = mPlayerSnapshot;
+        if (metadataId == SNAPSHOT_CONFLICTING) {
+            snapshot = mConflictingSnapshot;
+        }
+        if (mPlayerSnapshot != null) {
+            mPlayerSnapshotsClient.resolveConflict(conflictId, snapshot)
+               .addOnCompleteListener(getOnLoadCompleteListener());
+            return null;
+        }
+        return "Failed to resolve conflict. You aren't logged in.";
     }
 
     public byte[] getSave() {

@@ -2,6 +2,28 @@
 
 #include <dmsdk/sdk.h>
 
+enum PopupPositions
+{
+    POPUP_POS_TOP_LEFT =           48 | 3,
+    POPUP_POS_TOP_CENTER =         48 | 1,
+    POPUP_POS_TOP_RIGHT =          48 | 5,
+    POPUP_POS_CENTER_LEFT =        16 | 3,
+    POPUP_POS_CENTER =             16 | 1,
+    POPUP_POS_CENTER_RIGHT =       16 | 5,
+    POPUP_POS_BOTTOM_LEFT =        80 | 3,
+    POPUP_POS_BOTTOM_CENTER =      80 | 1,
+    POPUP_POS_BOTTOM_RIGHT =       80 | 5
+};
+
+enum ResolutionPolicy
+{
+    RESOLUTION_POLICY_MANUAL =                    -1,
+    RESOLUTION_POLICY_LONGEST_PLAYTIME =           1,
+    RESOLUTION_POLICY_LAST_KNOWN_GOOD =            2,
+    RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED =     3,
+    RESOLUTION_POLICY_HIGHEST_PROGRESS =           4
+};
+
 enum MESSAGE_ID
 {
     MSG_SIGN_IN =            1,
@@ -27,6 +49,12 @@ enum ERROR
     ERROR_STATUS_SNAPSHOT_COMMIT_FAILED =         26573,
     ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE =    26575,
     ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING =      26576,
+};
+
+enum SNAPSHOT_TYPE
+{
+    SNAPSHOT_CURRENT =                1,
+    SNAPSHOT_CONFLICTING =            2
 };
 
 struct GPGS_callback
