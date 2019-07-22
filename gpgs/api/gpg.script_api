@@ -1,0 +1,342 @@
+- name: gpg
+  type: table
+  desc: Functions and constants for interacting with Google Play Game Services (GPGS) APIs
+
+  members:
+
+#*****************************************************************************************************
+
+  - name: login
+    type: function
+    desc: Login to GPGS using a button.
+
+    examples:
+    - desc: |-
+            Log in to GPGS using a button:
+            ```lua
+            if gpg then
+              gpg.login()
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: silent_login
+    type: function
+    desc: Silent login to GPGS. 
+
+          This function is trying to retrieve the currently signed-in player’s account.
+
+          [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`. 
+          But if you use Disk, we have to request extra scope: `Drive.SCOPE_APPFOLDER`.
+          If so it causes the first time silent sign-in to fail, except for users who 
+          have already signed in successfully on a different device. Turn off GPGS 
+          features you don't want to use in `game.project`.
+
+    examples:
+    - desc: |-
+            Log in to Facebook with a set of publish permissions
+            ```lua
+            function init(self)
+              if gpg then
+                gpg.silent_login()
+              end
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: logout
+    type: function
+    desc: Logout from GPGS
+
+#*****************************************************************************************************
+
+  - name: get_display_name
+    type: function
+    desc: Get the current GPGS player display name.
+
+    returns:
+    - name: name
+      type: string
+      desc: The player's display name.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local name = gpg.get_display_name()
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: get_id
+    type: function
+    desc: Get the current GPGS player id.
+
+    returns:
+    - name: id
+      type: string
+      desc: The player ID.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local id = gpg.get_id()
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: is_logged_in
+    type: function
+    desc: Check if a user is logged in currently.
+
+    returns:
+    - name: is_loggedin
+      type: boolean
+      desc: The permissions
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local is_loggedin = gpg.is_logged_in()
+            end
+            ```
+
+
+#*****************************************************************************************************
+
+  - name: set_popup_position
+    type: function
+    desc: This method sets the position for the login popup.
+
+    parameters:
+    - name: position
+      type: number
+      desc: An position can be one of the predefined constants below:
+
+            - `gpg.POPUP_POS_TOP_LEFT`
+            - `gpg.POPUP_POS_TOP_CENTER`
+            - `gpg.POPUP_POS_TOP_RIGHT`
+            - `gpg.POPUP_POS_CENTER_LEFT`
+            - `gpg.POPUP_POS_CENTER`
+            - `gpg.POPUP_POS_CENTER_RIGHT`
+            - `gpg.POPUP_POS_BOTTOM_LEFT`
+            - `gpg.POPUP_POS_BOTTOM_CENTER`
+            - `gpg.POPUP_POS_BOTTOM_RIGHT`
+
+            Default is `gpg.POPUP_POS_TOP_CENTER`
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              gpg.set_popup_position(gpg.POPUP_POS_BOTTOM_CENTER)
+            end
+            ```
+
+
+#*****************************************************************************************************
+
+
+  - name: set_callback
+    type: function
+    desc: Set callback for receiving messages from GPGS.
+
+    parameters:
+    - name: callback
+      type: function
+      desc: A callback taking the following parameters:
+      parameters: 
+        - name: self
+          type: object
+          desc: The calling script
+
+        - name: message_id
+          type: number
+          desc: An message_id can be one of the predefined constants below:
+
+            - `gpg.MSG_SIGN_IN`
+            - `gpg.MSG_SILENT_SIGN_IN`
+            - `gpg.MSG_SIGN_OUT`
+            - `gpg.MSG_SHOW_SNAPSHOTS`
+            - `gpg.MSG_LOAD_SNAPSHOT`
+
+        - name: message
+          type: table
+          desc: Contains information that depends on message_id and `status` field that can be one of the predefined constants below:
+
+            - `gpg.STATUS_SUCCESS`
+            - `gpg.STATUS_FAILED`
+            - `gpg.STATUS_CREATE_NEW_SAVE`
+            - `gpg.STATUS_CONFLICT`
+
+    examples:
+    - desc: |-
+            ```lua
+            function callback(self, message_id, message)
+              if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
+                if message.status == gpg.STATUS_SUCCESS then
+                -- do something after login
+                end
+              elseif message_id == gpg.MSG_SIGN_OUT then
+              -- do something after logout
+              elseif message_id == gpg.MSG_LOAD_SNAPSHOT then
+              -- do something when a save was loaded
+              end
+            end
+
+            function init(self)
+              gpg.set_callback(callback)
+            end
+
+            function init(self)
+              gpg.set_callback(nil) -- remove callback
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: POPUP_POS_TOP_LEFT
+    type: number
+    desc: The login popup position at the top-left corner.
+
+  - name: POPUP_POS_TOP_CENTER
+    type: number
+    desc: The login popup position at the top-center.
+
+  - name: POPUP_POS_TOP_RIGHT
+    type: number
+    desc: The login popup position at the top-right corner.
+
+  - name: POPUP_POS_CENTER_LEFT
+    type: number
+    desc: The login popup position at the center-left.
+
+  - name: POPUP_POS_CENTER
+    type: number
+    desc: The login popup position at the center of the screen.
+
+  - name: POPUP_POS_CENTER_RIGHT
+    type: number
+    desc: The login popup position at the center-right.
+
+  - name: POPUP_POS_BOTTOM_LEFT
+    type: number
+    desc: The login popup position at the bottom-left corner.
+
+  - name: POPUP_POS_BOTTOM_CENTER
+    type: number
+    desc: The login popup position at the bottom-centre.
+
+  - name: POPUP_POS_BOTTOM_RIGHT
+    type: number
+    desc: The login popup position at the bottom-right corner.
+
+  - name: RESOLUTION_POLICY_MANUAL
+    type: number
+    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL) for this constant
+
+  - name: RESOLUTION_POLICY_LONGEST_PLAYTIME
+    type: number
+    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LONGEST_PLAYTIME) for this constant
+
+  - name: RESOLUTION_POLICY_LAST_KNOWN_GOOD
+    type: number
+    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LAST_KNOWN_GOOD) for this constant
+
+  - name: RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED
+    type: number
+    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED) for this constant
+
+  - name: RESOLUTION_POLICY_HIGHEST_PROGRESS
+    type: number
+    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
+
+  - name: MSG_SIGN_IN
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation 
+          after calling `gpg.login()`
+
+  - name: MSG_SILENT_SIGN_IN
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation 
+          after calling `gpg.silent_login()`
+
+  - name: MSG_SIGN_OUT
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation 
+          after calling `gpg.logout()`
+
+  - name: MSG_SHOW_SNAPSHOTS
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation 
+          after calling `gpg.snapshot_display_saves()`
+
+  - name: MSG_LOAD_SNAPSHOT
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation 
+          after calling `gpg.snapshot_open()`
+
+  - name: STATUS_SUCCESS
+    type: number
+    desc: An operation success.
+
+  - name: STATUS_FAILED
+    type: number
+    desc: An operation failed. Check the error field in the massage table.
+
+  - name: STATUS_CREATE_NEW_SAVE
+    type: number
+    desc: A user wants to create new save in as a result of `gpg.snapshot_display_saves()` method.
+          Turn off this button in `gpg.snapshot_display_saves()` if you don't want to have this functionality.
+
+  - name: STATUS_CONFLICT
+    type: number
+    desc: The result of the calling `gpg.snapshot_open()` or 'gpg.snapshot_resolve_conflict()' is a conflict.
+          You need to make decision on how to solve this conflict using 'gpg.snapshot_resolve_conflict()'.
+
+  - name: SNAPSHOT_CURRENT
+    type: number
+    desc: The second parameter for 'gpg.snapshot_resolve_conflict()' method, that means that you want to choose
+          the current snapshot as a snapshot for conflict solving.
+
+  - name: SNAPSHOT_CONFLICTING
+    type: number
+    desc: The second parameter for 'gpg.snapshot_resolve_conflict()' method, that means that you want to choose
+          the conflicting snapshot as a snapshot for conflict solving.
+
+  - name: ERROR_STATUS_SNAPSHOT_NOT_FOUND
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_NOT_FOUND) for this constant
+
+  - name: ERROR_STATUS_SNAPSHOT_CREATION_FAILED
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CREATION_FAILED) for this constant
+
+  - name: ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE) for this constant
+
+  - name: ERROR_STATUS_SNAPSHOT_COMMIT_FAILED
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_COMMIT_FAILED) for this constant
+
+  - name: ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_FOLDER_UNAVAILABLE) for this constant
+
+  - name: ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING
+    type: number
+    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`
+          [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT_MISSING) for this constant
+
