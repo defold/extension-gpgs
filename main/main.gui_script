@@ -156,10 +156,7 @@ function on_input(self, action_id, action)
 
     dirtylarry:button("snapshot_resolve_conflict_conflicting", action_id, action, function ()
         if gpg then
-            local success, error_message = gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
-            if not success then
-                print("snapshot_resolve_conflict_conflicting ERROR:", error_message)
-            end
+            gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
         end
     end)
     

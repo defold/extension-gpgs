@@ -508,17 +508,20 @@ public class GpgsJNI {
         });
     }
 
-    public String resolveConflict(String conflictId, int metadataId) {
+    public void resolveConflict(String conflictId, int metadataId) {
         Snapshot snapshot = mPlayerSnapshot;
         if (metadataId == SNAPSHOT_CONFLICTING) {
             snapshot = mConflictingSnapshot;
         }
-        if (mPlayerSnapshot != null) {
-            mPlayerSnapshotsClient.resolveConflict(conflictId, snapshot)
-               .addOnCompleteListener(getOnLoadCompleteListener());
-            return null;
+        if (mPlayerSnapshot == null) {
+            sendSimpleMessage(SNAPSHOT_CONFLICTING,
+                    "status", STATUS_FAILED,
+                    "error",
+                    "Failed to resolve conflict. You aren't logged in.");
+            return;
         }
-        return "Failed to resolve conflict. You aren't logged in.";
+        mPlayerSnapshotsClient.resolveConflict(conflictId, snapshot)
+           .addOnCompleteListener(getOnLoadCompleteListener());
     }
 
     public byte[] getSave() {

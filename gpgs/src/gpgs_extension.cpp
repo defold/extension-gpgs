@@ -282,28 +282,33 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
     jbyteArray jcoverImage = NULL;
     jstring jdescription = NULL;
 
-    if(lua_istable(L, 1)){
+    if(lua_istable(L, 1)) 
+    {
         lua_getfield(L, 1, "playedTime");
-        if(!lua_isnil(L, -1)){
+        if(!lua_isnil(L, -1))
+        {
             playedTime = luaL_checknumber(L, -1);
         }
         lua_pop(L, 1);
         
         lua_getfield(L, 1, "progressValue");
-        if(!lua_isnil(L, -1)){
+        if(!lua_isnil(L, -1))
+        {
             progressValue = luaL_checknumber(L, -1);
         }
         lua_pop(L, 1);
         
         lua_getfield(L, 1, "description");
-        if(!lua_isnil(L, -1)){
+        if(!lua_isnil(L, -1))
+        {
             const char* description = luaL_checkstring(L, -1);
             jdescription = env->NewStringUTF(description);
         }
         lua_pop(L, 1);
         
         lua_getfield(L, 1, "coverImage");
-        if(!lua_isnil(L, -1)){
+        if(!lua_isnil(L, -1))
+        {
             size_t length;
             const char* bytes = lua_tolstring(L, -1, &length);
             jcoverImage = env->NewByteArray(length);
@@ -482,7 +487,7 @@ static int GpgDisk_SnapshotResolveConflict(lua_State* L)
         return 0;
     }
 
-    DM_LUA_STACK_CHECK(L, 2);
+    DM_LUA_STACK_CHECK(L, 0);
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
@@ -491,22 +496,10 @@ static int GpgDisk_SnapshotResolveConflict(lua_State* L)
     int snapshotId = luaL_checknumber(L, 2);
     
     jstring jconflictId = env->NewStringUTF(conflictId);
-    jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_resolveConflict, jconflictId, snapshotId);
+    env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_resolveConflict, jconflictId, snapshotId);
     env->DeleteLocalRef(jconflictId);
 
-    if (return_value) 
-    {
-        lua_pushboolean(L, false);
-        const char* new_char = env->GetStringUTFChars(return_value, 0);
-        env->DeleteLocalRef(return_value);
-        lua_pushstring(L, new_char);
-    }
-    else
-    {
-        lua_pushboolean(L, true);
-        lua_pushnil(L);
-    }
-    return 2;
+    return 0;
 }
 
 // Extention methods
@@ -637,7 +630,7 @@ static void InitializeJNI()
         g_gpgs_disk.m_getMaxCoverImageSize = env->GetMethodID(cls, "getMaxCoverImageSize", "()I");
         g_gpgs_disk.m_getMaxDataSize = env->GetMethodID(cls, "getMaxDataSize", "()I");
         g_gpgs_disk.m_getConflictingSave = env->GetMethodID(cls, "getConflictingSave", "()[B");
-        g_gpgs_disk.m_resolveConflict = env->GetMethodID(cls, "resolveConflict", "(Ljava/lang/String;I)Ljava/lang/String;");
+        g_gpgs_disk.m_resolveConflict = env->GetMethodID(cls, "resolveConflict", "(Ljava/lang/String;I)V");
     }
     
     //private methods

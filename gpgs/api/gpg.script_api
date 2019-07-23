@@ -35,7 +35,6 @@
 
     examples:
     - desc: |-
-            Log in to Facebook with a set of publish permissions
             ```lua
             function init(self)
               if gpg then
@@ -97,7 +96,7 @@
     returns:
     - name: is_loggedin
       type: boolean
-      desc: The permissions
+      desc: A current login state.
 
     examples:
     - desc: |-
@@ -106,7 +105,6 @@
               local is_loggedin = gpg.is_logged_in()
             end
             ```
-
 
 #*****************************************************************************************************
 
@@ -129,7 +127,7 @@
             - `gpg.POPUP_POS_BOTTOM_CENTER`
             - `gpg.POPUP_POS_BOTTOM_RIGHT`
 
-            Default is `gpg.POPUP_POS_TOP_CENTER`
+            Default value is `gpg.POPUP_POS_TOP_CENTER`
 
     examples:
     - desc: |-
@@ -139,9 +137,7 @@
             end
             ```
 
-
 #*****************************************************************************************************
-
 
   - name: set_callback
     type: function
@@ -196,6 +192,277 @@
 
             function init(self)
               gpg.set_callback(nil) -- remove callback
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: snapshot_display_saves
+    type: function
+    desc: Provides a default saved games selection user interface.
+
+    parameters:
+    - name: popupTitle
+      type: string
+      desc: The title to display in the action bar. By default "Game Saves".
+
+    - name: allowAddButton
+      type: boolean
+      desc: Whether or not to display a "create new snapshot" option in the selection UI. By default `true`.
+
+    - name: allowDelete
+      type: boolean
+      desc: Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default `true`.
+
+    - name: maxNumberOfSavedGamesToShow
+      type: number
+      desc: The maximum number of snapshots to display in the UI. By default 5.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              gpg.snapshot_display_saves("Choose the save of the game", false, true, 10)
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: snapshot_open
+    type: function
+    desc: Provides a default saved games selection user interface.
+
+    parameters:
+    - name: saveName
+      type: string
+      desc: The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
+
+    - name: createIfNotFound
+      type: boolean
+      desc: If `true`, the snapshot will be created if one cannot be found.
+
+    - name: conflictPolicy
+      type: number
+      desc: The conflict resolution policy to use for this snapshot that can be one of the predefined constants below
+
+            - `gpg.RESOLUTION_POLICY_MANUAL`
+            - `gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME`
+            - `gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
+            - `gpg.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED`
+            - `gpg.RESOLUTION_POLICY_HIGHEST_PROGRESS`
+
+            Default value is `gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              gpg.snapshot_open("my_save_1", true, gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME)
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: snapshot_commit_and_close
+    type: function
+    desc: Save the currently opened save on the server and close it.
+
+    parameters:
+    - name: metadata
+      type: table
+      desc: A table with metadata for a save. It contains fields below
+      parameters: 
+        - name: playedTime
+          type: number
+          desc: The new played time to set for the snapshot in ms.
+
+        - name: progressValue
+          type: number
+          desc: The new progress value to set for the snapshot.
+
+        - name: description
+          type: string
+          desc: The new description to set for the snapshot.
+
+        - name: coverImage
+          type: object
+          desc: The new cover image to set for the snapshot in `png`.
+
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local png_img, w, h = screenshot.png()
+              gpg.snapshot_commit_and_close({
+                  coverImage = png_img,
+                  description = "LEVEL 31, CAVE",
+                  playedTime = 12345667,
+                  progressValue = 657
+              })
+            end
+
+#*****************************************************************************************************
+  
+  - name: snapshot_get_data
+    type: function
+    desc: Returns the currently opened snapshot data.
+
+    returns:
+      - name: bytes
+        type: string
+        desc: The byte array data of the currently opened snapshot. `nil` if something goes wrong.
+
+      - name: error_message
+        type: boolean
+        desc: An error message if something goes wrong.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local bytes, error_message = gpg.snapshot_get_data()
+              if not bytes then
+                  print("snapshot_get_data ERROR:", error_message)
+              else
+                  print("snapshot_get_data",bytes)
+                  -- Do something with your data
+              end
+            end
+            ```
+
+#*****************************************************************************************************
+  
+  - name: snapshot_set_data
+    type: function
+    desc: Returns the currently opened snapshot data.
+
+    returns:
+      - name: bytes
+        type: string
+        desc: The byte array data of the currently opened snapshot. `nil` if something goes wrong.
+
+      - name: error_message
+        type: boolean
+        desc: An error message if something goes wrong.
+
+    examples:
+    - desc: |-
+            ```lua
+              if gpg then
+                local success, error_message = gpg.snapshot_set_data(my_data)
+                if not success then
+                    print("snapshot_set_data ERROR:", error_message)
+                end
+              end
+            ```
+
+#*****************************************************************************************************
+
+  - name: snapshot_is_opened
+    type: function
+    desc: Check if a snapshot was opened.
+
+    returns:
+    - name: is_opened
+      type: boolean
+      desc: A current snapshot state.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local is_opened = gpg.snapshot_is_opened()
+            end
+
+#*****************************************************************************************************
+
+  - name: snapshot_get_max_image_size
+    type: function
+    desc: Returns the maximum data size per snapshot cover image in bytes.
+
+    returns:
+    - name: image_size
+      type: number
+      desc: The maximum data size per snapshot cover image in bytes.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local image_size = gpg.snapshot_get_max_image_size()
+            end
+
+#*****************************************************************************************************
+
+  - name: snapshot_get_max_save_size
+    type: function
+    desc: Returns the maximum data size per snapshot in bytes.
+
+    returns:
+    - name: data_size
+      type: number
+      desc: The maximum data size per snapshot in bytes.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local data_size = gpg.snapshot_get_max_save_size()
+            end
+
+#*****************************************************************************************************
+  
+  - name: snapshot_get_conflicting_data
+    type: function
+    desc: Returns the conflicting snapshot data.
+
+    returns:
+      - name: bytes
+        type: string
+        desc: The byte array data of the conflicting snapshot. `nil` if something goes wrong.
+
+      - name: error_message
+        type: boolean
+        desc: An error message if something goes wrong.
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              local bytes, error_message = gpg.snapshot_get_conflicting_data()
+              if not bytes then
+                  print("snapshot_get_conflicting_data ERROR:", error_message)
+              else
+                  print("snapshot_get_conflicting_data:",bytes)
+                  -- Do something with conflicting data data
+              end
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: snapshot_resolve_conflict
+    type: function
+    desc: Resolves a conflict using the data from the provided snapshot.
+
+    parameters:
+    - name: conflictId
+      type: string
+      desc: The conflict id that you want to resolve. Provided in `message` table with `STATUS_CONFLICT` message type.
+
+    - name: snapshotId
+      type: number
+      desc: Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below
+
+            - `gpg.SNAPSHOT_CURRENT`
+            - `gpg.SNAPSHOT_CONFLICTING`
+
+    examples:
+    - desc: |-
+            ```lua
+            if gpg then
+              gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
             end
             ```
 
