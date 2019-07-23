@@ -28,7 +28,7 @@
           This function is trying to retrieve the currently signed-in player’s account.
 
           [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`. 
-          But if you use Disk, we have to request extra scope: `Drive.SCOPE_APPFOLDER`.
+          But if you use Disk, we have to request extra scope `Drive.SCOPE_APPFOLDER`.
           If so it causes the first time silent sign-in to fail, except for users who 
           have already signed in successfully on a different device. Turn off GPGS 
           features you don't want to use in `game.project`.
@@ -117,7 +117,7 @@
     parameters:
     - name: position
       type: number
-      desc: An position can be one of the predefined constants below:
+      desc: An position can be one of the predefined constants below
 
             - `gpg.POPUP_POS_TOP_LEFT`
             - `gpg.POPUP_POS_TOP_CENTER`
@@ -150,7 +150,7 @@
     parameters:
     - name: callback
       type: function
-      desc: A callback taking the following parameters:
+      desc: A callback taking the following parameters
       parameters: 
         - name: self
           type: object
@@ -158,7 +158,7 @@
 
         - name: message_id
           type: number
-          desc: An message_id can be one of the predefined constants below:
+          desc: An message_id can be one of the predefined constants below
 
             - `gpg.MSG_SIGN_IN`
             - `gpg.MSG_SILENT_SIGN_IN`
@@ -168,7 +168,7 @@
 
         - name: message
           type: table
-          desc: Contains information that depends on message_id and `status` field that can be one of the predefined constants below:
+          desc: Contains information that depends on message_id and `status` field that can be one of the predefined constants below
 
             - `gpg.STATUS_SUCCESS`
             - `gpg.STATUS_FAILED`
@@ -239,23 +239,23 @@
 
   - name: RESOLUTION_POLICY_MANUAL
     type: number
-    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL) for this constant
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL) for this constant
 
   - name: RESOLUTION_POLICY_LONGEST_PLAYTIME
     type: number
-    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LONGEST_PLAYTIME) for this constant
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LONGEST_PLAYTIME) for this constant
 
   - name: RESOLUTION_POLICY_LAST_KNOWN_GOOD
     type: number
-    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LAST_KNOWN_GOOD) for this constant
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LAST_KNOWN_GOOD) for this constant
 
   - name: RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED
     type: number
-    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED) for this constant
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED) for this constant
 
   - name: RESOLUTION_POLICY_HIGHEST_PROGRESS
     type: number
-    desc: [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
 
   - name: MSG_SIGN_IN
     type: number

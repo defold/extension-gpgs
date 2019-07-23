@@ -28,7 +28,7 @@ function gpg_callback(self, message_id, message)
         gui.set_text(gui.get_node("id"), "---")
         gui.set_text(gui.get_node("name"), "---")
     elseif message_id == gpg.MSG_LOAD_SNAPSHOT then
-        if messag e.status == gpg.STATUS_CONFLICT then
+        if message.status == gpg.STATUS_CONFLICT then
             self.conflictId = message.conflictId
         end
     end
