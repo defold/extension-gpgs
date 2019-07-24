@@ -120,7 +120,7 @@
     type: function
     desc: This method sets the position for the login popup.
 
-    params:
+    parameters:
     - name: position
       type: number
       desc: An position can be one of the predefined constants below
@@ -160,11 +160,11 @@
     type: function
     desc: Set callback for receiving messages from GPGS.
 
-    params:
+    parameters:
     - name: callback
       type: function
       desc: A callback taking the following parameters
-      params: 
+      parameters: 
         - name: self
           type: object
           desc: The calling script
@@ -186,15 +186,23 @@
 
         - name: message
           type: table
-          desc: Contains information that depends on message_id and `status` field that can be one of the predefined constants below
+          desc: Contains information that depends on message_id.
+          members:
+          - name: status
+            type: number
+            desc: A status of current operation. It can be one of the predefined constants below
 
-            - `gpg.STATUS_SUCCESS`
+                  - `gpg.STATUS_SUCCESS`
 
-            - `gpg.STATUS_FAILED`
+                  - `gpg.STATUS_FAILED`
 
-            - `gpg.STATUS_CREATE_NEW_SAVE`
+                  - `gpg.STATUS_CREATE_NEW_SAVE`
 
-            - `gpg.STATUS_CONFLICT`
+                  - `gpg.STATUS_CONFLICT`
+
+          - name: status
+            type: number
+            desc: The field that can be one of the predefined constants below 
 
 
     examples:
@@ -227,21 +235,25 @@
     type: function
     desc: Provides a default saved games selection user interface.
 
-    params:
+    parameters:
     - name: popupTitle
       type: string
+      optional: true
       desc: The title to display in the action bar. By default "Game Saves".
 
     - name: allowAddButton
       type: boolean
+      optional: true
       desc: Whether or not to display a "create new snapshot" option in the selection UI. By default `true`.
 
     - name: allowDelete
       type: boolean
+      optional: true
       desc: Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default `true`.
 
     - name: maxNumberOfSavedGamesToShow
       type: number
+      optional: true
       desc: The maximum number of snapshots to display in the UI. By default 5.
 
     examples:
@@ -258,17 +270,19 @@
     type: function
     desc: Provides a default saved games selection user interface.
 
-    params:
+    parameters:
     - name: saveName
       type: string
       desc: The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
 
     - name: createIfNotFound
       type: boolean
+      optional: true
       desc: If `true`, the snapshot will be created if one cannot be found.
 
     - name: conflictPolicy
       type: number
+      optional: true
       desc: The conflict resolution policy to use for this snapshot that can be one of the predefined constants below
 
             - `gpg.RESOLUTION_POLICY_MANUAL`
@@ -298,25 +312,30 @@
     type: function
     desc: Save the currently opened save on the server and close it.
 
-    params:
+    parameters:
     - name: metadata
       type: table
+      optional: true
       desc: A table with metadata for a save. It contains fields below
-      params: 
+      members: 
         - name: playedTime
           type: number
+          optional: true
           desc: The new played time to set for the snapshot in ms.
 
         - name: progressValue
           type: number
+          optional: true
           desc: The new progress value to set for the snapshot.
 
         - name: description
           type: string
+          optional: true
           desc: The new description to set for the snapshot.
 
         - name: coverImage
           type: object
+          optional: true
           desc: The new cover image to set for the snapshot in `png`.
 
 
@@ -481,7 +500,7 @@
     type: function
     desc: Resolves a conflict using the data from the provided snapshot.
 
-    params:
+    parameters:
     - name: conflictId
       type: string
       desc: The conflict id that you want to resolve. Provided in `message` table with `STATUS_CONFLICT` message type.

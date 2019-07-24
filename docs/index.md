@@ -46,8 +46,8 @@ layout: default
     {% for function in module.members %}
         {% if function.type contains 'function' %}
 <div class="function-wrap">
-<h3 class="function-header"><a href="#{{ function.name | url_encode }}" id="{{ function.name | url_encode }}"><code>{{ module.name }}.{{ function.name }}({% for param in function.params %}{{param.name}}{% unless forloop.last %}, {% endunless %}{% endfor %})</code></a></h3>
-{% if function.params %}
+<h3 class="function-header"><a href="#{{ function.name | url_encode }}" id="{{ function.name | url_encode }}"><code>{{ module.name }}.{{ function.name }}({% for param in function.parameters %}{{param.name}}{% unless forloop.last %}, {% endunless %}{% endfor %})</code></a></h3>
+{% if function.parameters %}
 <table>
     <thead>
         <tr>
@@ -57,13 +57,18 @@ layout: default
         </tr>
     </thead>
     <tbody>
-    {% for param in function.params %}
+    {% for param in function.parameters %}
         <tr>
-            <td style="text-align: right;"><strong>{{ param.name }}</strong></td>
+            <td style="text-align: right;">
+                <strong>{{ param.name }}</strong>
+                {% if param.optional %}
+                    (optional)
+                {% endif %}
+            </td>
             <td><code>{{ param.type }}</code></td>
             <td>{{ param.desc | markdownify }}
                 {% if param.type == "function" %}
-                {% include type-function.md params=param.params %}
+                {% include type-function.md params=param.parameters %}
                 {% endif %}
                 {% if param.type == "table" %}
                 {% include type-table.md fields=param.members %}

@@ -14,7 +14,7 @@
             <td>{{ param.desc | markdownify }}
 
                 {% if param.type == "table" %}
-                {% include type-table.md fields=param.fields %}
+                {% include type-table.md fields=param.members %}
                 {% endif %}
             </td>
         </tr>

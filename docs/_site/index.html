@@ -12,11 +12,18 @@
     <![endif]-->
     <title>extension-gpgs</title>
   </head>
-  <body>
+    <body>
     <div class="wrapper">
-      <header>
+        <header>
         <h1>Defold Google Play Game Services API documentation</h1>
-        <p>Functions for interacting with Google Play Game Services. Supported Android.</p>
+        <h2>Google App Setup</h2>
+        <p>You need to follow the guides on Google's pages to create </p>
+
+        <p><a href="https://developers.google.com/games/services/android/quickstart">https://developers.google.com/games/services/android/quickstart</a></p>
+        <h2>Platforms</h2>
+        <p>The extension is only supported for Android.</p>
+        <h2>Defold setup</h2>
+        <p>Functions for interacting with Google Play Game Services.</p>
 
         <p>To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
           <pre>https://github.com/defold/extension-gpgs/archive/master.zip</pre>
@@ -36,10 +43,14 @@
         <br>use_disk = 1
         </code>
         <p>Where app_id app id from Google Play Console for your Play Services and use_disk option for using of the Game Saves (0 is turned-off disk, 1 is turned-on disk).
-      </header>
-      <hr>
-      <section>
-
+        <h2>Signed .apk</h2>
+        <p>To setup your app on google, you need to upload a signed package.</p>
+        <p>You can create a certificate using <a href="https://www.defold.com/manuals/android/#_creating_certificates_and_keys">this link</a></p>
+    </header>
+        <hr>
+        <section>
+        <h1>API</h1>
+        </br>
       <h2 id="modules">Modules</h2>
 
 <h3 id="gpg"><code>gpg</code></h3>
@@ -765,7 +776,10 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>position</strong></td>
+            <td style="text-align: right;">
+                <strong>position</strong>
+                
+            </td>
             <td><code>number</code></td>
             <td><p>An position can be one of the predefined constants below</p>
 <ul>
@@ -820,7 +834,10 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>callback</strong></td>
+            <td style="text-align: right;">
+                <strong>callback</strong>
+                
+            </td>
             <td><code>function</code></td>
             <td><p>A callback taking the following parameters</p>
 
@@ -865,7 +882,16 @@ This function is trying to retrieve the currently signed-in player’s account.
         <tr>
             <td><strong>message</strong></td>
             <td><code>table</code></td>
-            <td><p>Contains information that depends on message_id and <code class="highlighter-rouge">status</code> field that can be one of the predefined constants below</p>
+            <td><p>Contains information that depends on message_id.</p>
+
+
+                
+                <ul>
+
+<li>
+	<strong>status</strong>
+	
+	<code>number</code> - <p>A status of current operation. It can be one of the predefined constants below</p>
 <ul>
   <li><code class="highlighter-rouge">gpg.STATUS_SUCCESS</code></li>
   <li><code class="highlighter-rouge">gpg.STATUS_FAILED</code></li>
@@ -873,9 +899,14 @@ This function is trying to retrieve the currently signed-in player’s account.
   <li><code class="highlighter-rouge">gpg.STATUS_CONFLICT</code></li>
 </ul>
 
+</li>
 
-                
-                <ul>
+<li>
+	<strong>status</strong>
+	
+	<code>number</code> - <p>The field that can be one of the predefined constants below</p>
+
+</li>
 
 </ul>
 
@@ -940,7 +971,12 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>popupTitle</strong></td>
+            <td style="text-align: right;">
+                <strong>popupTitle</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>string</code></td>
             <td><p>The title to display in the action bar. By default “Game Saves”.</p>
 
@@ -950,7 +986,12 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>allowAddButton</strong></td>
+            <td style="text-align: right;">
+                <strong>allowAddButton</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>boolean</code></td>
             <td><p>Whether or not to display a “create new snapshot” option in the selection UI. By default <code class="highlighter-rouge">true</code>.</p>
 
@@ -960,7 +1001,12 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>allowDelete</strong></td>
+            <td style="text-align: right;">
+                <strong>allowDelete</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>boolean</code></td>
             <td><p>Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default <code class="highlighter-rouge">true</code>.</p>
 
@@ -970,7 +1016,12 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>maxNumberOfSavedGamesToShow</strong></td>
+            <td style="text-align: right;">
+                <strong>maxNumberOfSavedGamesToShow</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>number</code></td>
             <td><p>The maximum number of snapshots to display in the UI. By default 5.</p>
 
@@ -1012,7 +1063,10 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>saveName</strong></td>
+            <td style="text-align: right;">
+                <strong>saveName</strong>
+                
+            </td>
             <td><code>string</code></td>
             <td><p>The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols “-“, “.”, “_”, or “~”).</p>
 
@@ -1022,7 +1076,12 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>createIfNotFound</strong></td>
+            <td style="text-align: right;">
+                <strong>createIfNotFound</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>boolean</code></td>
             <td><p>If <code class="highlighter-rouge">true</code>, the snapshot will be created if one cannot be found.</p>
 
@@ -1032,7 +1091,12 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>conflictPolicy</strong></td>
+            <td style="text-align: right;">
+                <strong>conflictPolicy</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>number</code></td>
             <td><p>The conflict resolution policy to use for this snapshot that can be one of the predefined constants below</p>
 <ul>
@@ -1083,13 +1147,54 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>metadata</strong></td>
+            <td style="text-align: right;">
+                <strong>metadata</strong>
+                
+                    (optional)
+                
+            </td>
             <td><code>table</code></td>
             <td><p>A table with metadata for a save. It contains fields below</p>
 
                 
                 
                 <ul>
+
+<li>
+	<strong>playedTime</strong>
+	
+    	(optional)
+	
+	<code>number</code> - <p>The new played time to set for the snapshot in ms.</p>
+
+</li>
+
+<li>
+	<strong>progressValue</strong>
+	
+    	(optional)
+	
+	<code>number</code> - <p>The new progress value to set for the snapshot.</p>
+
+</li>
+
+<li>
+	<strong>description</strong>
+	
+    	(optional)
+	
+	<code>string</code> - <p>The new description to set for the snapshot.</p>
+
+</li>
+
+<li>
+	<strong>coverImage</strong>
+	
+    	(optional)
+	
+	<code>object</code> - <p>The new cover image to set for the snapshot in <code class="highlighter-rouge">png</code>.</p>
+
+</li>
 
 </ul>
 
@@ -1412,7 +1517,10 @@ This function is trying to retrieve the currently signed-in player’s account.
     <tbody>
     
         <tr>
-            <td style="text-align: right;"><strong>conflictId</strong></td>
+            <td style="text-align: right;">
+                <strong>conflictId</strong>
+                
+            </td>
             <td><code>string</code></td>
             <td><p>The conflict id that you want to resolve. Provided in <code class="highlighter-rouge">message</code> table with <code class="highlighter-rouge">STATUS_CONFLICT</code> message type.</p>
 
@@ -1422,7 +1530,10 @@ This function is trying to retrieve the currently signed-in player’s account.
         </tr>
         
         <tr>
-            <td style="text-align: right;"><strong>snapshotId</strong></td>
+            <td style="text-align: right;">
+                <strong>snapshotId</strong>
+                
+            </td>
             <td><code>number</code></td>
             <td><p>Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below</p>
 <ul>

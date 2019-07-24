@@ -12,11 +12,18 @@
     <![endif]-->
     <title>{{ site.title }}</title>
   </head>
-  <body>
+    <body>
     <div class="wrapper">
-      <header>
+        <header>
         <h1>Defold Google Play Game Services API documentation</h1>
-        <p>Functions for interacting with Google Play Game Services. Supported Android.</p>
+        <h2>Google App Setup</h2>
+        <p>You need to follow the guides on Google's pages to create </p>
+
+        <p><a href="https://developers.google.com/games/services/android/quickstart">https://developers.google.com/games/services/android/quickstart</a></p>
+        <h2>Platforms</h2>
+        <p>The extension is only supported for Android.</p>
+        <h2>Defold setup</h2>
+        <p>Functions for interacting with Google Play Game Services.</p>
 
         <p>To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
           <pre>https://github.com/defold/extension-gpgs/archive/master.zip</pre>
@@ -36,10 +43,14 @@
         <br>use_disk = 1
         </code>
         <p>Where app_id app id from Google Play Console for your Play Services and use_disk option for using of the Game Saves (0 is turned-off disk, 1 is turned-on disk).
-      </header>
-      <hr>
-      <section>
-
+        <h2>Signed .apk</h2>
+        <p>To setup your app on google, you need to upload a signed package.</p>
+        <p>You can create a certificate using <a href="https://www.defold.com/manuals/android/#_creating_certificates_and_keys">this link</a></p>
+    </header>
+        <hr>
+        <section>
+        <h1>API</h1>
+        </br>
       {{ content }}
 
       </section>
