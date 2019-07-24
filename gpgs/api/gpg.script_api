@@ -209,6 +209,19 @@
             type: number
             optional: true
             desc: The error code. Avaliable only if `status` is `gpg.STATUS_FAILED` and GPGS provide this code.
+                  It can be one of the predefined constants below
+                  
+                  - `gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED`
+
+                  - `gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING`
+
+                  - `gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE`
+
+                  - `gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED`
+
+                  - `gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE`
+
+                  - `gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
 
           - name: metadata
             type: table

@@ -915,7 +915,15 @@ This function is trying to retrieve the currently signed-in player’s account.
 	
     	(optional)
 	
-	<code>number</code> - <p>The error code. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_FAILED</code> and GPGS provide this code.</p>
+	<code>number</code> - <p>The error code. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_FAILED</code> and GPGS provide this code. It can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED</code></li>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING</code></li>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE</code></li>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED</code></li>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE</code></li>
+  <li><code class="highlighter-rouge">gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND</code></li>
+</ul>
 
 </li>
 
