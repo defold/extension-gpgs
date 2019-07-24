@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="rouge.css">
+    <link rel="stylesheet" href="fonts.css">
+    <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <title>extension-gpgs</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Defold Google Play Game Services API documentation</h1>
+        <p>Functions for interacting with Google Play Game Services. Supported Android.</p>
+
+        <p>To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
+          <pre>https://github.com/defold/extension-gpgs/archive/master.zip</pre>
+        </p>
+
+        <p>We recommend using a link to a <code class="inline-code-block">zip</code> file of a <a href="https://github.com/defold/extension-gpgs/releases">specific release</a>.</p>
+
+        <p>The source code can be viewed at: <a href="https://github.com/defold/extension-gpgs"> https://github.com/defold/extension-gpgs </a></p>
+
+        <h2>game.project</h2>
+
+        <p>Add the following section into your game.project file:
+        <p>
+        <code class="inline-code-block">
+        [gpgs]
+        <br>app_id = 1234567890
+        <br>use_disk = 1
+        </code>
+        <p>Where app_id app id from Google Play Console for your Play Services and use_disk option for using of the Game Saves (0 is turned-off disk, 1 is turned-on disk).
+      </header>
+      <hr>
+      <section>
+
+      <h2 id="modules">Modules</h2>
+
+<h3 id="gpg"><code>gpg</code></h3>
+<p>Functions and constants for interacting with Google Play Game Services (GPGS) APIs</p>
+
+<h2 id="enums">Enums</h2>
+<table>
+    <tbody>
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_TOP_LEFT</strong></td>
+            <td><p>The login popup position at the top-left corner.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_TOP_CENTER</strong></td>
+            <td><p>The login popup position at the top-center.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_TOP_RIGHT</strong></td>
+            <td><p>The login popup position at the top-right corner.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_CENTER_LEFT</strong></td>
+            <td><p>The login popup position at the center-left.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_CENTER</strong></td>
+            <td><p>The login popup position at the center of the screen.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_CENTER_RIGHT</strong></td>
+            <td><p>The login popup position at the center-right.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_BOTTOM_LEFT</strong></td>
+            <td><p>The login popup position at the bottom-left corner.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_BOTTOM_CENTER</strong></td>
+            <td><p>The login popup position at the bottom-centre.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.POPUP_POS_BOTTOM_RIGHT</strong></td>
+            <td><p>The login popup position at the bottom-right corner.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.RESOLUTION_POLICY_MANUAL</strong></td>
+            <td><p>Official <a href="https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL">GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME</strong></td>
+            <td><p>Official <a href="https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LONGEST_PLAYTIME">GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD</strong></td>
+            <td><p>Official <a href="https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_LAST_KNOWN_GOOD">GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED</strong></td>
+            <td><p>Official <a href="https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED">GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.RESOLUTION_POLICY_HIGHEST_PROGRESS</strong></td>
+            <td><p>Official <a href="https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS">GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.MSG_SIGN_IN</strong></td>
+            <td><p>The message type that GPGS sends when finishing the asynchronous operation after calling <code class="highlighter-rouge">gpg.login()</code></p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.MSG_SILENT_SIGN_IN</strong></td>
+            <td><p>The message type that GPGS sends when finishing the asynchronous operation after calling <code class="highlighter-rouge">gpg.silent_login()</code></p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.MSG_SIGN_OUT</strong></td>
+            <td><p>The message type that GPGS sends when finishing the asynchronous operation after calling <code class="highlighter-rouge">gpg.logout()</code></p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.MSG_SHOW_SNAPSHOTS</strong></td>
+            <td><p>The message type that GPGS sends when finishing the asynchronous operation after calling <code class="highlighter-rouge">gpg.snapshot_display_saves()</code></p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.MSG_LOAD_SNAPSHOT</strong></td>
+            <td><p>The message type that GPGS sends when finishing the asynchronous operation after calling <code class="highlighter-rouge">gpg.snapshot_open()</code></p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.STATUS_SUCCESS</strong></td>
+            <td><p>An operation success.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.STATUS_FAILED</strong></td>
+            <td><p>An operation failed. Check the error field in the massage table.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.STATUS_CREATE_NEW_SAVE</strong></td>
+            <td><p>A user wants to create new save in as a result of <code class="highlighter-rouge">gpg.snapshot_display_saves()</code> method. Turn off this button in <code class="highlighter-rouge">gpg.snapshot_display_saves()</code> if you don’t want to have this functionality.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.STATUS_CONFLICT</strong></td>
+            <td><p>The result of the calling <code class="highlighter-rouge">gpg.snapshot_open()</code> or ‘gpg.snapshot_resolve_conflict()’ is a conflict. You need to make decision on how to solve this conflict using ‘gpg.snapshot_resolve_conflict()’.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.SNAPSHOT_CURRENT</strong></td>
+            <td><p>The second parameter for ‘gpg.snapshot_resolve_conflict()’ method, that means that you want to choose the current snapshot as a snapshot for conflict solving.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.SNAPSHOT_CONFLICTING</strong></td>
+            <td><p>The second parameter for ‘gpg.snapshot_resolve_conflict()’ method, that means that you want to choose the conflicting snapshot as a snapshot for conflict solving.</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_NOT_FOUND">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CREATION_FAILED">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_COMMIT_FAILED">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_FOLDER_UNAVAILABLE">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+        
+        <tr>
+            <td><strong>gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING</strong></td>
+            <td><p>This constant contains in <code class="highlighter-rouge">message.error_status</code> table when <code class="highlighter-rouge">MSG_LOAD_SNAPSHOT</code> is <code class="highlighter-rouge">STATUS_FAILED</code>. <a href="https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT_MISSING">Official GPGS documentation</a> for this constant</p>
+</td>
+        </tr>
+
+        
+    
+
+    </tbody>
+</table>
+
+<hr />
+
+<h2 id="functions">Functions</h2>
+<table>
+    <tbody>
+
+    
+        
+        <tr>
+            <td><a href="#login"><strong>gpg.login()</strong></a></td>
+            <td>Login to GPGS using a button.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#silent_login"><strong>gpg.silent_login()</strong></a></td>
+            <td>Silent login to GPGS.
+This function is trying to retrieve the currently signe...</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#logout"><strong>gpg.logout()</strong></a></td>
+            <td>Logout from GPGS</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#get_display_name"><strong>gpg.get_display_name()</strong></a></td>
+            <td>Get the current GPGS player display name.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#get_id"><strong>gpg.get_id()</strong></a></td>
+            <td>Get the current GPGS player id.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#is_logged_in"><strong>gpg.is_logged_in()</strong></a></td>
+            <td>Check if a user is logged in currently.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#set_popup_position"><strong>gpg.set_popup_position()</strong></a></td>
+            <td>This method sets the position for the login popup.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#set_callback"><strong>gpg.set_callback()</strong></a></td>
+            <td>Set callback for receiving messages from GPGS.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_display_saves"><strong>gpg.snapshot_display_saves()</strong></a></td>
+            <td>Provides a default saved games selection user interface.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_open"><strong>gpg.snapshot_open()</strong></a></td>
+            <td>Provides a default saved games selection user interface.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_commit_and_close"><strong>gpg.snapshot_commit_and_close()</strong></a></td>
+            <td>Save the currently opened save on the server and close it.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_get_data"><strong>gpg.snapshot_get_data()</strong></a></td>
+            <td>Returns the currently opened snapshot data.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_set_data"><strong>gpg.snapshot_set_data()</strong></a></td>
+            <td>Returns the currently opened snapshot data.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_is_opened"><strong>gpg.snapshot_is_opened()</strong></a></td>
+            <td>Check if a snapshot was opened.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_get_max_image_size"><strong>gpg.snapshot_get_max_image_size()</strong></a></td>
+            <td>Returns the maximum data size per snapshot cover image in bytes.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_get_max_save_size"><strong>gpg.snapshot_get_max_save_size()</strong></a></td>
+            <td>Returns the maximum data size per snapshot in bytes.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_get_conflicting_data"><strong>gpg.snapshot_get_conflicting_data()</strong></a></td>
+            <td>Returns the conflicting snapshot data.</td>
+        </tr>
+        
+    
+        
+        <tr>
+            <td><a href="#snapshot_resolve_conflict"><strong>gpg.snapshot_resolve_conflict()</strong></a></td>
+            <td>Resolves a conflict using the data from the provided snapshot.</td>
+        </tr>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </tbody>
+</table>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#login" id="login"><code>gpg.login()</code></a></h3>
+
+
+<p>Login to GPGS using a button.</p>
+
+
+
+<h4>Examples</h4>
+
+<p>Log in to GPGS using a button:</p>
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">login</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#silent_login" id="silent_login"><code>gpg.silent_login()</code></a></h3>
+
+
+<p>Silent login to GPGS.
+This function is trying to retrieve the currently signed-in player’s account.
+<br /><br />⚠️ By default login methods request <code class="highlighter-rouge">GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN</code>. But if you use Disk, we have to request extra scope <code class="highlighter-rouge">Drive.SCOPE_APPFOLDER</code>. If so it causes the first time silent sign-in to fail, except for users who have already signed in successfully on a different device. Turn off GPGS features you don’t want to use in <code class="highlighter-rouge">game.project</code>.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nf">init</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+    <span class="n">gpg</span><span class="p">.</span><span class="n">silent_login</span><span class="p">()</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#logout" id="logout"><code>gpg.logout()</code></a></h3>
+
+
+<p>Logout from GPGS</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">logout</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#get_display_name" id="get_display_name"><code>gpg.get_display_name()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>name</td>
+                    <td><code class="inline-code-block">string</code></td>
+                    <td><p>The player’s display name.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Get the current GPGS player display name.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">name</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">get_display_name</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#get_id" id="get_id"><code>gpg.get_id()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>id</td>
+                    <td><code class="inline-code-block">string</code></td>
+                    <td><p>The player ID.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Get the current GPGS player id.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">id</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">get_id</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#is_logged_in" id="is_logged_in"><code>gpg.is_logged_in()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>is_loggedin</td>
+                    <td><code class="inline-code-block">boolean</code></td>
+                    <td><p>A current login state.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Check if a user is logged in currently.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">is_loggedin</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">is_logged_in</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#set_popup_position" id="set_popup_position"><code>gpg.set_popup_position(position)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>position</strong></td>
+            <td><code>number</code></td>
+            <td><p>An position can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_TOP_LEFT</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_TOP_CENTER</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_TOP_RIGHT</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_CENTER_LEFT</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_CENTER</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_CENTER_RIGHT</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_BOTTOM_LEFT</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_BOTTOM_CENTER</code></li>
+  <li><code class="highlighter-rouge">gpg.POPUP_POS_BOTTOM_RIGHT</code></li>
+</ul>
+
+<p>Default value is <code class="highlighter-rouge">gpg.POPUP_POS_TOP_CENTER</code></p>
+
+                
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>This method sets the position for the login popup.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">set_popup_position</span><span class="p">(</span><span class="n">gpg</span><span class="p">.</span><span class="n">POPUP_POS_BOTTOM_CENTER</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#set_callback" id="set_callback"><code>gpg.set_callback(callback)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>callback</strong></td>
+            <td><code>function</code></td>
+            <td><p>A callback taking the following parameters</p>
+
+                
+                <table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td><strong>self</strong></td>
+            <td><code>object</code></td>
+            <td><p>The calling script</p>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td><strong>message_id</strong></td>
+            <td><code>number</code></td>
+            <td><p>An message_id can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.MSG_SIGN_IN</code></li>
+  <li><code class="highlighter-rouge">gpg.MSG_SILENT_SIGN_IN</code></li>
+  <li><code class="highlighter-rouge">gpg.MSG_SIGN_OUT</code></li>
+  <li><code class="highlighter-rouge">gpg.MSG_SHOW_SNAPSHOTS</code></li>
+  <li><code class="highlighter-rouge">gpg.MSG_LOAD_SNAPSHOT</code></li>
+</ul>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td><strong>message</strong></td>
+            <td><code>table</code></td>
+            <td><p>Contains information that depends on message_id and <code class="highlighter-rouge">status</code> field that can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.STATUS_SUCCESS</code></li>
+  <li><code class="highlighter-rouge">gpg.STATUS_FAILED</code></li>
+  <li><code class="highlighter-rouge">gpg.STATUS_CREATE_NEW_SAVE</code></li>
+  <li><code class="highlighter-rouge">gpg.STATUS_CONFLICT</code></li>
+</ul>
+
+
+                
+                <ul>
+
+</ul>
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+                
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>Set callback for receiving messages from GPGS.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nf">callback</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">message_id</span> <span class="o">==</span> <span class="n">gpg</span><span class="p">.</span><span class="n">MSG_SIGN_IN</span> <span class="ow">or</span> <span class="n">message_id</span> <span class="o">==</span> <span class="n">gpg</span><span class="p">.</span><span class="n">MSG_SILENT_SIGN_IN</span> <span class="k">then</span>
+    <span class="k">if</span> <span class="n">message</span><span class="p">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">gpg</span><span class="p">.</span><span class="n">STATUS_SUCCESS</span> <span class="k">then</span>
+    <span class="c1">-- do something after login</span>
+    <span class="k">end</span>
+  <span class="k">elseif</span> <span class="n">message_id</span> <span class="o">==</span> <span class="n">gpg</span><span class="p">.</span><span class="n">MSG_SIGN_OUT</span> <span class="k">then</span>
+  <span class="c1">-- do something after logout</span>
+  <span class="k">elseif</span> <span class="n">message_id</span> <span class="o">==</span> <span class="n">gpg</span><span class="p">.</span><span class="n">MSG_LOAD_SNAPSHOT</span> <span class="k">then</span>
+  <span class="c1">-- do something when a save was loaded</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">init</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">set_callback</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">function</span> <span class="nf">init</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">set_callback</span><span class="p">(</span><span class="kc">nil</span><span class="p">)</span> <span class="c1">-- remove callback</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_display_saves" id="snapshot_display_saves"><code>gpg.snapshot_display_saves(popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>popupTitle</strong></td>
+            <td><code>string</code></td>
+            <td><p>The title to display in the action bar. By default “Game Saves”.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>allowAddButton</strong></td>
+            <td><code>boolean</code></td>
+            <td><p>Whether or not to display a “create new snapshot” option in the selection UI. By default <code class="highlighter-rouge">true</code>.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>allowDelete</strong></td>
+            <td><code>boolean</code></td>
+            <td><p>Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default <code class="highlighter-rouge">true</code>.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>maxNumberOfSavedGamesToShow</strong></td>
+            <td><code>number</code></td>
+            <td><p>The maximum number of snapshots to display in the UI. By default 5.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>Provides a default saved games selection user interface.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_display_saves</span><span class="p">(</span><span class="s2">"Choose the save of the game"</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_open" id="snapshot_open"><code>gpg.snapshot_open(saveName, createIfNotFound, conflictPolicy)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>saveName</strong></td>
+            <td><code>string</code></td>
+            <td><p>The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols “-“, “.”, “_”, or “~”).</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>createIfNotFound</strong></td>
+            <td><code>boolean</code></td>
+            <td><p>If <code class="highlighter-rouge">true</code>, the snapshot will be created if one cannot be found.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>conflictPolicy</strong></td>
+            <td><code>number</code></td>
+            <td><p>The conflict resolution policy to use for this snapshot that can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.RESOLUTION_POLICY_MANUAL</code></li>
+  <li><code class="highlighter-rouge">gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME</code></li>
+  <li><code class="highlighter-rouge">gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD</code></li>
+  <li><code class="highlighter-rouge">gpg.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED</code></li>
+  <li><code class="highlighter-rouge">gpg.RESOLUTION_POLICY_HIGHEST_PROGRESS</code></li>
+</ul>
+
+<p>Default value is <code class="highlighter-rouge">gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD</code></p>
+
+                
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>Provides a default saved games selection user interface.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_open</span><span class="p">(</span><span class="s2">"my_save_1"</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="n">gpg</span><span class="p">.</span><span class="n">RESOLUTION_POLICY_LONGEST_PLAYTIME</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_commit_and_close" id="snapshot_commit_and_close"><code>gpg.snapshot_commit_and_close(metadata)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>metadata</strong></td>
+            <td><code>table</code></td>
+            <td><p>A table with metadata for a save. It contains fields below</p>
+
+                
+                
+                <ul>
+
+</ul>
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>Save the currently opened save on the server and close it.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">png_img</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">screenshot</span><span class="p">.</span><span class="n">png</span><span class="p">()</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_commit_and_close</span><span class="p">({</span>
+      <span class="n">coverImage</span> <span class="o">=</span> <span class="n">png_img</span><span class="p">,</span>
+      <span class="n">description</span> <span class="o">=</span> <span class="s2">"LEVEL 31, CAVE"</span><span class="p">,</span>
+      <span class="n">playedTime</span> <span class="o">=</span> <span class="mi">12345667</span><span class="p">,</span>
+      <span class="n">progressValue</span> <span class="o">=</span> <span class="mi">657</span>
+  <span class="p">})</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_get_data" id="snapshot_get_data"><code>gpg.snapshot_get_data()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>bytes</td>
+                    <td><code class="inline-code-block">string</code></td>
+                    <td><p>The byte array data of the currently opened snapshot. <code class="highlighter-rouge">nil</code> if something goes wrong.</p>
+</td>
+                </tr>
+            
+                <tr>
+                    <td>error_message</td>
+                    <td><code class="inline-code-block">boolean</code></td>
+                    <td><p>An error message if something goes wrong.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Returns the currently opened snapshot data.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">bytes</span><span class="p">,</span> <span class="n">error_message</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_get_data</span><span class="p">()</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">bytes</span> <span class="k">then</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">"snapshot_get_data ERROR:"</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+  <span class="k">else</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">"snapshot_get_data"</span><span class="p">,</span><span class="n">bytes</span><span class="p">)</span>
+      <span class="c1">-- Do something with your data</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_set_data" id="snapshot_set_data"><code>gpg.snapshot_set_data()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>bytes</td>
+                    <td><code class="inline-code-block">string</code></td>
+                    <td><p>The byte array data of the currently opened snapshot. <code class="highlighter-rouge">nil</code> if something goes wrong.</p>
+</td>
+                </tr>
+            
+                <tr>
+                    <td>error_message</td>
+                    <td><code class="inline-code-block">boolean</code></td>
+                    <td><p>An error message if something goes wrong.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Returns the currently opened snapshot data.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+    <span class="kd">local</span> <span class="n">success</span><span class="p">,</span> <span class="n">error_message</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_set_data</span><span class="p">(</span><span class="n">my_data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span> <span class="k">then</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"snapshot_set_data ERROR:"</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+    <span class="k">end</span>
+  <span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_is_opened" id="snapshot_is_opened"><code>gpg.snapshot_is_opened()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>is_opened</td>
+                    <td><code class="inline-code-block">boolean</code></td>
+                    <td><p>A current snapshot state.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Check if a snapshot was opened.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">is_opened</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_is_opened</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_get_max_image_size" id="snapshot_get_max_image_size"><code>gpg.snapshot_get_max_image_size()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>image_size</td>
+                    <td><code class="inline-code-block">number</code></td>
+                    <td><p>The maximum data size per snapshot cover image in bytes.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Returns the maximum data size per snapshot cover image in bytes.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">image_size</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_get_max_image_size</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_get_max_save_size" id="snapshot_get_max_save_size"><code>gpg.snapshot_get_max_save_size()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>data_size</td>
+                    <td><code class="inline-code-block">number</code></td>
+                    <td><p>The maximum data size per snapshot in bytes.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Returns the maximum data size per snapshot in bytes.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">data_size</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_get_max_save_size</span><span class="p">()</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_get_conflicting_data" id="snapshot_get_conflicting_data"><code>gpg.snapshot_get_conflicting_data()</code></a></h3>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Return value</th>
+                <th>Type</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <h4>Returns</h4>
+            
+                <tr>
+                    <td>bytes</td>
+                    <td><code class="inline-code-block">string</code></td>
+                    <td><p>The byte array data of the conflicting snapshot. <code class="highlighter-rouge">nil</code> if something goes wrong.</p>
+</td>
+                </tr>
+            
+                <tr>
+                    <td>error_message</td>
+                    <td><code class="inline-code-block">boolean</code></td>
+                    <td><p>An error message if something goes wrong.</p>
+</td>
+                </tr>
+            
+        </tbody>
+    </table>
+
+<p>Returns the conflicting snapshot data.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="kd">local</span> <span class="n">bytes</span><span class="p">,</span> <span class="n">error_message</span> <span class="o">=</span> <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_get_conflicting_data</span><span class="p">()</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">bytes</span> <span class="k">then</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">"snapshot_get_conflicting_data ERROR:"</span><span class="p">,</span> <span class="n">error_message</span><span class="p">)</span>
+  <span class="k">else</span>
+      <span class="nb">print</span><span class="p">(</span><span class="s2">"snapshot_get_conflicting_data:"</span><span class="p">,</span><span class="n">bytes</span><span class="p">)</span>
+      <span class="c1">-- Do something with conflicting data data</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+<div class="function-wrap">
+<h3 class="function-header"><a href="#snapshot_resolve_conflict" id="snapshot_resolve_conflict"><code>gpg.snapshot_resolve_conflict(conflictId, snapshotId)</code></a></h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            <td style="text-align: right;"><strong>conflictId</strong></td>
+            <td><code>string</code></td>
+            <td><p>The conflict id that you want to resolve. Provided in <code class="highlighter-rouge">message</code> table with <code class="highlighter-rouge">STATUS_CONFLICT</code> message type.</p>
+
+                
+                
+            </td>
+        </tr>
+        
+        <tr>
+            <td style="text-align: right;"><strong>snapshotId</strong></td>
+            <td><code>number</code></td>
+            <td><p>Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below</p>
+<ul>
+  <li><code class="highlighter-rouge">gpg.SNAPSHOT_CURRENT</code></li>
+  <li><code class="highlighter-rouge">gpg.SNAPSHOT_CONFLICTING</code></li>
+</ul>
+
+                
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+<p>Resolves a conflict using the data from the provided snapshot.</p>
+
+
+
+<h4>Examples</h4>
+
+<div class="language-lua highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">gpg</span> <span class="k">then</span>
+  <span class="n">gpg</span><span class="p">.</span><span class="n">snapshot_resolve_conflict</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">conflictId</span><span class="p">,</span> <span class="n">gpg</span><span class="p">.</span><span class="n">SNAPSHOT_CONFLICTING</span><span class="p">)</span>
+<span class="k">end</span>
+</code></pre></div></div>
+
+
+
+</div>
+
+
+
+      </section>
+    </div>
+  </body>
+</html>

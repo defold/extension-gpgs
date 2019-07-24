@@ -67,6 +67,7 @@ public class GpgsJNI {
 
     //--------------------------------------------------
     public static native void gpgsAddToQueue(int msg, String json);
+
     //--------------------------------------------------
     private Activity activity;
     private boolean is_disk_active;
@@ -76,7 +77,7 @@ public class GpgsJNI {
 
     private GoogleSignInAccount mSignedInAccount = null;
     private GoogleSignInOptions mSignInOptions;
-    private GoogleSignInClient  mGoogleSignInClient;
+    private GoogleSignInClient mGoogleSignInClient;
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
 
@@ -86,7 +87,7 @@ public class GpgsJNI {
             JSONObject obj = new JSONObject();
             obj.put(key_1, value_1);
             message = obj.toString();
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
         }
         gpgsAddToQueue(msg, message);
@@ -99,7 +100,7 @@ public class GpgsJNI {
             obj.put(key_1, value_1);
             obj.put(key_2, value_2);
             message = obj.toString();
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
         }
         gpgsAddToQueue(msg, message);
@@ -113,7 +114,7 @@ public class GpgsJNI {
             obj.put(key_2, value_2);
             obj.put(key_3, value_3);
             message = obj.toString();
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
         }
         gpgsAddToQueue(msg, message);
@@ -172,7 +173,7 @@ public class GpgsJNI {
                 mSignInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
             }
         }
-        return  mSignInOptions;
+        return mSignInOptions;
     }
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
@@ -184,13 +185,13 @@ public class GpgsJNI {
                     onConnected(task.getResult(), MSG_SIGN_IN);
                 } else {
                     sendSimpleMessage(MSG_SIGN_IN, "status", STATUS_FAILED,
-                        "error", "Sign-in failed");
+                            "error", "Sign-in failed");
                 }
             } else {
                 sendSimpleMessage(MSG_SIGN_IN, "status", STATUS_FAILED,
-                    "error", "Sign-in failed. Intent do not exist.");
+                        "error", "Sign-in failed. Intent do not exist.");
             }
-        } else if(requestCode == RC_LIST_SAVED_GAMES) {
+        } else if (requestCode == RC_LIST_SAVED_GAMES) {
             if (intent != null) {
                 if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
                     SnapshotMetadata snapshotMetadata =
@@ -214,19 +215,19 @@ public class GpgsJNI {
                     onConnected(account, MSG_SILENT_SIGN_IN);
                 } else {
                     mGoogleSignInClient.silentSignIn().addOnCompleteListener(activity,
-                        new OnCompleteListener<GoogleSignInAccount>() {
-                            @Override
-                            public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
-                                if (task.isSuccessful()) {
-                                    onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
-                                } else {
-                                    sendSimpleMessage(MSG_SILENT_SIGN_IN,
-                                            "status", STATUS_FAILED,
-                                            "error",
-                                            "Silent sign-in failed");
+                            new OnCompleteListener<GoogleSignInAccount>() {
+                                @Override
+                                public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                                    if (task.isSuccessful()) {
+                                        onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
+                                    } else {
+                                        sendSimpleMessage(MSG_SILENT_SIGN_IN,
+                                                "status", STATUS_FAILED,
+                                                "error",
+                                                "Silent sign-in failed");
+                                    }
                                 }
-                            }
-                        });
+                            });
                 }
             }
         });
@@ -239,14 +240,14 @@ public class GpgsJNI {
 
     public void logout() {
         mGoogleSignInClient.signOut().addOnCompleteListener(this.activity,
-            new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    mSignedInAccount = null;
-                    mPlayer = null;
-                    sendSimpleMessage(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
-                }
-            });
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        mSignedInAccount = null;
+                        mPlayer = null;
+                        sendSimpleMessage(MSG_SIGN_OUT, "status", STATUS_SUCCESS);
+                    }
+                });
     }
 
     public String getDisplayName() {
@@ -288,7 +289,7 @@ public class GpgsJNI {
     // values from the official docs: https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxCoverImageSize()
     private int maxCoverImageSize = 819200;
     // https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#getMaxDataSize()
-    private int maxDataSize  = 3145728;
+    private int maxDataSize = 3145728;
 
     private void onAccountChangedDisk(GoogleSignInAccount googleSignInAccount) {
         if (this.is_disk_active) {
@@ -301,8 +302,8 @@ public class GpgsJNI {
                                 if (task.isSuccessful()) {
                                     maxCoverImageSize = task.getResult();
                                 }
-                    }
-                });
+                            }
+                        });
 
                 mPlayerSnapshotsClient.getMaxDataSize()
                         .addOnCompleteListener(new OnCompleteListener<Integer>() {
@@ -335,7 +336,7 @@ public class GpgsJNI {
         obj.put("snapshotId", metadata.getSnapshotId());
         obj.put("uniqueName", metadata.getUniqueName());
     }
-    
+
     private void sendSnapshotMetadataMessage(int msg, SnapshotMetadata metadata) {
         String message = null;
         try {
@@ -343,7 +344,7 @@ public class GpgsJNI {
             obj.put("status", STATUS_SUCCESS);
             addSnapshotMetadtaToJson(obj, "metadata", metadata);
             message = obj.toString();
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             message = "{ 'error':'Error while converting a metadata message to JSON: " + e.getMessage() +
                     "', 'status': '" + STATUS_FAILED + " }";
         }
@@ -359,7 +360,7 @@ public class GpgsJNI {
             addSnapshotMetadtaToJson(obj, "metadata", metadata);
             addSnapshotMetadtaToJson(obj, "conflictMetadata", conflictMetadata);
             message = obj.toString();
-        } catch(JSONException e) {
+        } catch (JSONException e) {
             message = "{ 'error':'Error while converting a metadata or a conflict metadata message to JSON: " + e.getMessage() +
                     "', 'status': '" + STATUS_FAILED + " }";
         }
@@ -432,21 +433,21 @@ public class GpgsJNI {
                 popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
 
         intentTask
-            .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                @Override
-                public void onSuccess(Intent intent) {
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
                         activity.startActivityForResult(intent, RC_LIST_SAVED_GAMES);
                     }
-                 })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    sendSimpleMessage(MSG_SHOW_SNAPSHOTS,
-                            "status", STATUS_FAILED,
-                            "error",
-                            "Can't start activity for showing saved games.");
-                }
-        });
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        sendSimpleMessage(MSG_SHOW_SNAPSHOTS,
+                                "status", STATUS_FAILED,
+                                "error",
+                                "Can't start activity for showing saved games.");
+                    }
+                });
     }
 
     public void loadSnapshot(String saveName, boolean createIfNotFound, int conflictPolicy) {
@@ -461,7 +462,7 @@ public class GpgsJNI {
         }
 
         mPlayerSnapshotsClient.open(saveName, createIfNotFound, conflictPolicy)
-            .addOnCompleteListener(getOnLoadCompleteListener());
+                .addOnCompleteListener(getOnLoadCompleteListener());
     }
 
     public void commitAndCloseSnapshot(long playedTime, long progressValue, String description, byte[] coverImage) {
@@ -490,35 +491,38 @@ public class GpgsJNI {
 
         mPlayerSnapshotsClient.commitAndClose(mPlayerSnapshot, builder.build())
                 .addOnCompleteListener(new OnCompleteListener<SnapshotMetadata>() {
-            @Override
-            public void onComplete(@NonNull Task<SnapshotMetadata> task) {
-                if (task.isSuccessful()) {
-                    mPlayerSnapshot = null;
-                    currentplayerSave = null;
-                    sendSimpleMessage(MSG_SAVE_SNAPSHOT,
-                            "status", STATUS_SUCCESS);
-                } else {
-                    Exception e = task.getException();
-                    sendSimpleMessage(MSG_SAVE_SNAPSHOT,
-                            "status", STATUS_FAILED,
-                            "error",
-                            "Failed to save a snapshot. "+ e.toString());
-                }
-            }
-        });
+                    @Override
+                    public void onComplete(@NonNull Task<SnapshotMetadata> task) {
+                        if (task.isSuccessful()) {
+                            mPlayerSnapshot = null;
+                            currentplayerSave = null;
+                            sendSimpleMessage(MSG_SAVE_SNAPSHOT,
+                                    "status", STATUS_SUCCESS);
+                        } else {
+                            Exception e = task.getException();
+                            sendSimpleMessage(MSG_SAVE_SNAPSHOT,
+                                    "status", STATUS_FAILED,
+                                    "error",
+                                    "Failed to save a snapshot. " + e.toString());
+                        }
+                    }
+                });
     }
 
-    public String resolveConflict(String conflictId, int metadataId) {
+    public void resolveConflict(String conflictId, int metadataId) {
         Snapshot snapshot = mPlayerSnapshot;
         if (metadataId == SNAPSHOT_CONFLICTING) {
             snapshot = mConflictingSnapshot;
         }
-        if (mPlayerSnapshot != null) {
-            mPlayerSnapshotsClient.resolveConflict(conflictId, snapshot)
-               .addOnCompleteListener(getOnLoadCompleteListener());
-            return null;
+        if (mPlayerSnapshot == null) {
+            sendSimpleMessage(SNAPSHOT_CONFLICTING,
+                    "status", STATUS_FAILED,
+                    "error",
+                    "Failed to resolve conflict. You aren't logged in.");
+            return;
         }
-        return "Failed to resolve conflict. You aren't logged in.";
+        mPlayerSnapshotsClient.resolveConflict(conflictId, snapshot)
+                .addOnCompleteListener(getOnLoadCompleteListener());
     }
 
     public byte[] getSave() {

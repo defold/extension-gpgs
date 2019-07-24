@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="rouge.css">
+    <link rel="stylesheet" href="fonts.css">
+    <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <title>{{ site.title }}</title>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Defold Google Play Game Services API documentation</h1>
+        <p>Functions for interacting with Google Play Game Services. Supported Android.</p>
+
+        <p>To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
+          <pre>https://github.com/defold/extension-gpgs/archive/master.zip</pre>
+        </p>
+
+        <p>We recommend using a link to a <code class="inline-code-block">zip</code> file of a <a href="https://github.com/defold/extension-gpgs/releases">specific release</a>.</p>
+
+        <p>The source code can be viewed at: <a href="https://github.com/defold/extension-gpgs"> https://github.com/defold/extension-gpgs </a></p>
+
+        <h2>game.project</h2>
+
+        <p>Add the following section into your game.project file:
+        <p>
+        <code class="inline-code-block">
+        [gpgs]
+        <br>app_id = 1234567890
+        <br>use_disk = 1
+        </code>
+        <p>Where app_id app id from Google Play Console for your Play Services and use_disk option for using of the Game Saves (0 is turned-off disk, 1 is turned-on disk).
+      </header>
+      <hr>
+      <section>
+
+      {{ content }}
+
+      </section>
+    </div>
+  </body>
+</html>
