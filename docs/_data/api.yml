@@ -11,7 +11,7 @@
     desc: Login to GPGS using a button.
 
     examples:
-    - desc: |-
+      - desc: |-
             Log in to GPGS using a button:
             ```lua
             if gpg then
@@ -34,7 +34,7 @@
           features you don't want to use in `game.project`.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             function init(self)
               if gpg then
@@ -50,7 +50,7 @@
     desc: Logout from GPGS
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               gpg.logout()
@@ -64,12 +64,12 @@
     desc: Get the current GPGS player display name.
 
     returns:
-    - name: name
-      type: string
-      desc: The player's display name.
+      - name: name
+        type: string
+        desc: The player's display name.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local name = gpg.get_display_name()
@@ -83,12 +83,12 @@
     desc: Get the current GPGS player id.
 
     returns:
-    - name: id
-      type: string
-      desc: The player ID.
+      - name: id
+        type: string
+        desc: The player ID.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local id = gpg.get_id()
@@ -102,12 +102,12 @@
     desc: Check if a user is logged in currently.
 
     returns:
-    - name: is_loggedin
-      type: boolean
-      desc: A current login state.
+      - name: is_loggedin
+        type: boolean
+        desc: A current login state.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local is_loggedin = gpg.is_logged_in()
@@ -121,9 +121,9 @@
     desc: This method sets the position for the login popup.
 
     parameters:
-    - name: position
-      type: number
-      desc: An position can be one of the predefined constants below
+      - name: position
+        type: number
+        desc: An position can be one of the predefined constants below
 
             - `gpg.POPUP_POS_TOP_LEFT`
 
@@ -147,7 +147,7 @@
             Default value is `gpg.POPUP_POS_TOP_CENTER`
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               gpg.set_popup_position(gpg.POPUP_POS_BOTTOM_CENTER)
@@ -161,85 +161,85 @@
     desc: Set callback for receiving messages from GPGS.
 
     parameters:
-    - name: callback
-      type: function
-      desc: A callback taking the following parameters
-      parameters: 
-        - name: self
-          type: object
-          desc: The calling script
+      - name: callback
+        type: function
+        desc: A callback taking the following parameters
+        parameters: 
+          - name: self
+            type: object
+            desc: The calling script
 
-        - name: message_id
-          type: number
-          desc: An message_id can be one of the predefined constants below
-
-            - `gpg.MSG_SIGN_IN`
-
-            - `gpg.MSG_SILENT_SIGN_IN`
-
-            - `gpg.MSG_SIGN_OUT`
-
-            - `gpg.MSG_SHOW_SNAPSHOTS`
-
-            - `gpg.MSG_LOAD_SNAPSHOT`
-
-
-        - name: message
-          type: table
-          desc: Contains information that depends on message_id.
-          members:
-          - name: status
+          - name: message_id
             type: number
-            desc: A status of current operation. It can be one of the predefined constants below
+            desc: An message_id can be one of the predefined constants below
 
-                  - `gpg.STATUS_SUCCESS`
+              - `gpg.MSG_SIGN_IN`
 
-                  - `gpg.STATUS_FAILED`
+              - `gpg.MSG_SILENT_SIGN_IN`
 
-                  - `gpg.STATUS_CREATE_NEW_SAVE`
+              - `gpg.MSG_SIGN_OUT`
 
-                  - `gpg.STATUS_CONFLICT`
+              - `gpg.MSG_SHOW_SNAPSHOTS`
 
-          - name: error
-            type: string
-            optional: true
-            desc: The error message. Avaliable only if `status` is `gpg.STATUS_FAILED`.
+              - `gpg.MSG_LOAD_SNAPSHOT`
 
-          - name: error_status
-            type: number
-            optional: true
-            desc: The error code. Avaliable only if `status` is `gpg.STATUS_FAILED` and GPGS provide this code.
-                  It can be one of the predefined constants below
-                  
-                  - `gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED`
 
-                  - `gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING`
-
-                  - `gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE`
-
-                  - `gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED`
-
-                  - `gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE`
-
-                  - `gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
-
-          - name: metadata
+          - name: message
             type: table
-            optional: true
-            desc: Metadata of the loaded save. Avaliable only if `message_id` is `gpg.MSG_LOAD_SNAPSHOT`.
+            desc: Contains information that depends on message_id.
+            members:
+            - name: status
+              type: number
+              desc: A status of current operation. It can be one of the predefined constants below
 
-          - name: conflictId
-            type: string
-            optional: true
-            desc: The conflict id. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+                    - `gpg.STATUS_SUCCESS`
 
-          - name: conflictMetadata
-            type: table
-            optional: true
-            desc: The conflicting metadata. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+                    - `gpg.STATUS_FAILED`
+
+                    - `gpg.STATUS_CREATE_NEW_SAVE`
+
+                    - `gpg.STATUS_CONFLICT`
+
+            - name: error
+              type: string
+              optional: true
+              desc: The error message. Avaliable only if `status` is `gpg.STATUS_FAILED`.
+
+            - name: error_status
+              type: number
+              optional: true
+              desc: The error code. Avaliable only if `status` is `gpg.STATUS_FAILED` and GPGS provide this code.
+                    It can be one of the predefined constants below
+                    
+                    - `gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED`
+
+                    - `gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING`
+
+                    - `gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE`
+
+                    - `gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED`
+
+                    - `gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE`
+
+                    - `gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
+
+            - name: metadata
+              type: table
+              optional: true
+              desc: Metadata of the loaded save. Avaliable only if `message_id` is `gpg.MSG_LOAD_SNAPSHOT`.
+
+            - name: conflictId
+              type: string
+              optional: true
+              desc: The conflict id. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+
+            - name: conflictMetadata
+              type: table
+              optional: true
+              desc: The conflicting metadata. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             function callback(self, message_id, message)
               if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
@@ -269,28 +269,28 @@
     desc: Provides a default saved games selection user interface.
 
     parameters:
-    - name: popupTitle
-      type: string
-      optional: true
-      desc: The title to display in the action bar. By default "Game Saves".
+      - name: popupTitle
+        type: string
+        optional: true
+        desc: The title to display in the action bar. By default "Game Saves".
 
-    - name: allowAddButton
-      type: boolean
-      optional: true
-      desc: Whether or not to display a "create new snapshot" option in the selection UI. By default `true`.
+      - name: allowAddButton
+        type: boolean
+        optional: true
+        desc: Whether or not to display a "create new snapshot" option in the selection UI. By default `true`.
 
-    - name: allowDelete
-      type: boolean
-      optional: true
-      desc: Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default `true`.
+      - name: allowDelete
+        type: boolean
+        optional: true
+        desc: Whether or not to provide a delete overflow menu option for each snapshot in the selection UI. By default `true`.
 
-    - name: maxNumberOfSavedGamesToShow
-      type: number
-      optional: true
-      desc: The maximum number of snapshots to display in the UI. By default 5.
+      - name: maxNumberOfSavedGamesToShow
+        type: number
+        optional: true
+        desc: The maximum number of snapshots to display in the UI. By default 5.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               gpg.snapshot_display_saves("Choose the save of the game", false, true, 10)
@@ -304,19 +304,19 @@
     desc: Provides a default saved games selection user interface.
 
     parameters:
-    - name: saveName
-      type: string
-      desc: The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
+      - name: saveName
+        type: string
+        desc: The name of the snapshot file to open. Must be between 1 and 100 non-URL-reserved characters (a-z, A-Z, 0-9, or the symbols "-", ".", "_", or "~").
 
-    - name: createIfNotFound
-      type: boolean
-      optional: true
-      desc: If `true`, the snapshot will be created if one cannot be found.
+      - name: createIfNotFound
+        type: boolean
+        optional: true
+        desc: If `true`, the snapshot will be created if one cannot be found.
 
-    - name: conflictPolicy
-      type: number
-      optional: true
-      desc: The conflict resolution policy to use for this snapshot that can be one of the predefined constants below
+      - name: conflictPolicy
+        type: number
+        optional: true
+        desc: The conflict resolution policy to use for this snapshot that can be one of the predefined constants below
 
             - `gpg.RESOLUTION_POLICY_MANUAL`
 
@@ -332,7 +332,7 @@
             Default value is `gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               gpg.snapshot_open("my_save_1", true, gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME)
@@ -346,30 +346,30 @@
     desc: Save the currently opened save on the server and close it.
 
     parameters:
-    - name: metadata
-      type: table
-      optional: true
-      desc: A table with metadata for a save. It contains fields below
-      members: 
-        - name: playedTime
-          type: number
-          optional: true
-          desc: The new played time to set for the snapshot in ms.
+      - name: metadata
+        type: table
+        optional: true
+        desc: A table with metadata for a save. It contains fields below
+        members: 
+          - name: playedTime
+            type: number
+            optional: true
+            desc: The new played time to set for the snapshot in ms.
 
-        - name: progressValue
-          type: number
-          optional: true
-          desc: The new progress value to set for the snapshot.
+          - name: progressValue
+            type: number
+            optional: true
+            desc: The new progress value to set for the snapshot.
 
-        - name: description
-          type: string
-          optional: true
-          desc: The new description to set for the snapshot.
+          - name: description
+            type: string
+            optional: true
+            desc: The new description to set for the snapshot.
 
-        - name: coverImage
-          type: object
-          optional: true
-          desc: The new cover image to set for the snapshot in `png`.
+          - name: coverImage
+            type: object
+            optional: true
+            desc: The new cover image to set for the snapshot in `png`.
 
 
     examples:
@@ -402,7 +402,7 @@
         desc: An error message if something goes wrong.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local bytes, error_message = gpg.snapshot_get_data()
@@ -431,7 +431,7 @@
         desc: An error message if something goes wrong.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
               if gpg then
                 local success, error_message = gpg.snapshot_set_data(my_data)
@@ -448,12 +448,12 @@
     desc: Check if a snapshot was opened.
 
     returns:
-    - name: is_opened
-      type: boolean
-      desc: A current snapshot state.
+      - name: is_opened
+        type: boolean
+        desc: A current snapshot state.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local is_opened = gpg.snapshot_is_opened()
@@ -467,12 +467,12 @@
     desc: Returns the maximum data size per snapshot cover image in bytes.
 
     returns:
-    - name: image_size
-      type: number
-      desc: The maximum data size per snapshot cover image in bytes.
+      - name: image_size
+        type: number
+        desc: The maximum data size per snapshot cover image in bytes.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local image_size = gpg.snapshot_get_max_image_size()
@@ -486,12 +486,12 @@
     desc: Returns the maximum data size per snapshot in bytes.
 
     returns:
-    - name: data_size
-      type: number
-      desc: The maximum data size per snapshot in bytes.
+      - name: data_size
+        type: number
+        desc: The maximum data size per snapshot in bytes.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local data_size = gpg.snapshot_get_max_save_size()
@@ -514,7 +514,7 @@
         desc: An error message if something goes wrong.
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               local bytes, error_message = gpg.snapshot_get_conflicting_data()
@@ -534,20 +534,20 @@
     desc: Resolves a conflict using the data from the provided snapshot.
 
     parameters:
-    - name: conflictId
-      type: string
-      desc: The conflict id that you want to resolve. Provided in `message` table with `STATUS_CONFLICT` message type.
+      - name: conflictId
+        type: string
+        desc: The conflict id that you want to resolve. Provided in `message` table with `STATUS_CONFLICT` message type.
 
-    - name: snapshotId
-      type: number
-      desc: Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below
+      - name: snapshotId
+        type: number
+        desc: Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below
 
-            - `gpg.SNAPSHOT_CURRENT`
+              - `gpg.SNAPSHOT_CURRENT`
 
-            - `gpg.SNAPSHOT_CONFLICTING`
+              - `gpg.SNAPSHOT_CONFLICTING`
 
     examples:
-    - desc: |-
+      - desc: |-
             ```lua
             if gpg then
               gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
