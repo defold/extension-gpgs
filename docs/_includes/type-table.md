@@ -2,7 +2,7 @@
 {% for field in include.fields %}
 <li>
 	<strong>{{ field.name }}</strong>
-	{% if param.optional %}
+	{% if field.optional %}
     	(optional)
 	{% endif %}
 	<code>{{ field.type }}</code> - {{ field.desc | markdownify }}
