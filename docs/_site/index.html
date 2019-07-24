@@ -902,9 +902,47 @@ This function is trying to retrieve the currently signed-in player’s account.
 </li>
 
 <li>
-	<strong>status</strong>
+	<strong>error</strong>
 	
-	<code>number</code> - <p>The field that can be one of the predefined constants below</p>
+    	(optional)
+	
+	<code>string</code> - <p>The error message. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_FAILED</code>.</p>
+
+</li>
+
+<li>
+	<strong>error_status</strong>
+	
+    	(optional)
+	
+	<code>number</code> - <p>The error code. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_FAILED</code> and GPGS provide this code.</p>
+
+</li>
+
+<li>
+	<strong>metadata</strong>
+	
+    	(optional)
+	
+	<code>table</code> - <p>Metadata of the loaded save. Avaliable only if <code class="highlighter-rouge">message_id</code> is <code class="highlighter-rouge">gpg.MSG_LOAD_SNAPSHOT</code>.</p>
+
+</li>
+
+<li>
+	<strong>conflictId</strong>
+	
+    	(optional)
+	
+	<code>string</code> - <p>The conflict id. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_CONFLICT</code>.</p>
+
+</li>
+
+<li>
+	<strong>conflictMetadata</strong>
+	
+    	(optional)
+	
+	<code>table</code> - <p>The conflicting metadata. Avaliable only if <code class="highlighter-rouge">status</code> is <code class="highlighter-rouge">gpg.STATUS_CONFLICT</code>.</p>
 
 </li>
 

@@ -200,10 +200,30 @@
 
                   - `gpg.STATUS_CONFLICT`
 
-          - name: status
-            type: number
-            desc: The field that can be one of the predefined constants below 
+          - name: error
+            type: string
+            optional: true
+            desc: The error message. Avaliable only if `status` is `gpg.STATUS_FAILED`.
 
+          - name: error_status
+            type: number
+            optional: true
+            desc: The error code. Avaliable only if `status` is `gpg.STATUS_FAILED` and GPGS provide this code.
+
+          - name: metadata
+            type: table
+            optional: true
+            desc: Metadata of the loaded save. Avaliable only if `message_id` is `gpg.MSG_LOAD_SNAPSHOT`.
+
+          - name: conflictId
+            type: string
+            optional: true
+            desc: The conflict id. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+
+          - name: conflictMetadata
+            type: table
+            optional: true
+            desc: The conflicting metadata. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
 
     examples:
     - desc: |-
