@@ -1,4 +1,4 @@
-- name: gpg
+- name: gpgs
   type: table
   desc: Functions and constants for interacting with Google Play Game Services (GPGS) APIs
 
@@ -14,8 +14,8 @@
       - desc: |-
             Log in to GPGS using a button:
             ```lua
-            if gpg then
-              gpg.login()
+            if gpgs then
+              gpgs.login()
             end
             ```
 
@@ -23,22 +23,22 @@
 
   - name: silent_login
     type: function
-    desc: Silent login to GPGS. 
+    desc: Silent login to GPGS.
 
           This function is trying to retrieve the currently signed-in player’s account.
 
-          [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`. 
+          [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`.
           But if you use Disk, we have to request extra scope `Drive.SCOPE_APPFOLDER`.
-          If so it causes the first time silent sign-in to fail, except for users who 
-          have already signed in successfully on a different device. Turn off GPGS 
+          If so it causes the first time silent sign-in to fail, except for users who
+          have already signed in successfully on a different device. Turn off GPGS
           features you don't want to use in `game.project`.
 
     examples:
       - desc: |-
             ```lua
             function init(self)
-              if gpg then
-                gpg.silent_login()
+              if gpgs then
+                gpgs.silent_login()
               end
             end
             ```
@@ -52,8 +52,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              gpg.logout()
+            if gpgs then
+              gpgs.logout()
             end
             ```
 
@@ -71,8 +71,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local name = gpg.get_display_name()
+            if gpgs then
+              local name = gpgs.get_display_name()
             end
             ```
 
@@ -90,8 +90,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local id = gpg.get_id()
+            if gpgs then
+              local id = gpgs.get_id()
             end
             ```
 
@@ -104,13 +104,13 @@
     returns:
       - name: is_loggedin
         type: boolean
-        desc: A current login state.
+        desc: Current login state.
 
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local is_loggedin = gpg.is_logged_in()
+            if gpgs then
+              local is_loggedin = gpgs.is_logged_in()
             end
             ```
 
@@ -125,32 +125,32 @@
         type: number
         desc: An position can be one of the predefined constants below
 
-            - `gpg.POPUP_POS_TOP_LEFT`
+            - `gpgs.POPUP_POS_TOP_LEFT`
 
-            - `gpg.POPUP_POS_TOP_CENTER`
+            - `gpgs.POPUP_POS_TOP_CENTER`
 
-            - `gpg.POPUP_POS_TOP_RIGHT`
+            - `gpgs.POPUP_POS_TOP_RIGHT`
 
-            - `gpg.POPUP_POS_CENTER_LEFT`
+            - `gpgs.POPUP_POS_CENTER_LEFT`
 
-            - `gpg.POPUP_POS_CENTER`
+            - `gpgs.POPUP_POS_CENTER`
 
-            - `gpg.POPUP_POS_CENTER_RIGHT`
+            - `gpgs.POPUP_POS_CENTER_RIGHT`
 
-            - `gpg.POPUP_POS_BOTTOM_LEFT`
+            - `gpgs.POPUP_POS_BOTTOM_LEFT`
 
-            - `gpg.POPUP_POS_BOTTOM_CENTER`
+            - `gpgs.POPUP_POS_BOTTOM_CENTER`
 
-            - `gpg.POPUP_POS_BOTTOM_RIGHT`
+            - `gpgs.POPUP_POS_BOTTOM_RIGHT`
 
 
-            Default value is `gpg.POPUP_POS_TOP_CENTER`
+            Default value is `gpgs.POPUP_POS_TOP_CENTER`
 
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              gpg.set_popup_position(gpg.POPUP_POS_BOTTOM_CENTER)
+            if gpgs then
+              gpgs.set_popup_position(gpgs.POPUP_POS_BOTTOM_CENTER)
             end
             ```
 
@@ -164,7 +164,7 @@
       - name: callback
         type: function
         desc: A callback taking the following parameters
-        parameters: 
+        parameters:
           - name: self
             type: object
             desc: The calling script
@@ -173,15 +173,15 @@
             type: number
             desc: An message_id can be one of the predefined constants below
 
-              - `gpg.MSG_SIGN_IN`
+              - `gpgs.MSG_SIGN_IN`
 
-              - `gpg.MSG_SILENT_SIGN_IN`
+              - `gpgs.MSG_SILENT_SIGN_IN`
 
-              - `gpg.MSG_SIGN_OUT`
+              - `gpgs.MSG_SIGN_OUT`
 
-              - `gpg.MSG_SHOW_SNAPSHOTS`
+              - `gpgs.MSG_SHOW_SNAPSHOTS`
 
-              - `gpg.MSG_LOAD_SNAPSHOT`
+              - `gpgs.MSG_LOAD_SNAPSHOT`
 
 
           - name: message
@@ -190,75 +190,75 @@
             members:
             - name: status
               type: number
-              desc: A status of current operation. It can be one of the predefined constants below
+              desc: Status of the current operation. It can be one of the predefined constants below
 
-                    - `gpg.STATUS_SUCCESS`
+                    - `gpgs.STATUS_SUCCESS`
 
-                    - `gpg.STATUS_FAILED`
+                    - `gpgs.STATUS_FAILED`
 
-                    - `gpg.STATUS_CREATE_NEW_SAVE`
+                    - `gpgs.STATUS_CREATE_NEW_SAVE`
 
-                    - `gpg.STATUS_CONFLICT`
+                    - `gpgs.STATUS_CONFLICT`
 
             - name: error
               type: string
               optional: true
-              desc: The error message. Avaliable only if `status` is `gpg.STATUS_FAILED`.
+              desc: The error message. Available only if `status` is `gpgs.STATUS_FAILED`.
 
             - name: error_status
               type: number
               optional: true
-              desc: The error code. Avaliable only if `status` is `gpg.STATUS_FAILED` and GPGS provide this code.
+              desc: The error code. Available only if `status` is `gpgs.STATUS_FAILED` and GPGS provide this code.
                     It can be one of the predefined constants below
-                    
-                    - `gpg.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED`
 
-                    - `gpg.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING`
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_COMMIT_FAILED`
 
-                    - `gpg.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE`
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING`
 
-                    - `gpg.ERROR_STATUS_SNAPSHOT_CREATION_FAILED`
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE`
 
-                    - `gpg.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE`
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_CREATION_FAILED`
 
-                    - `gpg.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE`
+
+                    - `gpgs.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
 
             - name: metadata
               type: table
               optional: true
-              desc: Metadata of the loaded save. Avaliable only if `message_id` is `gpg.MSG_LOAD_SNAPSHOT`.
+              desc: Metadata of the loaded save. Available only if `message_id` is `gpgs.MSG_LOAD_SNAPSHOT`.
 
             - name: conflictId
               type: string
               optional: true
-              desc: The conflict id. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+              desc: The conflict id. Available only if `status` is `gpgs.STATUS_CONFLICT`.
 
             - name: conflictMetadata
               type: table
               optional: true
-              desc: The conflicting metadata. Avaliable only if `status` is `gpg.STATUS_CONFLICT`.
+              desc: The conflicting metadata. Available only if `status` is `gpgs.STATUS_CONFLICT`.
 
     examples:
       - desc: |-
             ```lua
             function callback(self, message_id, message)
-              if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
-                if message.status == gpg.STATUS_SUCCESS then
+              if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
+                if message.status == gpgs.STATUS_SUCCESS then
                 -- do something after login
                 end
-              elseif message_id == gpg.MSG_SIGN_OUT then
+              elseif message_id == gpgs.MSG_SIGN_OUT then
               -- do something after logout
-              elseif message_id == gpg.MSG_LOAD_SNAPSHOT then
+              elseif message_id == gpgs.MSG_LOAD_SNAPSHOT then
               -- do something when a save was loaded
               end
             end
 
             function init(self)
-              gpg.set_callback(callback)
+              gpgs.set_callback(callback)
             end
 
             function init(self)
-              gpg.set_callback(nil) -- remove callback
+              gpgs.set_callback(nil) -- remove callback
             end
             ```
 
@@ -292,8 +292,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              gpg.snapshot_display_saves("Choose the save of the game", false, true, 10)
+            if gpgs then
+              gpgs.snapshot_display_saves("Choose the save of the game", false, true, 10)
             end
             ```
 
@@ -318,24 +318,24 @@
         optional: true
         desc: The conflict resolution policy to use for this snapshot that can be one of the predefined constants below
 
-            - `gpg.RESOLUTION_POLICY_MANUAL`
+            - `gpgs.RESOLUTION_POLICY_MANUAL`
 
-            - `gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME`
+            - `gpgs.RESOLUTION_POLICY_LONGEST_PLAYTIME`
 
-            - `gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
+            - `gpgs.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
 
-            - `gpg.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED`
+            - `gpgs.RESOLUTION_POLICY_MOST_RECENTLY_MODIFIED`
 
-            - `gpg.RESOLUTION_POLICY_HIGHEST_PROGRESS`
+            - `gpgs.RESOLUTION_POLICY_HIGHEST_PROGRESS`
 
-            
-            Default value is `gpg.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
+
+            Default value is `gpgs.RESOLUTION_POLICY_LAST_KNOWN_GOOD`
 
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              gpg.snapshot_open("my_save_1", true, gpg.RESOLUTION_POLICY_LONGEST_PLAYTIME)
+            if gpgs then
+              gpgs.snapshot_open("my_save_1", true, gpgs.RESOLUTION_POLICY_LONGEST_PLAYTIME)
             end
             ```
 
@@ -349,8 +349,8 @@
       - name: metadata
         type: table
         optional: true
-        desc: A table with metadata for a save. It contains fields below
-        members: 
+        desc: A table with metadata for a save. It contains the fields below
+        members:
           - name: playedTime
             type: number
             optional: true
@@ -375,9 +375,9 @@
     examples:
     - desc: |-
             ```lua
-            if gpg then
+            if gpgs then
               local png_img, w, h = screenshot.png()
-              gpg.snapshot_commit_and_close({
+              gpgs.snapshot_commit_and_close({
                   coverImage = png_img,
                   description = "LEVEL 31, CAVE",
                   playedTime = 12345667,
@@ -387,7 +387,7 @@
             ```
 
 #*****************************************************************************************************
-  
+
   - name: snapshot_get_data
     type: function
     desc: Returns the currently opened snapshot data.
@@ -404,8 +404,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local bytes, error_message = gpg.snapshot_get_data()
+            if gpgs then
+              local bytes, error_message = gpgs.snapshot_get_data()
               if not bytes then
                   print("snapshot_get_data ERROR:", error_message)
               else
@@ -416,7 +416,7 @@
             ```
 
 #*****************************************************************************************************
-  
+
   - name: snapshot_set_data
     type: function
     desc: Returns the currently opened snapshot data.
@@ -433,8 +433,8 @@
     examples:
       - desc: |-
             ```lua
-              if gpg then
-                local success, error_message = gpg.snapshot_set_data(my_data)
+              if gpgs then
+                local success, error_message = gpgs.snapshot_set_data(my_data)
                 if not success then
                     print("snapshot_set_data ERROR:", error_message)
                 end
@@ -455,8 +455,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local is_opened = gpg.snapshot_is_opened()
+            if gpgs then
+              local is_opened = gpgs.snapshot_is_opened()
             end
             ```
 
@@ -474,8 +474,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local image_size = gpg.snapshot_get_max_image_size()
+            if gpgs then
+              local image_size = gpgs.snapshot_get_max_image_size()
             end
             ```
 
@@ -493,13 +493,13 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local data_size = gpg.snapshot_get_max_save_size()
+            if gpgs then
+              local data_size = gpgs.snapshot_get_max_save_size()
             end
             ```
 
 #*****************************************************************************************************
-  
+
   - name: snapshot_get_conflicting_data
     type: function
     desc: Returns the conflicting snapshot data.
@@ -516,8 +516,8 @@
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              local bytes, error_message = gpg.snapshot_get_conflicting_data()
+            if gpgs then
+              local bytes, error_message = gpgs.snapshot_get_conflicting_data()
               if not bytes then
                   print("snapshot_get_conflicting_data ERROR:", error_message)
               else
@@ -542,15 +542,15 @@
         type: number
         desc: Type of the snapshot you want to use for conflict solving that can be one of the predefined constants below
 
-              - `gpg.SNAPSHOT_CURRENT`
+              - `gpgs.SNAPSHOT_CURRENT`
 
-              - `gpg.SNAPSHOT_CONFLICTING`
+              - `gpgs.SNAPSHOT_CONFLICTING`
 
     examples:
       - desc: |-
             ```lua
-            if gpg then
-              gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
+            if gpgs then
+              gpgs.snapshot_resolve_conflict(self.conflictId, gpgs.SNAPSHOT_CONFLICTING)
             end
             ```
 
@@ -614,28 +614,28 @@
 
   - name: MSG_SIGN_IN
     type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation 
-          after calling `gpg.login()`
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.login()`
 
   - name: MSG_SILENT_SIGN_IN
     type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation 
-          after calling `gpg.silent_login()`
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.silent_login()`
 
   - name: MSG_SIGN_OUT
     type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation 
-          after calling `gpg.logout()`
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.logout()`
 
   - name: MSG_SHOW_SNAPSHOTS
     type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation 
-          after calling `gpg.snapshot_display_saves()`
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.snapshot_display_saves()`
 
   - name: MSG_LOAD_SNAPSHOT
     type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation 
-          after calling `gpg.snapshot_open()`
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.snapshot_open()`
 
   - name: STATUS_SUCCESS
     type: number
@@ -647,51 +647,50 @@
 
   - name: STATUS_CREATE_NEW_SAVE
     type: number
-    desc: A user wants to create new save in as a result of `gpg.snapshot_display_saves()` method.
-          Turn off this button in `gpg.snapshot_display_saves()` if you don't want to have this functionality.
+    desc: A user wants to create new save as a result of `gpgs.snapshot_display_saves()` method.
+          Turn off this button in `gpgs.snapshot_display_saves()` if you don't want to have this functionality.
 
   - name: STATUS_CONFLICT
     type: number
-    desc: The result of the calling `gpg.snapshot_open()` or 'gpg.snapshot_resolve_conflict()' is a conflict.
-          You need to make decision on how to solve this conflict using 'gpg.snapshot_resolve_conflict()'.
+    desc: The result of the calling `gpgs.snapshot_open()` or 'gpgs.snapshot_resolve_conflict()' is a conflict.
+          You need to make decision on how to solve this conflict using 'gpgs.snapshot_resolve_conflict()'.
 
   - name: SNAPSHOT_CURRENT
     type: number
-    desc: The second parameter for 'gpg.snapshot_resolve_conflict()' method, that means that you want to choose
+    desc: The second parameter for 'gpgs.snapshot_resolve_conflict()' method, which means that you want to choose
           the current snapshot as a snapshot for conflict solving.
 
   - name: SNAPSHOT_CONFLICTING
     type: number
-    desc: The second parameter for 'gpg.snapshot_resolve_conflict()' method, that means that you want to choose
+    desc: The second parameter for 'gpgs.snapshot_resolve_conflict()' method, which means that you want to choose
           the conflicting snapshot as a snapshot for conflict solving.
 
   - name: ERROR_STATUS_SNAPSHOT_NOT_FOUND
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_NOT_FOUND) for this constant
 
   - name: ERROR_STATUS_SNAPSHOT_CREATION_FAILED
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CREATION_FAILED) for this constant
 
   - name: ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE) for this constant
 
   - name: ERROR_STATUS_SNAPSHOT_COMMIT_FAILED
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_COMMIT_FAILED) for this constant
 
   - name: ERROR_STATUS_SNAPSHOT_FOLDER_UNAVAILABLE
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_FOLDER_UNAVAILABLE) for this constant
 
   - name: ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING
     type: number
-    desc: This constant contains in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
+    desc: This constant is used in `message.error_status` table when `MSG_LOAD_SNAPSHOT` is `STATUS_FAILED`.
           [Official GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT_MISSING) for this constant
-

@@ -27,8 +27,7 @@ bundle_identifier = com.defoldtest.gpgs
 
 [gpgs]
 app_id = 567627510591
-use_disk = 1
+use_saved_games = 1
 
 [library]
 include_dirs = gpgs
-

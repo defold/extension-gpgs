@@ -1,6 +1,6 @@
 #define EXTENSION_NAME GpgsExt
 #define LIB_NAME "GpgsExt"
-#define MODULE_NAME "gpg"
+#define MODULE_NAME "gpgs"
 
 #define DLIB_LOG_DOMAIN LIB_NAME
 #include <dmsdk/sdk.h>
@@ -30,7 +30,7 @@ struct GPGS
 struct GPGS_Disk
 {
     bool                   is_using;
-    
+
     jmethodID              m_showSavedGamesUI;
     jmethodID              m_loadSnapshot;
     jmethodID              m_commitAndCloseSnapshot;
@@ -46,52 +46,52 @@ struct GPGS_Disk
 static GPGS         g_gpgs;
 static GPGS_Disk    g_gpgs_disk;
 
-// GPGPS autorization 
+// GPGPS autorization
 
 static int GpgAuth_Login(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
-    
+
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_login);
-    
+
     return 0;
 }
 
 static int GpgAuth_Logout(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
-    
+
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
-    
+
     return 0;
 }
 
 static int GpgAuth_SilentLogin(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
-    
+
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
-    
+
     return 0;
 }
 
 static int GpgAuth_getDisplayName(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
-    
+
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getDisplayName);
-    if (return_value) 
+    if (return_value)
     {
         const char* new_char = env->GetStringUTFChars(return_value, 0);
         env->DeleteLocalRef(return_value);
@@ -101,19 +101,19 @@ static int GpgAuth_getDisplayName(lua_State* L)
     {
         lua_pushnil(L);
     }
-    
+
     return 1;
 }
 
 static int GpgAuth_getId(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 1);
-    
+
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_getId);
-    if (return_value) 
+    if (return_value)
     {
         const char* new_char = env->GetStringUTFChars(return_value, 0);
         env->DeleteLocalRef(return_value);
@@ -123,7 +123,7 @@ static int GpgAuth_getId(lua_State* L)
     {
         lua_pushnil(L);
     }
-    
+
     return 1;
 }
 
@@ -133,9 +133,9 @@ static int GpgAuth_isLoggedIn(lua_State* L)
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_isLoggedIn);
-    
+
     lua_pushboolean(L, JNI_TRUE == return_value);
 
     return 1;
@@ -187,7 +187,7 @@ static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     int type = lua_type(L, 1);
     char* popupTitle = "Game Saves";
 
@@ -219,7 +219,7 @@ static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
     {
         maxNumberOfSavedGamesToShow = luaL_checknumber(L, 4);
     }
-    
+
     jstring jpopupTitle = env->NewStringUTF(popupTitle);
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_showSavedGamesUI, jpopupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
     env->DeleteLocalRef(jpopupTitle);
@@ -260,7 +260,7 @@ static int GpgDisk_SnapshotOpen(lua_State* L)
     jstring jsaveName = env->NewStringUTF(saveName);
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_loadSnapshot, jsaveName, createIfNotFound, conflictPolicy);
     env->DeleteLocalRef(jsaveName);
-    
+
     return 0;
 }
 
@@ -282,7 +282,7 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
     jbyteArray jcoverImage = NULL;
     jstring jdescription = NULL;
 
-    if(lua_istable(L, 1)) 
+    if(lua_istable(L, 1))
     {
         lua_getfield(L, 1, "playedTime");
         if(!lua_isnil(L, -1))
@@ -290,14 +290,14 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
             playedTime = luaL_checknumber(L, -1);
         }
         lua_pop(L, 1);
-        
+
         lua_getfield(L, 1, "progressValue");
         if(!lua_isnil(L, -1))
         {
             progressValue = luaL_checknumber(L, -1);
         }
         lua_pop(L, 1);
-        
+
         lua_getfield(L, 1, "description");
         if(!lua_isnil(L, -1))
         {
@@ -305,7 +305,7 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
             jdescription = env->NewStringUTF(description);
         }
         lua_pop(L, 1);
-        
+
         lua_getfield(L, 1, "coverImage");
         if(!lua_isnil(L, -1))
         {
@@ -316,14 +316,14 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
         }
         lua_pop(L, 1);
     }
-    
+
     env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
 
-    if (jdescription) 
+    if (jdescription)
     {
         env->DeleteLocalRef(jdescription);
     }
-    
+
     return 0;
 }
 
@@ -364,7 +364,7 @@ static int GpgDisk_SnapshotSetData(lua_State* L)
     {
         return 0;
     }
-    
+
     DM_LUA_STACK_CHECK(L, 2);
 
     ThreadAttacher attacher;
@@ -377,7 +377,7 @@ static int GpgDisk_SnapshotSetData(lua_State* L)
     env->SetByteArrayRegion(byteArray, 0, bytes_lenght, (jbyte*)bytes);
     jstring return_value = (jstring)env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_setSave, byteArray);
 
-    if (return_value) 
+    if (return_value)
     {
         lua_pushboolean(L, false);
         const char* new_char = env->GetStringUTFChars(return_value, 0);
@@ -403,7 +403,7 @@ static int GpgDisk_SnapshotIsOpened(lua_State* L)
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     jboolean return_value = (jboolean)env->CallBooleanMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_isSnapshotOpened);
 
     lua_pushboolean(L, JNI_TRUE == return_value);
@@ -417,7 +417,7 @@ static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
     {
         return 0;
     }
-    
+
     DM_LUA_STACK_CHECK(L, 1);
 
     ThreadAttacher attacher;
@@ -426,7 +426,7 @@ static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
     int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxCoverImageSize);
 
     lua_pushnumber(L, return_value);
-    
+
     return 1;
 }
 
@@ -441,7 +441,7 @@ static int GpgDisk_GetMaxDataSize(lua_State* L)
 
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
-    
+
     int return_value = (int)env->CallIntMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxDataSize);
 
     lua_pushnumber(L, return_value);
@@ -494,7 +494,7 @@ static int GpgDisk_SnapshotResolveConflict(lua_State* L)
 
     const char* conflictId = luaL_checkstring(L, 1);
     int snapshotId = luaL_checknumber(L, 2);
-    
+
     jstring jconflictId = env->NewStringUTF(conflictId);
     env->CallObjectMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_resolveConflict, jconflictId, snapshotId);
     env->DeleteLocalRef(jconflictId);
@@ -580,7 +580,7 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(STATUS_FAILED)
     SETCONSTANT(STATUS_CREATE_NEW_SAVE)
     SETCONSTANT(STATUS_CONFLICT)
-    
+
     SETCONSTANT(ERROR_STATUS_SNAPSHOT_COMMIT_FAILED)
     SETCONSTANT(ERROR_STATUS_SNAPSHOT_CONFLICT_MISSING)
     SETCONSTANT(ERROR_STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE)
@@ -596,9 +596,9 @@ static void LuaInit(lua_State* L)
 
     SETCONSTANT(SNAPSHOT_CURRENT)
     SETCONSTANT(SNAPSHOT_CONFLICTING)
-    
+
 #undef SETCONSTANT
-    
+
     lua_pop(L,  1);
 }
 
@@ -619,7 +619,7 @@ static void InitializeJNI()
     g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
 
     //disk
-    if (g_gpgs_disk.is_using) 
+    if (g_gpgs_disk.is_using)
     {
         g_gpgs_disk.m_showSavedGamesUI = env->GetMethodID(cls, "showSavedGamesUI", "(Ljava/lang/String;ZZI)V");
         g_gpgs_disk.m_loadSnapshot = env->GetMethodID(cls, "loadSnapshot", "(Ljava/lang/String;ZI)V");
@@ -632,10 +632,10 @@ static void InitializeJNI()
         g_gpgs_disk.m_getConflictingSave = env->GetMethodID(cls, "getConflictingSave", "()[B");
         g_gpgs_disk.m_resolveConflict = env->GetMethodID(cls, "resolveConflict", "(Ljava/lang/String;I)V");
     }
-    
+
     //private methods
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
-    
+
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;Z)V");
     g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity(), g_gpgs_disk.is_using));
 }
@@ -644,12 +644,12 @@ static dmExtension::Result InitializeGpg(dmExtension::Params* params)
 {
     LuaInit(params->m_L);
 
-    int is_using = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.use_disk", 0);
+    int is_using = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.use_saved_games", 0);
     if (is_using > 0)
     {
         g_gpgs_disk.is_using = true;
     }
-    
+
     InitializeJNI();
     dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
     gpgs_callback_initialize();
