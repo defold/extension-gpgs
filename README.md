@@ -1,6 +1,8 @@
 # Google Play Game Services for Defold
 
-[Documentation](https://defold.github.io/extension-gpgs/)
+This is a Defold [native extension](https://www.defold.com/manuals/extensions/) which provides access to Google Play Game Services functionality on Android devices.
+
+To learn more please visit the [documentation page](https://defold.github.io/extension-gpgs/) for this extension. 
 
 ---
 
