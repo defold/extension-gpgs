@@ -71,6 +71,9 @@ public class GpgsJNI {
     //--------------------------------------------------
     private Activity activity;
     private boolean is_disk_active;
+    private String client_id;
+    private boolean is_request_id_token;
+    private boolean is_request_auth_code;
 
     //--------------------------------------------------
     // Autorization
@@ -121,9 +124,12 @@ public class GpgsJNI {
     }
 
 
-    public GpgsJNI(Activity activity, boolean is_disk_active) {
+    public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, String client_id) {
         this.activity = activity;
         this.is_disk_active = is_disk_active;
+        this.client_id = client_id;
+        this.is_request_auth_code = is_request_auth_code;
+        this.is_request_id_token = is_request_id_token;
 
         mGoogleSignInClient = GoogleSignIn.getClient(activity, getSignInOptions());
     }
@@ -165,14 +171,23 @@ public class GpgsJNI {
 
     private GoogleSignInOptions getSignInOptions() {
         if (mSignInOptions == null) {
+            GoogleSignInOptions.Builder builder = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN);
+
             if (is_disk_active) {
-                mSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                        .requestScopes(Drive.SCOPE_APPFOLDER)
-                        .build();
-            } else {
-                mSignInOptions = GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN;
+                builder.requestScopes(Drive.SCOPE_APPFOLDER);
             }
+
+            if (is_request_id_token && client_id != null) {
+                builder.requestIdToken(client_id);
+            }
+
+            if (is_request_auth_code && client_id != null) {
+                builder.requestServerAuthCode(client_id);
+            }
+
+            mSignInOptions = builder.build();
         }
+
         return mSignInOptions;
     }
 
@@ -181,6 +196,7 @@ public class GpgsJNI {
             if (intent != null) {
                 Task<GoogleSignInAccount> task =
                         GoogleSignIn.getSignedInAccountFromIntent(intent);
+
                 if (task.isSuccessful()) {
                     onConnected(task.getResult(), MSG_SIGN_IN);
                 } else {
@@ -251,24 +267,23 @@ public class GpgsJNI {
     }
 
     public String getDisplayName() {
-        if (mPlayer == null) {
-            return null;
-        }
-        return mPlayer.getDisplayName();
+        return isLoggedIn() ? mPlayer.getDisplayName() : null;
     }
 
     public String getId() {
-        if (mPlayer == null) {
-            return null;
-        }
-        return mPlayer.getPlayerId();
+        return isLoggedIn() ? mPlayer.getPlayerId() : null;
+    }
+
+    public String getIdToken() {
+        return isLoggedIn() ? mSignedInAccount.getIdToken() : null;
+    }
+
+    public String getServerAuthCode() {
+        return isLoggedIn() ? mSignedInAccount.getServerAuthCode() : null;
     }
 
     public boolean isLoggedIn() {
-        if (mPlayer == null) {
-            return false;
-        }
-        return true;
+        return mPlayer != null && mSignedInAccount != null;
     }
 
     public void setGravityForPopups(int gravity) {

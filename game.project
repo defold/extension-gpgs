@@ -21,13 +21,18 @@ shared_state = 1
 
 [android]
 package = com.potatojam.onet_paradise.match_two_tiles
+minimum_sdk_version = 16
+target_sdk_version = 28
 
 [ios]
 bundle_identifier = com.defoldtest.gpgs
 
 [gpgs]
 app_id = 567627510591
+#client_id = client id from google console
 use_saved_games = 1
+request_server_auth_code = 0
+request_id_token = 0
 
 [library]
 include_dirs = gpgs

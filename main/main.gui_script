@@ -12,23 +12,33 @@ local positions = {
     "POPUP_POS_BOTTOM_RIGHT"
 }
 
+local use_saved_games = sys.get_config("gpgs.use_saved_games") == "1"
+
 function gpg_callback(self, message_id, message)
     print("---------")
     print(message_id)
     pprint(message)
     print("---------")
-    if message_id == gpg.MSG_SIGN_IN or message_id == gpg.MSG_SILENT_SIGN_IN then
-        if message.status == gpg.STATUS_SUCCESS then
-            gui.set_text(gui.get_node("id"), gpg.get_id())
-            gui.set_text(gui.get_node("name"), gpg.get_display_name())
-            print("max_snapshot_image_size: "..gpg.snapshot_get_max_image_size().." bytes",
-                "max_snapshot_size: "..gpg.snapshot_get_max_save_size().." bytes")
+    if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
+        if message.status == gpgs.STATUS_SUCCESS then
+            gui.set_text(gui.get_node("id"), gpgs.get_id())
+            gui.set_text(gui.get_node("name"), gpgs.get_display_name())
+
+            if sys.get_config("gpgs.client_id") then
+                print("id_token: ", gpgs.get_id_token())
+                print("auth_code: ", gpgs.get_server_auth_code())
+            end
+
+            if use_saved_games then
+                print("max_snapshot_image_size: "..gpgs.snapshot_get_max_image_size().." bytes",
+                    "max_snapshot_size: "..gpgs.snapshot_get_max_save_size().." bytes")
+            end
         end
-    elseif message_id == gpg.MSG_SIGN_OUT then
+    elseif message_id == gpgs.MSG_SIGN_OUT then
         gui.set_text(gui.get_node("id"), "---")
         gui.set_text(gui.get_node("name"), "---")
-    elseif message_id == gpg.MSG_LOAD_SNAPSHOT then
-        if message.status == gpg.STATUS_CONFLICT then
+    elseif message_id == gpgs.MSG_LOAD_SNAPSHOT then
+        if message.status == gpgs.STATUS_CONFLICT then
             self.conflictId = message.conflictId
         end
     end
@@ -36,23 +46,25 @@ end
 
 function init(self)
     msg.post(".", "acquire_input_focus")
-    pprint(_G.gpg)
-    if gpg then
-        gpg.set_callback(gpg_callback)
-        gpg.silent_login()
+    pprint(_G.gpgs)
+    if gpgs then
+        gpgs.set_callback(gpg_callback)
+        gpgs.silent_login()
     end
 end
 
 function update(self, dt)
-    if gpg then
-        if self.is_logged_in ~= gpg.is_logged_in() then
-            self.is_logged_in = gpg.is_logged_in()
-            gui.set_text(gui.get_node("autorized"), "is_logged_in: "..tostring(gpg.is_logged_in()))
+    if gpgs then
+        if self.is_logged_in ~= gpgs.is_logged_in() then
+            self.is_logged_in = gpgs.is_logged_in()
+            gui.set_text(gui.get_node("autorized"), "is_logged_in: "..tostring(gpgs.is_logged_in()))
         end
-        
-        if self.snapshot_is_opened ~= gpg.snapshot_is_opened() then
-            self.snapshot_is_opened = gpg.snapshot_is_opened()
-            gui.set_text(gui.get_node("snapshotOpened"), "snapshot_is_opened: "..tostring(gpg.snapshot_is_opened()))
+
+        if use_saved_games then
+            if self.snapshot_is_opened ~= gpgs.snapshot_is_opened() then
+                self.snapshot_is_opened = gpgs.snapshot_is_opened()
+                gui.set_text(gui.get_node("snapshotOpened"), "snapshot_is_opened: "..tostring(gpgs.snapshot_is_opened()))
+            end
         end
     end
 end
@@ -62,8 +74,8 @@ local function change_popup_pos(self)
         self.pos = 3
     end
     gui.set_text(gui.get_node("popup_pos_value"), positions[self.pos])
-    if gpg then
-        gpg.set_popup_position(gpg[positions[self.pos]])
+    if gpgs then
+        gpgs.set_popup_position(gpgs[positions[self.pos]])
     end
     self.pos = self.pos + 1
     if self.pos > #positions then
@@ -74,15 +86,15 @@ end
 function on_input(self, action_id, action)
     dirtylarry:button("login", action_id, action, function ()
         print("LOGIN was pressed")
-        if gpg then
-            gpg.login()
+        if gpgs then
+            gpgs.login()
         end
     end)
-    
+
     dirtylarry:button("logout", action_id, action, function ()
         print("LOGOUT was pressed")
-        if gpg then
-            gpg.logout()
+        if gpgs then
+            gpgs.logout()
         end
     end)
 
@@ -91,20 +103,20 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("show_snapshots", action_id, action, function ()
-        if gpg then
-            gpg.snapshot_display_saves("My cool saves", true, true, 3)
+        if gpgs then
+            gpgs.snapshot_display_saves("My cool saves", true, true, 3)
         end
     end)
 
     dirtylarry:button("snapshot_open", action_id, action, function ()
-        if gpg then
-            gpg.snapshot_open("my_save", true, gpg.RESOLUTION_POLICY_MANUAL)
+        if gpgs then
+            gpgs.snapshot_open("my_save", true, gpgs.RESOLUTION_POLICY_MANUAL)
         end
     end)
 
     dirtylarry:button("snapshot_get_data", action_id, action, function ()
-        if gpg then
-            local bytes, error_message = gpg.snapshot_get_data()
+        if gpgs then
+            local bytes, error_message = gpgs.snapshot_get_data()
             if not bytes then
                 print("snapshot_get_data ERROR:", error_message)
             else
@@ -114,9 +126,9 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("save_snapshot", action_id, action, function ()
-        if gpg then
+        if gpgs then
             local png, w, h = screenshot.png()
-            gpg.snapshot_commit_and_close({
+            gpgs.snapshot_commit_and_close({
                 coverImage = png,
                 description = "LEVEL 31, CAVE",
                 playedTime = math.random(1000, 2000),
@@ -126,8 +138,8 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("snapshot_get_conflicting_data", action_id, action, function ()
-        if gpg then
-            local bytes, error_message = gpg.snapshot_get_conflicting_data()
+        if gpgs then
+            local bytes, error_message = gpgs.snapshot_get_conflicting_data()
             if not bytes then
                 print("snapshot_get_conflicting_data ERROR: ", error_message)
             else
@@ -137,8 +149,8 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("snapshot_set_data", action_id, action, function ()
-        if gpg then
-            local success, error_message = gpg.snapshot_set_data("MyCustomBytesForSnapshot")
+        if gpgs then
+            local success, error_message = gpgs.snapshot_set_data("MyCustomBytesForSnapshot")
             if not success then
                 print("snapshot_set_data ERROR:", error_message)
             end
@@ -146,8 +158,8 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("snapshot_resolve_conflict", action_id, action, function ()
-        if gpg then
-            local success, error_message = gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CURRENT)
+        if gpgs then
+            local success, error_message = gpgs.snapshot_resolve_conflict(self.conflictId, gpgs.SNAPSHOT_CURRENT)
             if not success then
                 print("snapshot_resolve_conflict ERROR:", error_message)
             end
@@ -155,9 +167,9 @@ function on_input(self, action_id, action)
     end)
 
     dirtylarry:button("snapshot_resolve_conflict_conflicting", action_id, action, function ()
-        if gpg then
-            gpg.snapshot_resolve_conflict(self.conflictId, gpg.SNAPSHOT_CONFLICTING)
+        if gpgs then
+            gpgs.snapshot_resolve_conflict(self.conflictId, gpgs.SNAPSHOT_CONFLICTING)
         end
     end)
-    
+
 end

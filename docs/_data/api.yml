@@ -29,6 +29,7 @@
 
           [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`.
           But if you use Disk, we have to request extra scope `Drive.SCOPE_APPFOLDER`.
+          Or if you use ID token, we have to request ID token with provided client_id.
           If so it causes the first time silent sign-in to fail, except for users who
           have already signed in successfully on a different device. Turn off GPGS
           features you don't want to use in `game.project`.
@@ -92,6 +93,46 @@
             ```lua
             if gpgs then
               local id = gpgs.get_id()
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: get_id_token
+    type: function
+    desc: Get the current GPGS player id token. Available only if "gpgs.client_id" is configured in game.project
+          and "gpgs.request_id_token = 1".
+
+    returns:
+      - name: id_token
+        type: string
+        desc: The player ID token.
+
+    examples:
+      - desc: |-
+            ```lua
+            if gpgs then
+              local id_token = gpgs.get_id_token()
+            end
+            ```
+
+#*****************************************************************************************************
+
+  - name: get_server_auth_code
+    type: function
+    desc: Get the current GPGS player id token. Available only if "gpgs.client_id" is configured in game.project
+          and "gpgs.request_server_auth_code = 1".
+
+    returns:
+      - name: server_auth_code
+        type: string
+        desc: The server auth code for logged in account.
+
+    examples:
+      - desc: |-
+            ```lua
+            if gpgs then
+              local server_auth_code = gpgs.get_server_auth_code()
             end
             ```
 
