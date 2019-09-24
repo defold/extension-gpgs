@@ -150,8 +150,7 @@ void gpgs_callback_update()
             free(data->json);
             data->json = 0;
         }
-        m_callbacksQueue.EraseSwap(i--);
     }
-    
+    m_callbacksQueue.SetSize(0);
 }
 #endif
