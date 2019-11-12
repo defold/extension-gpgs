@@ -1,115 +1,50 @@
 ---
 layout: default
 ---
-## Modules
-{% for item in site.data.api %}
-### <code>{{ item.name }}</code>
-{{ item.desc }}
-{% endfor %}
 
-## Enums
-<table>
-    <tbody>
-{% for module in site.data.api %}
-    {% for item in module.members %}
-        {% if item.type contains 'number' %}
-        <tr>
-            <td><strong>{{ module.name }}.{{ item.name }}</strong></td>
-            <td>{{ item.desc | markdownify | replace: "[icon:attention]","<br><br>⚠️"}}</td>
-        </tr>
+# Defold Google Play Game Services API documentation
 
-        {% endif %}
-    {% endfor %}
-{% endfor %}
-    </tbody>
-</table>
+This extension provides functions for interacting with Google Play Game Services. Supported on Android.
 
-<hr>
+# Usage
+To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
 
-## Functions
-<table>
-    <tbody>
-{% for module in site.data.api %}
-    {% for item in module.members %}
-        {% if item.type contains 'function' %}
-        <tr>
-            <td><a href="#{{ item.name | url_encode }}"><strong>{{ module.name }}.{{ item.name }}()</strong></a></td>
-            <td>{{ item.desc | truncate: 80 }}</td>
-        </tr>
-        {% endif %}
-    {% endfor %}
-{% endfor %}
-    </tbody>
-</table>
+    https://github.com/defold/extension-gpgs/archive/master.zip
 
-{% for module in site.data.api %}
-    {% for function in module.members %}
-        {% if function.type contains 'function' %}
-<div class="function-wrap">
-<h3 class="function-header"><a href="#{{ function.name | url_encode }}" id="{{ function.name | url_encode }}"><code>{{ module.name }}.{{ function.name }}({% for param in function.parameters %}{{param.name}}{% unless forloop.last %}, {% endunless %}{% endfor %})</code></a></h3>
-{% if function.parameters %}
-<table>
-    <thead>
-        <tr>
-            <th>Parameter</th>
-            <th>Type</th>
-            <th>Description</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for param in function.parameters %}
-        <tr>
-            <td style="text-align: right;">
-                <strong>{{ param.name }}</strong>
-                {% if param.optional %}
-                    (optional)
-                {% endif %}
-            </td>
-            <td><code>{{ param.type }}</code></td>
-            <td>{{ param.desc | markdownify }}
-                {% if param.type == "function" %}
-                {% include type-function.md params=param.parameters %}
-                {% endif %}
-                {% if param.type == "table" %}
-                {% include type-table.md fields=param.members %}
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
-{% if function.returns %}
-    <table>
-        <thead>
-            <tr>
-                <th>Return value</th>
-                <th>Type</th>
-                <th>Description</th>
-            </tr>
-        </thead>
-        <tbody>
-            <h4>Returns</h4>
-            {% for return in function.returns %}
-                <tr>
-                    <td>{{ return.name }}</td>
-                    <td><code class="inline-code-block">{{ return.type }}</code></td>
-                    <td>{{ return.desc | markdownify }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% endif %}
-{{ function.desc | markdownify | replace: "[icon:attention]","<br><br>⚠️" | replace: "[type:string]","<code class='inline-code-block'>string</code>" | replace: "[type:number]","<code class='inline-code-block'>number</code>" | replace: "[type:table]","<code class='inline-code-block'>table</code>" | markdownify}}
+We recommend using a link to a zip file of a [https://github.com/defold/extension-gpgs/releases](specific release).
 
-{% if function.examples %}
-<h4>Examples</h4>
-{% for example in function.examples %}
-{{ example.desc | markdownify }}
-{% endfor %}
-{% endif %}
-</div>
+# Dependencies
 
-        {% endif %}
-    {% endfor %}
-{% endfor %}
+The extension has the following dependencies:
+
+    https://github.com/defold/android-base-extensions/releases/download/1.0.0/gps-games-17.0.0.zip
+    https://github.com/defold/android-base-extensions/releases/download/1.0.0/gps-base-16.1.0.zip
+    https://github.com/defold/android-base-extensions/releases/download/1.0.0/support-v4-27.0.2.zip
+
+## Google App Setup
+In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [https://support.google.com/googleplay/android-developer/answer/6112435](the official documentation).
+
+Once the application is registered you also need to enable Google Play Game Services for the application. Follow the official documentation to [https://developers.google.com/games/services/console/enabling](enable Google Play Game Services).
+
+## Defold Setup
+
+### game.project
+Add the following section into your game.project file:
+
+    [gpgs]
+    app_id = 1234567890
+    use_saved_games = 1
+
+Where `app_id` is the 12 or 13 digit Application ID from the Google Play Console, found under Development Tools > Services & APIs and Google Play game services.</p>
+
+Where `use_saved_games` indicates if the [https://developers.google.com/games/services/common/concepts/savedgames](Game Saves service) should be used (0 is disabled, 1 is enabled).</p>
+
+
+## Source code
+
+The source code is available on [GitHub](https://github.com/defold/extension-gpgs)
+
+
+# API reference
+
+{% include api_ref.md %}

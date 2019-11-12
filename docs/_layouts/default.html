@@ -4,62 +4,18 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="rouge.css">
-    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/rouge.css">
+    <link rel="stylesheet" href="css/fonts.css">
     <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     <title>{{ site.title }}</title>
   </head>
-    <body>
+  <body>
     <div class="wrapper">
-        <header>
-        <h1>Defold Google Play Game Services API documentation</h1>
-        <p>This extension provides functions for interacting with Google Play Game Services.</p>
-
-        <h2>Platforms</h2>
-        <p>The extension is only supported for Android.</p>
-
-        <h2>Source code</h2>
-        <p>The source code can be viewed at: <a href="https://github.com/defold/extension-gpgs"> https://github.com/defold/extension-gpgs </a></p>
-
-        <h2>Google App Setup</h2>
-        <p>In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in <a href="https://support.google.com/googleplay/android-developer/answer/6112435">the official documentation</a>.</p>
-
-        <p>Once the application is registered you also need to enable Google Play Game Services for the application. Follow the official documentation to <a href="https://developers.google.com/games/services/console/enabling">enable Google Play Game Services</a>.</p>
-
-        <h2>Defold setup</h2>
-        <p>To use this library in your Defold project, add the following URL to your <code class="inline-code-block">game.project</code> dependencies:
-          <pre>https://github.com/defold/extension-gpgs/archive/master.zip</pre>
-        </p>
-
-        <p>We recommend using a link to a <code class="inline-code-block">zip</code> file of a <a href="https://github.com/defold/extension-gpgs/releases">specific release</a>.</p>
-
-        <p>
-          Starting Defold 1.2.162 this extension has one more dependency:
-          <pre>https://github.com/defold/extension-gps</pre>
-          Check `game.project` of the release you are using to figure out the appropriate release of `extension-gps`.
-        </p>
-
-        <h3>game.project</h3>
-        <p>Add the following section into your game.project file:
-        <p>
-        <code class="inline-code-block">
-        [gpgs]
-        <br>app_id = 1234567890
-        <br>use_saved_games = 1
-        </code>
-        <p>Where <kbd>app_id</kbd> is the 12 or 13 digit Application ID from the Google Play Console, found under <kbd>Development Tools > Services & APIs and Google Play game services</kbd>.</p>
-        <p>Where <kbd>use_saved_games</kbd> indicates if the <a href="https://developers.google.com/games/services/common/concepts/savedgames">Game Saves service</a> should be used (0 is disabled, 1 is enabled).</p>
-
-    </header>
-        <hr>
-        <section>
-        <h1>API</h1>
-        </br>
+      <section>
       {{ content }}
-
       </section>
     </div>
   </body>
