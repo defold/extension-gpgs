@@ -11,7 +11,7 @@ To use this library in your Defold project, add the following URL to your <code 
 
     https://github.com/defold/extension-gpgs/archive/master.zip
 
-We recommend using a link to a zip file of a [https://github.com/defold/extension-gpgs/releases](specific release).
+We recommend using a link to a zip file of a [specific release](https://github.com/defold/extension-gpgs/releases).
 
 # Dependencies
 
