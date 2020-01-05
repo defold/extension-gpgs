@@ -22,9 +22,9 @@ The extension has the following dependencies:
     https://github.com/defold/android-base-extensions/releases/download/1.0.0/support-v4-27.0.2.zip
 
 ## Google App Setup
-In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [https://support.google.com/googleplay/android-developer/answer/6112435](the official documentation).
+In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [the official documentation](https://support.google.com/googleplay/android-developer/answer/6112435).
 
-Once the application is registered you also need to enable Google Play Game Services for the application. Follow the official documentation to [https://developers.google.com/games/services/console/enabling](enable Google Play Game Services).
+Once the application is registered you also need to enable Google Play Game Services for the application. Follow the official documentation to [enable Google Play Game Services](https://developers.google.com/games/services/console/enabling).
 
 ## Defold Setup
 

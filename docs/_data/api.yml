@@ -120,8 +120,7 @@
 
   - name: get_server_auth_code
     type: function
-    desc: Get the current GPGS player id token. Available only if "gpgs.client_id" is configured in game.project
-          and "gpgs.request_server_auth_code = 1".
+    desc: Returns a one-time server auth code to send to your web server which can be exchanged for access token 
 
     returns:
       - name: server_auth_code
@@ -342,7 +341,7 @@
 
   - name: snapshot_open
     type: function
-    desc: Provides a default saved games selection user interface.
+    desc: Opens a snapshot with the given `saveName`. If `createIfNotFound` is set to `true`, the specified snapshot will be created if it does not already exist.
 
     parameters:
       - name: saveName
@@ -460,7 +459,7 @@
 
   - name: snapshot_set_data
     type: function
-    desc: Returns the currently opened snapshot data.
+    desc: Sets the data for the currently opened snapshot.
 
     returns:
       - name: bytes
