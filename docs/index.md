@@ -13,14 +13,6 @@ To use this library in your Defold project, add the following URL to your <code 
 
 We recommend using a link to a zip file of a [specific release](https://github.com/defold/extension-gpgs/releases).
 
-# Dependencies
-
-The extension has the following dependencies:
-
-    https://github.com/defold/android-base-extensions/releases/download/1.0.0/gps-games-17.0.0.zip
-    https://github.com/defold/android-base-extensions/releases/download/1.0.0/gps-base-16.1.0.zip
-    https://github.com/defold/android-base-extensions/releases/download/1.0.0/support-v4-27.0.2.zip
-
 ## Google App Setup
 In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [the official documentation](https://support.google.com/googleplay/android-developer/answer/6112435).
 
