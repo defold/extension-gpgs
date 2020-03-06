@@ -30,7 +30,9 @@ enum MESSAGE_ID
     MSG_SILENT_SIGN_IN =     2,
     MSG_SIGN_OUT =           3,
     MSG_SHOW_SNAPSHOTS =     4,
-    MSG_LOAD_SNAPSHOT =      5
+    MSG_LOAD_SNAPSHOT =      5,
+    MSG_SAVE_SNAPSHOT =      6,
+    MSG_GET_ACHIEVEMENTS =   7
 };
 
 enum STATUS

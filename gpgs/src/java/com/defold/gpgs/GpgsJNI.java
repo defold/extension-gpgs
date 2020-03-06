@@ -32,24 +32,30 @@ import com.google.android.gms.common.api.ApiException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.google.android.gms.games.AnnotatedData;
+import com.google.android.gms.games.achievement.Achievement;
+import com.google.android.gms.games.achievement.AchievementBuffer;
+
 import java.io.IOException;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
 
 public class GpgsJNI {
+
+    private static final String TAG = "GpgsJNI";
+
     //Internal constants:
 
+    private static final int RC_UNUSED = 5001;
     // Request code used to invoke sign in user interactions.
     private static final int RC_SIGN_IN = 9001;
     // Request code for listing saved games
     private static final int RC_LIST_SAVED_GAMES = 9002;
-    // Request code for selecting a snapshot
-    private static final int RC_SELECT_SNAPSHOT = 9003;
-    // Request code for saving the game to a snapshot.
-    private static final int RC_SAVE_SNAPSHOT = 9004;
+    // Request code for listing achievements
+    private static final int RC_ACHIEVEMENT_UI = 9003;
 
-    private static final int RC_LOAD_SNAPSHOT = 9005;
 
     //Duplicate of ENUMS from С:
     private static final int MSG_SIGN_IN = 1;
@@ -57,7 +63,9 @@ public class GpgsJNI {
     private static final int MSG_SIGN_OUT = 3;
     private static final int MSG_SHOW_SNAPSHOTS = 4;
     private static final int MSG_LOAD_SNAPSHOT = 5;
-    private static final int MSG_SAVE_SNAPSHOT = 5;
+    private static final int MSG_SAVE_SNAPSHOT = 6;
+    private static final int MSG_GET_ACHIEVEMENTS = 7;
+
 
     private static final int STATUS_SUCCESS = 1;
     private static final int STATUS_FAILED = 2;
@@ -592,42 +600,89 @@ public class GpgsJNI {
     }
 
     public void revealAchievement(String achievementId) {
-        System.out.println("revealAchievement() " + achievementId);
         if(initAchievements()) {
             mAchievementsClient.reveal(achievementId);
         }
     }
 
     public void unlockAchievement(String achievementId) {
-        System.out.println("unlockAchievement() " + achievementId);
         if(initAchievements()) {
             mAchievementsClient.unlock(achievementId);
         }
     }
 
     public void incrementAchievement(String achievementId, int steps) {
-        System.out.println("incrementAchievement() " + achievementId + " steps = " + steps);
         if(initAchievements()) {
             mAchievementsClient.increment(achievementId, steps);
         }
     }
 
     public void setAchievement(String achievementId, int steps) {
-        System.out.println("setAchievement() " + achievementId + " steps = " + steps);
         if(initAchievements()) {
             mAchievementsClient.setSteps(achievementId, steps);
         }
     }
 
     public void showAchievements() {
-        System.out.println("showAchievements()");
         if(initAchievements()) {
+            mAchievementsClient.getAchievementsIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        activity.startActivityForResult(intent, RC_UNUSED);
+                    }
+                });
         }
     }
 
     public void getAchievements() {
-        System.out.println("getAchievements()");
         if(initAchievements()) {
+            Task<AnnotatedData<AchievementBuffer>> task = mAchievementsClient.load(false);
+            task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<AchievementBuffer>>() {
+                @Override
+                public void onSuccess(AnnotatedData<AchievementBuffer> data) {
+                    AchievementBuffer buffer = data.get();
+                    String message = null;
+                    try {
+                        JSONArray result = new JSONArray();
+                        for (Achievement a : buffer) {
+                            JSONObject json = new JSONObject();
+                            json.put("id", a.getAchievementId());
+                            json.put("name", a.getName());
+                            json.put("description", a.getDescription());
+                            json.put("xp", a.getXpValue());
+                            if (a.getType() == Achievement.TYPE_INCREMENTAL) {
+                                json.put("steps", a.getCurrentSteps());
+                                json.put("total_steps", a.getTotalSteps());
+                            }
+                            if (a.getState() == Achievement.STATE_UNLOCKED) {
+                                json.put("unlocked", true);
+                            }
+                            else if (a.getState() == Achievement.STATE_HIDDEN) {
+                                json.put("hidden", true);
+                            }
+                            else if (a.getState() == Achievement.STATE_REVEALED) {
+                                json.put("revealed", true);
+                            }
+                            result.put(json.toString());
+                        }
+                        message = result.toString();
+                    } catch (JSONException e) {
+                        message = "{ 'error':'Error while converting achievements to JSON: " + e.getMessage() +
+                                "', 'status': '" + STATUS_FAILED + " }";
+                    }
+                    gpgsAddToQueue(MSG_GET_ACHIEVEMENTS, message);
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    sendSimpleMessage(MSG_GET_ACHIEVEMENTS,
+                            "status", STATUS_FAILED,
+                            "error",
+                            "Unable to get achievements.");
+                }
+            });
         }
     }
 }

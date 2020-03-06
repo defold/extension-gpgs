@@ -148,45 +148,45 @@ static int CallIntMethod(lua_State* L, jobject instance, jmethodID method)
 // GPGPS authorization
 //******************************************************************************
 
-static int GpgAuth_Login(lua_State* L)
+static int GpgsAuth_Login(lua_State* L)
 {
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_login);
     return 0;
 }
 
-static int GpgAuth_Logout(lua_State* L)
+static int GpgsAuth_Logout(lua_State* L)
 {
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
     return 0;
 }
 
-static int GpgAuth_SilentLogin(lua_State* L)
+static int GpgsAuth_SilentLogin(lua_State* L)
 {
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
     return 0;
 }
 
-static int GpgAuth_getDisplayName(lua_State* L)
+static int GpgsAuth_getDisplayName(lua_State* L)
 {
     return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getDisplayName);
 }
 
-static int GpgAuth_getId(lua_State* L)
+static int GpgsAuth_getId(lua_State* L)
 {
     return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getId);
 }
 
-static int GpgAuth_getIdToken(lua_State* L)
+static int GpgsAuth_getIdToken(lua_State* L)
 {
     return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getIdToken);
 }
 
-static int GpgAuth_getServerAuthCode(lua_State* L)
+static int GpgsAuth_getServerAuthCode(lua_State* L)
 {
     return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getServerAuthCode);
 }
 
-static int GpgAuth_isLoggedIn(lua_State* L)
+static int GpgsAuth_isLoggedIn(lua_State* L)
 {
     return CallBooleanMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_isLoggedIn);
 }
@@ -195,7 +195,7 @@ static int GpgAuth_isLoggedIn(lua_State* L)
 // GPGPS misc
 //******************************************************************************
 
-static int GpgAuth_setGravityForPopups(lua_State* L)
+static int GpgsAuth_setGravityForPopups(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
     int position_lua = luaL_checknumber(L, 1);
@@ -227,7 +227,7 @@ static bool is_disk_avaliable()
     }
 }
 
-static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
+static int GpgsDisk_SnapshotDisplaySaves(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -252,7 +252,7 @@ static int GpgDisk_SnapshotDisplaySaves(lua_State* L)
     return 0;
 }
 
-static int GpgDisk_SnapshotOpen(lua_State* L)
+static int GpgsDisk_SnapshotOpen(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -275,7 +275,7 @@ static int GpgDisk_SnapshotOpen(lua_State* L)
     return 0;
 }
 
-static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
+static int GpgsDisk_SnapshotCommitAndClose(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -314,7 +314,7 @@ static int GpgDisk_SnapshotCommitAndClose(lua_State* L)
     return 0;
 }
 
-static int GpgDisk_SnapshotGetData(lua_State* L)
+static int GpgsDisk_SnapshotGetData(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -345,7 +345,7 @@ static int GpgDisk_SnapshotGetData(lua_State* L)
     return 2;
 }
 
-static int GpgDisk_SnapshotSetData(lua_State* L)
+static int GpgsDisk_SnapshotSetData(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -379,7 +379,7 @@ static int GpgDisk_SnapshotSetData(lua_State* L)
     return 2;
 }
 
-static int GpgDisk_SnapshotIsOpened(lua_State* L)
+static int GpgsDisk_SnapshotIsOpened(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -389,7 +389,7 @@ static int GpgDisk_SnapshotIsOpened(lua_State* L)
     return CallBooleanMethod(L, g_gpgs.m_GpgsJNI, g_gpgs_disk.m_isSnapshotOpened);
 }
 
-static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
+static int GpgsDisk_GetMaxCoverImageSize(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -399,7 +399,7 @@ static int GpgDisk_GetMaxCoverImageSize(lua_State* L)
     return CallIntMethod(L, g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxCoverImageSize);
 }
 
-static int GpgDisk_GetMaxDataSize(lua_State* L)
+static int GpgsDisk_GetMaxDataSize(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -409,7 +409,7 @@ static int GpgDisk_GetMaxDataSize(lua_State* L)
     return CallIntMethod(L, g_gpgs.m_GpgsJNI, g_gpgs_disk.m_getMaxDataSize);
 }
 
-static int GpgDisk_SnapshotGetConflictingData(lua_State* L)
+static int GpgsDisk_SnapshotGetConflictingData(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -440,7 +440,7 @@ static int GpgDisk_SnapshotGetConflictingData(lua_State* L)
     return 2;
 }
 
-static int GpgDisk_SnapshotResolveConflict(lua_State* L)
+static int GpgsDisk_SnapshotResolveConflict(lua_State* L)
 {
     if (not is_disk_avaliable())
     {
@@ -459,66 +459,52 @@ static int GpgDisk_SnapshotResolveConflict(lua_State* L)
 // GPGPS achievements
 //******************************************************************************
 
-static int GpgAchievement_Reveal(lua_State* L)
+static int GpgsAchievement_Reveal(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Reveal()");
     DM_LUA_STACK_CHECK(L, 0);
 
     const char* achievementId = luaL_checkstring(L, 1);
-    dmLogInfo("GpgAchievement_Reveal() %s", achievementId);
-
     CallVoidMethodChar(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_RevealAchievement, achievementId);
     return 0;
 }
 
-static int GpgAchievement_Unlock(lua_State* L)
+static int GpgsAchievement_Unlock(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Unlock()");
     DM_LUA_STACK_CHECK(L, 0);
 
     const char* achievementId = luaL_checkstring(L, 1);
-    dmLogInfo("GpgAchievement_Unlock() %s", achievementId);
-
     CallVoidMethodChar(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_UnlockAchievement, achievementId);
     return 0;
 }
 
-static int GpgAchievement_Increment(lua_State* L)
+static int GpgsAchievement_Increment(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Increment()");
     DM_LUA_STACK_CHECK(L, 0);
 
     const char* achievementId = luaL_checkstring(L, 1);
     int steps = luaL_checknumber(L, 2);
-    dmLogInfo("GpgAchievement_Increment() %s %i", achievementId, steps);
-
     CallVoidMethodCharInt(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_UnlockAchievement, achievementId, steps);
     return 0;
 }
 
-static int GpgAchievement_Set(lua_State* L)
+static int GpgsAchievement_Set(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Set()");
     DM_LUA_STACK_CHECK(L, 0);
 
     const char* achievementId = luaL_checkstring(L, 1);
     int steps = luaL_checknumber(L, 2);
-    dmLogInfo("GpgAchievement_Set() %s %i", achievementId, steps);
-
     CallVoidMethodCharInt(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_SetAchievement, achievementId, steps);
     return 0;
 }
 
-static int GpgAchievement_Show(lua_State* L)
+static int GpgsAchievement_Show(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Show()");
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_ShowAchievements);
     return 0;
 }
 
-static int GpgAchievement_Get(lua_State* L)
+static int GpgsAchievement_Get(lua_State* L)
 {
-    dmLogInfo("GpgAchievement_Get()");
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_GetAchievements);
     return 0;
 }
@@ -541,37 +527,37 @@ JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env,
 }
 //-----
 
-static const luaL_reg Gpg_methods[] =
+static const luaL_reg Gpgs_methods[] =
 {
-    //autorization
-    {"login", GpgAuth_Login},
-    {"logout", GpgAuth_Logout},
-    {"silent_login", GpgAuth_SilentLogin},
-    {"get_display_name", GpgAuth_getDisplayName},
-    {"get_id", GpgAuth_getId},
-    {"get_id_token", GpgAuth_getIdToken},
-    {"get_server_auth_code", GpgAuth_getServerAuthCode},
-    {"is_logged_in", GpgAuth_isLoggedIn},
-    {"set_popup_position", GpgAuth_setGravityForPopups},
+    //authorization
+    {"login", GpgsAuth_Login},
+    {"logout", GpgsAuth_Logout},
+    {"silent_login", GpgsAuth_SilentLogin},
+    {"get_display_name", GpgsAuth_getDisplayName},
+    {"get_id", GpgsAuth_getId},
+    {"get_id_token", GpgsAuth_getIdToken},
+    {"get_server_auth_code", GpgsAuth_getServerAuthCode},
+    {"is_logged_in", GpgsAuth_isLoggedIn},
+    {"set_popup_position", GpgsAuth_setGravityForPopups},
     {"set_callback", Gpg_set_callback},
     //disk
-    {"snapshot_display_saves", GpgDisk_SnapshotDisplaySaves},
-    {"snapshot_open", GpgDisk_SnapshotOpen},
-    {"snapshot_commit_and_close", GpgDisk_SnapshotCommitAndClose},
-    {"snapshot_get_data", GpgDisk_SnapshotGetData},
-    {"snapshot_set_data", GpgDisk_SnapshotSetData},
-    {"snapshot_is_opened", GpgDisk_SnapshotIsOpened},
-    {"snapshot_get_max_image_size", GpgDisk_GetMaxCoverImageSize},
-    {"snapshot_get_max_save_size", GpgDisk_GetMaxDataSize},
-    {"snapshot_get_conflicting_data", GpgDisk_SnapshotGetConflictingData},
-    {"snapshot_resolve_conflict", GpgDisk_SnapshotResolveConflict},
+    {"snapshot_display_saves", GpgsDisk_SnapshotDisplaySaves},
+    {"snapshot_open", GpgsDisk_SnapshotOpen},
+    {"snapshot_commit_and_close", GpgsDisk_SnapshotCommitAndClose},
+    {"snapshot_get_data", GpgsDisk_SnapshotGetData},
+    {"snapshot_set_data", GpgsDisk_SnapshotSetData},
+    {"snapshot_is_opened", GpgsDisk_SnapshotIsOpened},
+    {"snapshot_get_max_image_size", GpgsDisk_GetMaxCoverImageSize},
+    {"snapshot_get_max_save_size", GpgsDisk_GetMaxDataSize},
+    {"snapshot_get_conflicting_data", GpgsDisk_SnapshotGetConflictingData},
+    {"snapshot_resolve_conflict", GpgsDisk_SnapshotResolveConflict},
     //achievement
-    {"achievement_reveal", GpgAchievement_Reveal},
-    {"achievement_unlock", GpgAchievement_Unlock},
-    {"achievement_set", GpgAchievement_Set},
-    {"achievement_increment", GpgAchievement_Increment},
-    {"achievement_show", GpgAchievement_Show},
-    {"achievement_get", GpgAchievement_Get},
+    {"achievement_reveal", GpgsAchievement_Reveal},
+    {"achievement_unlock", GpgsAchievement_Unlock},
+    {"achievement_set", GpgsAchievement_Set},
+    {"achievement_increment", GpgsAchievement_Increment},
+    {"achievement_show", GpgsAchievement_Show},
+    {"achievement_get", GpgsAchievement_Get},
     {0,0}
 };
 
@@ -584,7 +570,7 @@ static dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
 static void LuaInit(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
-    luaL_register(L, MODULE_NAME, Gpg_methods);
+    luaL_register(L, MODULE_NAME, Gpgs_methods);
 
 #define SETCONSTANT(name) \
     lua_pushnumber(L, (lua_Number) name); \

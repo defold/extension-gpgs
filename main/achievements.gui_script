@@ -3,7 +3,8 @@ local monarch = require "monarch.monarch"
 
 
 function gpgs_callback(self, message_id, message)
-	print(message_id, message)
+	print(message_id)
+	pprint(message)
 end
 
 function init(self)
@@ -38,6 +39,18 @@ function on_input(self, action_id, action)
 		end
 	end)
 	
+	dirtylarry:button("show", action_id, action, function ()
+		if gpgs then
+			gpgs.achievement_show()
+		end
+	end)
+
+	dirtylarry:button("get", action_id, action, function ()
+		if gpgs then
+			gpgs.achievement_get()
+		end
+	end)
+		
 	dirtylarry:button("back", action_id, action, function ()
 		monarch.back()
 	end)
