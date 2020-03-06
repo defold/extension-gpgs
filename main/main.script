@@ -1,0 +1,13 @@
+local monarch = require "monarch.monarch"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	if gpgs then
+		for k,v in pairs(gpgs) do
+			print("gpgs." .. tostring(k))
+		end
+	end
+	timer.delay(0, false, function()
+		monarch.show("menu")
+	end)
+end

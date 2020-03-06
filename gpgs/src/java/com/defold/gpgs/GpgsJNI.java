@@ -20,6 +20,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import com.google.android.gms.games.AchievementsClient;
+
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.SnapshotsClient;
 import com.google.android.gms.games.snapshot.SnapshotMetadata;
@@ -76,7 +78,7 @@ public class GpgsJNI {
     private boolean is_request_auth_code;
 
     //--------------------------------------------------
-    // Autorization
+    // Authorization
 
     private GoogleSignInAccount mSignedInAccount = null;
     private GoogleSignInOptions mSignInOptions;
@@ -570,5 +572,62 @@ public class GpgsJNI {
 
     public int getMaxDataSize() {
         return maxDataSize;
+    }
+
+
+    //--------------------------------------------------
+    // Achievements
+
+    // Client used to interact with Achievements.
+    private AchievementsClient mAchievementsClient = null;
+
+    private boolean initAchievements() {
+        if (mSignedInAccount == null) {
+            return false;
+        }
+        if (mAchievementsClient == null) {
+            mAchievementsClient = Games.getAchievementsClient(activity, mSignedInAccount);
+        }
+        return true;
+    }
+
+    public void revealAchievement(String achievementId) {
+        System.out.println("revealAchievement() " + achievementId);
+        if(initAchievements()) {
+            mAchievementsClient.reveal(achievementId);
+        }
+    }
+
+    public void unlockAchievement(String achievementId) {
+        System.out.println("unlockAchievement() " + achievementId);
+        if(initAchievements()) {
+            mAchievementsClient.unlock(achievementId);
+        }
+    }
+
+    public void incrementAchievement(String achievementId, int steps) {
+        System.out.println("incrementAchievement() " + achievementId + " steps = " + steps);
+        if(initAchievements()) {
+            mAchievementsClient.increment(achievementId, steps);
+        }
+    }
+
+    public void setAchievement(String achievementId, int steps) {
+        System.out.println("setAchievement() " + achievementId + " steps = " + steps);
+        if(initAchievements()) {
+            mAchievementsClient.setSteps(achievementId, steps);
+        }
+    }
+
+    public void showAchievements() {
+        System.out.println("showAchievements()");
+        if(initAchievements()) {
+        }
+    }
+
+    public void getAchievements() {
+        System.out.println("getAchievements()");
+        if(initAchievements()) {
+        }
     }
 }
