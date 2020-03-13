@@ -1,0 +1,62 @@
+local dirtylarry = require "dirtylarry.dirtylarry"
+local monarch = require "monarch.monarch"
+
+function gpgs_callback(self, message_id, message)
+    print(message_id)
+    pprint(message)
+    if message_id == gpgs.MSG_GET_PLAYER_SCORE then
+        local text = ("%s (%s)"):format(message.display_score, message.display_rank)
+        gui.set_text(gui.get_node("score"), text)
+    elseif message_id == gpgs.MSG_GET_PLAYER_CENTERED_SCORES 
+    or message_id == gpgs.MSG_GET_TOP_SCORES then
+        local s = ""
+        for _,score in ipairs(message) do
+            score = json.decode(score)
+            s = s .. ("%s - %s (%s)\n"):format(score.score_holder_name, score.display_score, score.display_rank)
+        end
+        gui.set_text(gui.get_node("scores"), s)
+    end
+end
+
+function init(self)
+    msg.post(".", "acquire_input_focus")
+    if gpgs then
+        gpgs.set_callback(gpgs_callback)
+    end
+    self.clicks = 0
+end
+
+function on_input(self, action_id, action)
+    if action_id == hash("touch") and action.released then
+        self.clicks = self.clicks + 1
+        print(self.clicks)
+        gui.set_text(gui.get_node("clicks"), tostring(self.clicks))
+    end
+    
+    dirtylarry:button("submit_score", action_id, action, function ()
+        gpgs.leaderboard_submit_score("CgkIq5-gxcsVEAIQAg", self.clicks)
+    end)
+
+    dirtylarry:button("top_scores", action_id, action, function ()
+        gpgs.leaderboard_get_top_scores("CgkIq5-gxcsVEAIQAg", gpgs.TIME_SPAN_ALL_TIME, gpgs.COLLECTION_PUBLIC, 10)
+    end)
+
+    dirtylarry:button("player_centered_scores", action_id, action, function ()
+        gpgs.leaderboard_get_player_centered_scores("CgkIq5-gxcsVEAIQAg", gpgs.TIME_SPAN_ALL_TIME, gpgs.COLLECTION_PUBLIC, 10)
+    end)
+
+    dirtylarry:button("player_score", action_id, action, function ()
+        gpgs.leaderboard_get_player_score("CgkIq5-gxcsVEAIQAg", gpgs.TIME_SPAN_ALL_TIME, gpgs.COLLECTION_PUBLIC)
+    end)
+
+    dirtylarry:button("show_leaderboard", action_id, action, function ()
+        gpgs.leaderboard_show("CgkIq5-gxcsVEAIQAg", gpgs.TIME_SPAN_ALL_TIME, gpgs.COLLECTION_PUBLIC)
+    end)
+                
+    dirtylarry:button("back", action_id, action, function ()
+        monarch.back()
+    end)
+end
+
+function on_reload(self)
+end

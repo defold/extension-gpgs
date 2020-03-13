@@ -43,7 +43,11 @@ function on_input(self, action_id, action)
     dirtylarry:button("achievements", action_id, action, function ()
         monarch.show("achievements")
     end)
-    
+
+    dirtylarry:button("leaderboards", action_id, action, function ()
+        monarch.show("leaderboards")
+    end)
+        
     dirtylarry:button("popup_pos", action_id, action, function ()
         change_popup_pos(self)
     end)

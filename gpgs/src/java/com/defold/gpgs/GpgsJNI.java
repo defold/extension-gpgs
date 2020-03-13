@@ -6,6 +6,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Gravity;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -15,24 +18,25 @@ import com.google.android.gms.games.Games;
 import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.Player;
 import com.google.android.gms.games.PlayersClient;
+import com.google.android.gms.games.AnnotatedData;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-
-import com.google.android.gms.games.AchievementsClient;
+import com.google.android.gms.tasks.Continuation;
 
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.SnapshotsClient;
 import com.google.android.gms.games.snapshot.SnapshotMetadata;
 import com.google.android.gms.games.snapshot.SnapshotMetadataChange;
 import com.google.android.gms.games.snapshot.Snapshot;
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.common.api.ApiException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
-import com.google.android.gms.games.AnnotatedData;
+import com.google.android.gms.games.LeaderboardsClient;
+import com.google.android.gms.games.leaderboard.LeaderboardScore;
+import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
+
+import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.achievement.Achievement;
 import com.google.android.gms.games.achievement.AchievementBuffer;
 
@@ -55,23 +59,28 @@ public class GpgsJNI {
     private static final int RC_LIST_SAVED_GAMES = 9002;
     // Request code for listing achievements
     private static final int RC_ACHIEVEMENT_UI = 9003;
+    private static final int RC_SHOW_LEADERBOARD = 9004;
 
 
-    //Duplicate of ENUMS from С:
+    // duplicate of enums from gpgs_extension.h:
     private static final int MSG_SIGN_IN = 1;
     private static final int MSG_SILENT_SIGN_IN = 2;
     private static final int MSG_SIGN_OUT = 3;
     private static final int MSG_SHOW_SNAPSHOTS = 4;
     private static final int MSG_LOAD_SNAPSHOT = 5;
     private static final int MSG_SAVE_SNAPSHOT = 6;
-    private static final int MSG_GET_ACHIEVEMENTS = 7;
+    private static final int MSG_ACHIEVEMENTS = 7;
+    private static final int MSG_GET_TOP_SCORES = 8;
+    private static final int MSG_GET_PLAYER_CENTERED_SCORES = 9;
+    private static final int MSG_GET_PLAYER_SCORE = 10;
 
-
+    // duplicate of enums from gpgs_extension.h:
     private static final int STATUS_SUCCESS = 1;
     private static final int STATUS_FAILED = 2;
     private static final int STATUS_CREATE_NEW_SAVE = 3;
     private static final int STATUS_CONFLICT = 4;
 
+    // duplicate of enums from gpgs_extension.h:
     private static final int SNAPSHOT_CURRENT = 1;
     private static final int SNAPSHOT_CONFLICTING = 2;
 
@@ -93,6 +102,27 @@ public class GpgsJNI {
     private GoogleSignInClient mGoogleSignInClient;
     private Player mPlayer;
     private int mGravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+
+
+    private OnFailureListener newOnFailureListener(final int messageId, final String message) {
+        return new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                sendSimpleMessage(messageId,
+                        "status", STATUS_FAILED,
+                        "error", message);
+            }
+        };
+    }
+
+    private OnSuccessListener<Intent> newOnSuccessListenerForIntent(final int requestCode) {
+        return new OnSuccessListener<Intent>() {
+            @Override
+            public void onSuccess(Intent intent) {
+                activity.startActivityForResult(intent, requestCode);
+            }
+        };
+    }
 
     private void sendSimpleMessage(int msg, String key_1, int value_1) {
         String message = null;
@@ -163,15 +193,7 @@ public class GpgsJNI {
                                     "status", STATUS_SUCCESS);
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            sendSimpleMessage(MSG_SIGN_IN,
-                                    "status", STATUS_FAILED,
-                                    "error",
-                                    "There was a problem getting the player id!");
-                        }
-                    });
+                    .addOnFailureListener(newOnFailureListener(MSG_SIGN_IN, "There was a problem getting the player id!"));
         }
         GamesClient gamesClient = Games.getGamesClient(activity, googleSignInAccount);
         gamesClient.setGravityForPopups(mGravity);
@@ -458,21 +480,8 @@ public class GpgsJNI {
                 popupTitle, allowAddButton, allowDelete, maxNumberOfSavedGamesToShow);
 
         intentTask
-                .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                    @Override
-                    public void onSuccess(Intent intent) {
-                        activity.startActivityForResult(intent, RC_LIST_SAVED_GAMES);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        sendSimpleMessage(MSG_SHOW_SNAPSHOTS,
-                                "status", STATUS_FAILED,
-                                "error",
-                                "Can't start activity for showing saved games.");
-                    }
-                });
+            .addOnSuccessListener(newOnSuccessListenerForIntent(RC_LIST_SAVED_GAMES))
+            .addOnFailureListener(newOnFailureListener(MSG_SHOW_SNAPSHOTS, "Can't start activity for showing saved games."));
     }
 
     public void loadSnapshot(String saveName, boolean createIfNotFound, int conflictPolicy) {
@@ -584,6 +593,127 @@ public class GpgsJNI {
 
 
     //--------------------------------------------------
+    // Leaderboards
+
+    // Client used to interact with Leaderboards.
+    private LeaderboardsClient mLeaderboardsClient = null;
+
+    private boolean initLeaderboards() {
+        if (mSignedInAccount == null) {
+            return false;
+        }
+        if (mLeaderboardsClient == null) {
+            mLeaderboardsClient = Games.getLeaderboardsClient(activity, mSignedInAccount);
+        }
+        return true;
+    }
+
+    public void submitScore(String leaderboardId, long score) {
+        if(initLeaderboards()) {
+            mLeaderboardsClient.submitScore(leaderboardId, score);
+        }
+    }
+
+    private static JSONObject scoreToJSON(LeaderboardScore score) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("display_rank", score.getDisplayRank());
+        json.put("display_score", score.getDisplayScore());
+        json.put("rank", score.getRank());
+        json.put("score", score.getRawScore());
+        json.put("tag", score.getScoreTag());
+        json.put("timestamp", score.getTimestampMillis());
+        json.put("score_holder_name", score.getScoreHolderDisplayName());
+        json.put("score_holder_icon", score.getScoreHolderIconImageUri());
+        json.put("score_holder_image", score.getScoreHolderHiResImageUri());
+        return json;
+    }
+
+    public void loadTopScores(String leaderboardId, int span, int collection, int maxResults) {
+        if(initLeaderboards()) {
+            Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadTopScores(leaderboardId, span, collection, maxResults);
+            task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
+                @Override
+                public void onSuccess(AnnotatedData<LeaderboardsClient.LeaderboardScores> data) {
+                    LeaderboardsClient.LeaderboardScores scores = data.get();
+                    LeaderboardScoreBuffer buffer = scores.getScores();
+                    String message = null;
+                    try {
+                        JSONArray result = new JSONArray();
+                        for (LeaderboardScore score : buffer) {
+                            JSONObject json = scoreToJSON(score);
+                            result.put(json.toString());
+                        }
+                        message = result.toString();
+                    } catch (JSONException e) {
+                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
+                                "', 'status': '" + STATUS_FAILED + " }";
+                    }
+                    buffer.release();
+                    gpgsAddToQueue(MSG_GET_TOP_SCORES, message);
+                }
+            })
+            .addOnFailureListener(newOnFailureListener(MSG_GET_TOP_SCORES, "Unable to get top scores."));
+        }
+    }
+
+    public void loadPlayerCenteredScores(String leaderboardId, int span, int collection, int maxResults) {
+        if(initLeaderboards()) {
+            Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults);
+            task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
+                @Override
+                public void onSuccess(AnnotatedData<LeaderboardsClient.LeaderboardScores> data) {
+                    LeaderboardsClient.LeaderboardScores scores = data.get();
+                    LeaderboardScoreBuffer buffer = scores.getScores();
+                    String message = null;
+                    try {
+                        JSONArray result = new JSONArray();
+                        for (LeaderboardScore score : buffer) {
+                            JSONObject json = scoreToJSON(score);
+                            result.put(json.toString());
+                        }
+                        message = result.toString();
+                    } catch (JSONException e) {
+                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
+                                "', 'status': '" + STATUS_FAILED + " }";
+                    }
+                    buffer.release();
+                    gpgsAddToQueue(MSG_GET_PLAYER_CENTERED_SCORES, message);
+                }
+            })
+            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_CENTERED_SCORES, "Unable to get player centered scores."));
+        }
+    }
+
+    public void loadCurrentPlayerLeaderboardScore(String leaderboardId, int span, int collection) {
+        if(initLeaderboards()) {
+            Task<AnnotatedData<LeaderboardScore>> task = mLeaderboardsClient.loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection);
+            task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardScore>>() {
+                @Override
+                public void onSuccess(AnnotatedData<LeaderboardScore> data) {
+                    LeaderboardScore score = data.get();
+                    String message = null;
+                    try {
+                        JSONObject result = scoreToJSON(score);
+                        message = result.toString();
+                    } catch (JSONException e) {
+                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
+                                "', 'status': '" + STATUS_FAILED + " }";
+                    }
+                    gpgsAddToQueue(MSG_GET_PLAYER_SCORE, message);
+                }
+            })
+            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_SCORE, "Unable to get player scores."));
+        }
+    }
+
+    public void showLeaderboard(String leaderboardId, int span, int collection) {
+        if(initLeaderboards()) {
+            mLeaderboardsClient.getLeaderboardIntent(leaderboardId, span, collection)
+                .addOnSuccessListener(newOnSuccessListenerForIntent(RC_SHOW_LEADERBOARD));
+        }
+    }
+
+    //--------------------------------------------------
     // Achievements
 
     // Client used to interact with Achievements.
@@ -626,12 +756,7 @@ public class GpgsJNI {
     public void showAchievements() {
         if(initAchievements()) {
             mAchievementsClient.getAchievementsIntent()
-                .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                    @Override
-                    public void onSuccess(Intent intent) {
-                        activity.startActivityForResult(intent, RC_UNUSED);
-                    }
-                });
+                .addOnSuccessListener(newOnSuccessListenerForIntent(RC_UNUSED));
         }
     }
 
@@ -667,22 +792,15 @@ public class GpgsJNI {
                             result.put(json.toString());
                         }
                         message = result.toString();
+                        buffer.release();
                     } catch (JSONException e) {
                         message = "{ 'error':'Error while converting achievements to JSON: " + e.getMessage() +
                                 "', 'status': '" + STATUS_FAILED + " }";
                     }
-                    gpgsAddToQueue(MSG_GET_ACHIEVEMENTS, message);
+                    gpgsAddToQueue(MSG_ACHIEVEMENTS, message);
                 }
             })
-            .addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    sendSimpleMessage(MSG_GET_ACHIEVEMENTS,
-                            "status", STATUS_FAILED,
-                            "error",
-                            "Unable to get achievements.");
-                }
-            });
+            .addOnFailureListener(newOnFailureListener(MSG_ACHIEVEMENTS, "Unable to get achievements."));
         }
     }
 }

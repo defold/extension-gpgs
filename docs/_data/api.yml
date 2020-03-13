@@ -600,6 +600,138 @@
             ```
 
 #*****************************************************************************************************
+# Achievement
+#*****************************************************************************************************
+
+  - name: achievement_reveal
+    type: function
+
+    parameters:
+      - name: achievementId
+        type: string
+
+#*****************************************************************************************************
+
+  - name: achievement_unlock
+    type: function
+
+    parameters:
+      - name: achievementId
+        type: string
+
+#*****************************************************************************************************
+
+  - name: achievement_set
+    type: function
+
+    parameters:
+      - name: achievementId
+        type: string
+
+    parameters:
+      - name: value
+        type: string
+
+#*****************************************************************************************************
+
+  - name: achievement_increment
+    type: function
+
+    parameters:
+      - name: achievementId
+        type: string
+
+    parameters:
+      - name: value
+        type: string
+
+#*****************************************************************************************************
+
+  - name: achievement_show
+    type: function
+
+#*****************************************************************************************************
+
+  - name: achievement_get
+    type: function
+
+
+#*****************************************************************************************************
+# Leaderboard
+#*****************************************************************************************************
+
+  - name: leaderboard_submit_score
+    type: function
+
+    parameters:
+      - name: leaderboardId
+        type: string
+      - name: score
+        type: number
+
+#*****************************************************************************************************
+
+  - name: leaderboard_get_top_scores
+    type: function
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+
+      - name: collection
+        type: number
+
+      - name: max_results
+        type: number
+
+#*****************************************************************************************************
+
+  - name: leaderboard_get_player_centered_scores
+    type: function
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+
+      - name: collection
+        type: number
+
+      - name: max_results
+        type: number
+
+#*****************************************************************************************************
+
+  - name: leaderboard_show
+    type: function
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+#*****************************************************************************************************
+
+  - name: leaderboard_get_player_score
+    type: function
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+
+      - name: collection
+        type: number
+
+#*****************************************************************************************************
+# Popup position
+#*****************************************************************************************************
 
   - name: POPUP_POS_TOP_LEFT
     type: number
@@ -637,6 +769,10 @@
     type: number
     desc: The login popup position at the bottom-right corner.
 
+#*****************************************************************************************************
+# Snapshot constants
+#*****************************************************************************************************
+
   - name: RESOLUTION_POLICY_MANUAL
     type: number
     desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL) for this constant
@@ -656,6 +792,29 @@
   - name: RESOLUTION_POLICY_HIGHEST_PROGRESS
     type: number
     desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
+
+#*****************************************************************************************************
+# Leaderboard constants
+#*****************************************************************************************************
+
+  - name: TIME_SPAN_DAILY
+    type: number
+
+  - name: TIME_SPAN_WEEKLY
+    type: number
+
+  - name: TIME_SPAN_ALL_TIME
+    type: number
+
+  - name: COLLECTION_PUBLIC
+    type: number
+
+  - name: COLLECTION_SOCIAL
+    type: number
+
+#*****************************************************************************************************
+# Extension callback constants
+#*****************************************************************************************************
 
   - name: MSG_SIGN_IN
     type: number
@@ -682,6 +841,22 @@
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.snapshot_open()`
 
+  - name: MSG_GET_ACHIEVEMENTS
+    type: number
+
+  - name: MSG_GET_TOP_SCORES
+    type: number
+
+  - name: MSG_GET_PLAYER_CENTERED_SCORES
+    type: number
+
+  - name: MSG_GET_PLAYER_SCORE
+    type: number
+
+#*****************************************************************************************************
+# Status
+#*****************************************************************************************************
+
   - name: STATUS_SUCCESS
     type: number
     desc: An operation success.
@@ -700,6 +875,10 @@
     desc: The result of the calling `gpgs.snapshot_open()` or 'gpgs.snapshot_resolve_conflict()' is a conflict.
           You need to make decision on how to solve this conflict using 'gpgs.snapshot_resolve_conflict()'.
 
+#*****************************************************************************************************
+# Snapshot constants
+#*****************************************************************************************************
+
   - name: SNAPSHOT_CURRENT
     type: number
     desc: The second parameter for 'gpgs.snapshot_resolve_conflict()' method, which means that you want to choose
@@ -709,6 +888,10 @@
     type: number
     desc: The second parameter for 'gpgs.snapshot_resolve_conflict()' method, which means that you want to choose
           the conflicting snapshot as a snapshot for conflict solving.
+
+#*****************************************************************************************************
+# Error constants
+#*****************************************************************************************************
 
   - name: ERROR_STATUS_SNAPSHOT_NOT_FOUND
     type: number
