@@ -794,6 +794,25 @@
     desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
 
 #*****************************************************************************************************
+# Leaderboard constants
+#*****************************************************************************************************
+
+  - name: TIME_SPAN_DAILY
+    type: number
+
+  - name: TIME_SPAN_WEEKLY
+    type: number
+
+  - name: TIME_SPAN_ALL_TIME
+    type: number
+
+  - name: COLLECTION_PUBLIC
+    type: number
+
+  - name: COLLECTION_SOCIAL
+    type: number
+
+#*****************************************************************************************************
 # Extension callback constants
 #*****************************************************************************************************
 
