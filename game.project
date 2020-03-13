@@ -1,7 +1,7 @@
 [project]
-title = GPGS
+title = extension-gpgs
 version = 0.2
-dependencies = https://github.com/andsve/dirtylarry/archive/master.zip,https://github.com/britzl/defold-screenshot/archive/master.zip
+dependencies = https://github.com/andsve/dirtylarry/archive/master.zip,https://github.com/britzl/defold-screenshot/archive/master.zip,https://github.com/britzl/monarch/archive/3.1.0.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -20,20 +20,24 @@ scale = 0.02
 shared_state = 1
 
 [android]
-package = com.potatojam.onet_paradise.match_two_tiles
+package = com.defold.extension.gpgs
 minimum_sdk_version = 16
 target_sdk_version = 28
 
 [ios]
-bundle_identifier = com.defoldtest.gpgs
+bundle_identifier = com.defold.extension.gpgs
+infoplist = /builtins/manifests/ios/Info.plist
 
 [gpgs]
-app_id = 567627510591
-#client_id = client id from google console
+app_id = 741832396715
+#client_id = 741832396715-sl2dn4pjiqop78t1pgflb6ob4aqsvom5.apps.googleusercontent.com
 use_saved_games = 1
 request_server_auth_code = 0
 request_id_token = 0
 
 [library]
 include_dirs = gpgs
+
+[osx]
+bundle_identifier = com.defold.extension.gpgs
 

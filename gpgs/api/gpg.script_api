@@ -120,7 +120,7 @@
 
   - name: get_server_auth_code
     type: function
-    desc: Returns a one-time server auth code to send to your web server which can be exchanged for access token 
+    desc: Returns a one-time server auth code to send to your web server which can be exchanged for access token
 
     returns:
       - name: server_auth_code
@@ -438,7 +438,7 @@
         desc: The byte array data of the currently opened snapshot. `nil` if something goes wrong.
 
       - name: error_message
-        type: boolean
+        type: string
         desc: An error message if something goes wrong.
 
     examples:
@@ -461,13 +461,18 @@
     type: function
     desc: Sets the data for the currently opened snapshot.
 
-    returns:
-      - name: bytes
+    parameters:
+      - name: data
         type: string
-        desc: The byte array data of the currently opened snapshot. `nil` if something goes wrong.
+        desc: The data to set.
+
+    returns:
+      - name: success
+        type: boolean
+        desc: True if data was set for the currently opened snapshot.
 
       - name: error_message
-        type: boolean
+        type: string
         desc: An error message if something goes wrong.
 
     examples:
