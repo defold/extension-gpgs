@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "gpgs_jni.h"
+#include "gpgs_extension.h"
 #include "private_gpgs_callback.h"
 #include "com_defold_gpgs_GpgsJNI.h"
 #include "utils/LuaUtils.h"
@@ -18,7 +19,6 @@
 struct GPGS
 {
     jobject                 m_GpgsJNI;
-    //autorization
     jmethodID               m_silentLogin;
     jmethodID               m_login;
     jmethodID               m_logout;
@@ -57,9 +57,19 @@ struct GPGS_Achievement
     jmethodID              m_GetAchievements;
 };
 
+struct GPGS_Leaderboard
+{
+    jmethodID              m_SubmitScore;
+    jmethodID              m_LoadTopScores;
+    jmethodID              m_LoadPlayerCenteredScores;
+    jmethodID              m_ShowLeaderboard;
+    jmethodID              m_LoadCurrentPlayerScore;
+};
+
 static GPGS             g_gpgs;
 static GPGS_Disk        g_gpgs_disk;
 static GPGS_Achievement g_gpgs_achievement;
+static GPGS_Leaderboard g_gpgs_leaderboard;
 
 // generic JNI calls
 
@@ -80,6 +90,36 @@ static void CallVoidMethodCharInt(jobject instance, jmethodID method, const char
     JNIEnv *env = attacher.env;
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr, i);
+    env->DeleteLocalRef(jstr);
+}
+
+// void method(char*, int, int)
+static void CallVoidMethodCharIntInt(jobject instance, jmethodID method, const char* cstr, int i1, int i2)
+{
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    jstring jstr = env->NewStringUTF(cstr);
+    env->CallVoidMethod(instance, method, jstr, i1, i2);
+    env->DeleteLocalRef(jstr);
+}
+
+// void method(char*, int, int, int)
+static void CallVoidMethodCharIntIntInt(jobject instance, jmethodID method, const char* cstr, int i1, int i2, int i3)
+{
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    jstring jstr = env->NewStringUTF(cstr);
+    env->CallVoidMethod(instance, method, jstr, i1, i2, i3);
+    env->DeleteLocalRef(jstr);
+}
+
+// void method(char*, long)
+static void CallVoidMethodCharLong(jobject instance, jmethodID method, const char* cstr, long l)
+{
+    ThreadAttacher attacher;
+    JNIEnv *env = attacher.env;
+    jstring jstr = env->NewStringUTF(cstr);
+    env->CallVoidMethod(instance, method, jstr, l);
     env->DeleteLocalRef(jstr);
 }
 
@@ -509,6 +549,66 @@ static int GpgsAchievement_Get(lua_State* L)
     return 0;
 }
 
+//******************************************************************************
+// GPGPS leaderboard
+//******************************************************************************
+
+static int GpgsLeaderboard_SubmitScore(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* leaderboardId = luaL_checkstring(L, 1);
+    lua_Number score = luaL_checknumber(L, 2);
+    CallVoidMethodCharLong(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_SubmitScore, leaderboardId, score);
+    return 0;
+}
+
+static int GpgsLeaderboard_GetTopScores(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* leaderboardId = luaL_checkstring(L, 1);
+    lua_Number span = luaL_checknumber(L, 2);
+    lua_Number collection = luaL_checknumber(L, 3);
+    lua_Number maxResults = luaL_checknumber(L, 4);
+    CallVoidMethodCharIntIntInt(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_LoadTopScores, leaderboardId, span, collection, maxResults);
+    return 0;
+}
+
+static int GpgsLeaderboard_GetPlayerCenteredScores(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* leaderboardId = luaL_checkstring(L, 1);
+    lua_Number span = luaL_checknumber(L, 2);
+    lua_Number collection = luaL_checknumber(L, 3);
+    lua_Number maxResults = luaL_checknumber(L, 4);
+    CallVoidMethodCharIntIntInt(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_LoadPlayerCenteredScores, leaderboardId, span, collection, maxResults);
+    return 0;
+}
+
+static int GpgsLeaderboard_GetPlayerScore(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* leaderboardId = luaL_checkstring(L, 1);
+    lua_Number span = luaL_checknumber(L, 2);
+    lua_Number collection = luaL_checknumber(L, 3);
+    CallVoidMethodCharIntInt(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_LoadCurrentPlayerScore, leaderboardId, span, collection);
+    return 0;
+}
+
+static int GpgsLeaderboard_ShowLeaderboard(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* leaderboardId = luaL_checkstring(L, 1);
+    lua_Number span = luaL_checknumber(L, 2);
+    lua_Number collection = luaL_checknumber(L, 3);
+    CallVoidMethodCharIntInt(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_ShowLeaderboard, leaderboardId, span, collection);
+    return 0;
+}
+
 // Extension methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -558,10 +658,16 @@ static const luaL_reg Gpgs_methods[] =
     {"achievement_increment", GpgsAchievement_Increment},
     {"achievement_show", GpgsAchievement_Show},
     {"achievement_get", GpgsAchievement_Get},
+    //leaderboard
+    {"leaderboard_submit_score", GpgsLeaderboard_SubmitScore},
+    {"leaderboard_get_top_scores", GpgsLeaderboard_GetTopScores},
+    {"leaderboard_get_player_centered_scores", GpgsLeaderboard_GetPlayerCenteredScores},
+    {"leaderboard_show", GpgsLeaderboard_ShowLeaderboard},
+    {"leaderboard_get_player_score", GpgsLeaderboard_GetPlayerScore},
     {0,0}
 };
 
-static dmExtension::Result AppInitializeGpg(dmExtension::AppParams* params)
+static dmExtension::Result AppInitializeGpgs(dmExtension::AppParams* params)
 {
     dmLogInfo("Registered extension Gpgs");
     return dmExtension::RESULT_OK;
@@ -591,6 +697,10 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(MSG_SIGN_OUT)
     SETCONSTANT(MSG_SHOW_SNAPSHOTS)
     SETCONSTANT(MSG_LOAD_SNAPSHOT)
+    SETCONSTANT(MSG_GET_ACHIEVEMENTS)
+    SETCONSTANT(MSG_GET_TOP_SCORES)
+    SETCONSTANT(MSG_GET_PLAYER_CENTERED_SCORES)
+    SETCONSTANT(MSG_GET_PLAYER_SCORE)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
@@ -612,6 +722,14 @@ static void LuaInit(lua_State* L)
 
     SETCONSTANT(SNAPSHOT_CURRENT)
     SETCONSTANT(SNAPSHOT_CONFLICTING)
+
+    SETCONSTANT(TIME_SPAN_DAILY)
+    SETCONSTANT(TIME_SPAN_WEEKLY)
+    SETCONSTANT(TIME_SPAN_ALL_TIME)
+
+    SETCONSTANT(COLLECTION_PUBLIC)
+    SETCONSTANT(COLLECTION_SOCIAL)
+
 
 #undef SETCONSTANT
 
@@ -655,6 +773,13 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     g_gpgs_achievement.m_ShowAchievements = env->GetMethodID(cls, "showAchievements", "()V");
     g_gpgs_achievement.m_GetAchievements = env->GetMethodID(cls, "getAchievements", "()V");
 
+    //leaderboard
+    g_gpgs_leaderboard.m_SubmitScore = env->GetMethodID(cls, "submitScore", "(Ljava/lang/String;J)V");
+    g_gpgs_leaderboard.m_LoadTopScores = env->GetMethodID(cls, "loadTopScores", "(Ljava/lang/String;III)V");
+    g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
+    g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
+    g_gpgs_leaderboard.m_LoadCurrentPlayerScore = env->GetMethodID(cls, "loadCurrentPlayerLeaderboardScore", "(Ljava/lang/String;II)V");
+
     //private methods
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");
 }
@@ -696,7 +821,7 @@ static void InitializeJNI(const char* client_id, bool request_server_auth_code, 
     env->DeleteLocalRef(java_client_id);
 }
 
-static dmExtension::Result InitializeGpg(dmExtension::Params* params)
+static dmExtension::Result InitializeGpgs(dmExtension::Params* params)
 {
     LuaInit(params->m_L);
 
@@ -714,39 +839,39 @@ static dmExtension::Result InitializeGpg(dmExtension::Params* params)
     return dmExtension::RESULT_OK;
 }
 
-static dmExtension::Result AppFinalizeGpg(dmExtension::AppParams* params)
+static dmExtension::Result AppFinalizeGpgs(dmExtension::AppParams* params)
 {
     return dmExtension::RESULT_OK;
 }
 
-static dmExtension::Result UpdateGpg(dmExtension::Params* params)
+static dmExtension::Result UpdateGpgs(dmExtension::Params* params)
 {
     gpgs_callback_update();
     return dmExtension::RESULT_OK;
 }
 
-static dmExtension::Result FinalizeGpg(dmExtension::Params* params)
+static dmExtension::Result FinalizeGpgs(dmExtension::Params* params)
 {
     gpgs_callback_finalize();
     dmExtension::UnregisterAndroidOnActivityResultListener(OnActivityResult);
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpg, AppFinalizeGpg, InitializeGpg, UpdateGpg, 0, FinalizeGpg)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, AppInitializeGpgs, AppFinalizeGpgs, InitializeGpgs, UpdateGpgs, 0, FinalizeGpgs)
 
 #else
 
-dmExtension::Result InitializeGpg(dmExtension::Params* params)
+dmExtension::Result InitializeGpgs(dmExtension::Params* params)
 {
     dmLogInfo("Registered extension Gpgs (null)");
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result FinalizeGpg(dmExtension::Params* params)
+dmExtension::Result FinalizeGpgs(dmExtension::Params* params)
 {
     return dmExtension::RESULT_OK;
 }
 
-DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, InitializeGpg, 0, 0, FinalizeGpg)
+DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, InitializeGpgs, 0, 0, FinalizeGpgs)
 
 #endif
