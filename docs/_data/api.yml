@@ -662,10 +662,12 @@
 
   - name: leaderboard_submit_score
     type: function
+    desc: Submit a score to a leaderboard for the currently signed-in player.
 
     parameters:
       - name: leaderboardId
         type: string
+
       - name: score
         type: number
 
@@ -673,6 +675,7 @@
 
   - name: leaderboard_get_top_scores
     type: function
+    desc: Asynchronously gets the top page of scores for a leaderboard.
 
     parameters:
       - name: leaderboardId
@@ -680,17 +683,21 @@
 
       - name: time_span
         type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
 
       - name: collection
         type: number
+        desc: One of the gpgs.COLLECTION_ constants
 
       - name: max_results
         type: number
+        desc: Between 1-25
 
 #*****************************************************************************************************
 
   - name: leaderboard_get_player_centered_scores
     type: function
+    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
 
     parameters:
       - name: leaderboardId
@@ -698,17 +705,21 @@
 
       - name: time_span
         type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
 
       - name: collection
         type: number
+        desc: One of the gpgs.COLLECTION_ constants
 
       - name: max_results
         type: number
+        desc: Between 1-25
 
 #*****************************************************************************************************
 
   - name: leaderboard_show
     type: function
+    desc: Show a leaderboard for a game specified by a leaderboardId.
 
     parameters:
       - name: leaderboardId
@@ -718,6 +729,7 @@
 
   - name: leaderboard_get_player_score
     type: function
+    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
 
     parameters:
       - name: leaderboardId
@@ -725,9 +737,11 @@
 
       - name: time_span
         type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
 
       - name: collection
         type: number
+        desc: One of the gpgs.COLLECTION_ constants
 
 #*****************************************************************************************************
 # Popup position
@@ -799,18 +813,23 @@
 
   - name: TIME_SPAN_DAILY
     type: number
+    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_daily)
 
   - name: TIME_SPAN_WEEKLY
     type: number
+    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_weekly)
 
   - name: TIME_SPAN_ALL_TIME
     type: number
+    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_all_time)
 
   - name: COLLECTION_PUBLIC
     type: number
+    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_public)
 
   - name: COLLECTION_SOCIAL
     type: number
+    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_social)
 
 #*****************************************************************************************************
 # Extension callback constants
@@ -843,15 +862,23 @@
 
   - name: MSG_GET_ACHIEVEMENTS
     type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.achievement_get()`
 
   - name: MSG_GET_TOP_SCORES
     type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_top_scores()`
 
   - name: MSG_GET_PLAYER_CENTERED_SCORES
     type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_player_centered_scores()`
 
   - name: MSG_GET_PLAYER_SCORE
     type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_player_score()`
 
 #*****************************************************************************************************
 # Status
