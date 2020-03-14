@@ -605,6 +605,7 @@
 
   - name: achievement_reveal
     type: function
+    desc: Reveals a hidden achievement to the currently signed-in player.
 
     parameters:
       - name: achievementId
@@ -614,6 +615,7 @@
 
   - name: achievement_unlock
     type: function
+    desc: Unlocks an achievement for the currently signed in player.
 
     parameters:
       - name: achievementId
@@ -623,6 +625,7 @@
 
   - name: achievement_set
     type: function
+    desc: Sets an achievement to have at least the given number of steps completed.
 
     parameters:
       - name: achievementId
@@ -636,6 +639,7 @@
 
   - name: achievement_increment
     type: function
+    desc: Increments an achievement by the given number of steps.
 
     parameters:
       - name: achievementId
@@ -649,11 +653,13 @@
 
   - name: achievement_show
     type: function
+    desc: Show all achievements for the currently signed-in player.
 
 #*****************************************************************************************************
 
   - name: achievement_get
     type: function
+    desc: Asynchronously gets all achievements for the currently signed-in player.
 
 
 #*****************************************************************************************************
