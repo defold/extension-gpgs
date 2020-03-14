@@ -813,23 +813,23 @@
 
   - name: TIME_SPAN_DAILY
     type: number
-    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_daily)
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_daily)
 
   - name: TIME_SPAN_WEEKLY
     type: number
-    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_weekly)
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_weekly)
 
   - name: TIME_SPAN_ALL_TIME
     type: number
-    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_all_time)
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-time_span_all_time)
 
   - name: COLLECTION_PUBLIC
     type: number
-    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_public)
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_public)
 
   - name: COLLECTION_SOCIAL
     type: number
-    desc: [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_social)
+    desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_social)
 
 #*****************************************************************************************************
 # Extension callback constants
