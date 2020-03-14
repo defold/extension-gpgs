@@ -40,6 +40,10 @@ import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.achievement.Achievement;
 import com.google.android.gms.games.achievement.AchievementBuffer;
 
+import com.google.android.gms.games.EventsClient;
+import com.google.android.gms.games.event.Event;
+import com.google.android.gms.games.event.EventBuffer;
+
 import java.io.IOException;
 
 import org.json.JSONArray;
@@ -73,6 +77,7 @@ public class GpgsJNI {
     private static final int MSG_GET_TOP_SCORES = 8;
     private static final int MSG_GET_PLAYER_CENTERED_SCORES = 9;
     private static final int MSG_GET_PLAYER_SCORE = 10;
+    private static final int MSG_GET_EVENTS = 11;
 
     // duplicate of enums from gpgs_extension.h:
     private static final int STATUS_SUCCESS = 1;
@@ -803,4 +808,57 @@ public class GpgsJNI {
             .addOnFailureListener(newOnFailureListener(MSG_ACHIEVEMENTS, "Unable to get achievements."));
         }
     }
+
+    private EventsClient mEventsClient = null;
+
+    private boolean initEvents() {
+        if (mSignedInAccount == null) {
+            return false;
+        }
+        if (mEventsClient == null) {
+            mEventsClient = Games.getEventsClient(activity, mSignedInAccount);
+        }
+        return true;
+    }
+
+    public void incrementEvent(String eventId, int amount) {
+        if(initEvents()) {
+            mEventsClient.increment(eventId, amount);
+        }
+    }
+
+    public void loadEvents() {
+        if(initEvents()) {
+            Task<AnnotatedData<EventBuffer>> task = mEventsClient.load(false);
+            task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<EventBuffer>>() {
+                @Override
+                public void onSuccess(AnnotatedData<EventBuffer> data) {
+                    EventBuffer buffer = data.get();
+                    String message = null;
+                    try {
+                        JSONArray result = new JSONArray();
+                        for (Event e : buffer) {
+                            JSONObject json = new JSONObject();
+                            json.put("id", e.getEventId());
+                            json.put("fomatted_value", e.getFormattedValue());
+                            json.put("value", e.getValue());
+                            json.put("description", e.getDescription());
+                            json.put("image", e.getIconImageUri());
+                            json.put("name", e.getName());
+                            json.put("visible", e.isVisible());
+                            result.put(json.toString());
+                        }
+                        message = result.toString();
+                        buffer.release();
+                    } catch (JSONException e) {
+                        message = "{ 'error':'Error while converting event to JSON: " + e.getMessage() +
+                                "', 'status': '" + STATUS_FAILED + " }";
+                    }
+                    gpgsAddToQueue(MSG_GET_EVENTS, message);
+                }
+            })
+            .addOnFailureListener(newOnFailureListener(MSG_GET_EVENTS, "Unable to get events."));
+        }
+    }
+
 }

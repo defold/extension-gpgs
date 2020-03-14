@@ -749,6 +749,28 @@
         type: number
         desc: One of the gpgs.COLLECTION_ constants
 
+
+#*****************************************************************************************************
+# Events
+#*****************************************************************************************************
+
+  - name: event_increment
+    type: function
+    desc: Increments an event specified by eventId by the given amount.
+
+    parameters:
+      - name: eventId
+        type: string
+
+      - name: amount
+        type: number
+
+#*****************************************************************************************************
+
+  - name: event_get
+    type: function
+    desc: Asynchronously gets all events.
+
 #*****************************************************************************************************
 # Popup position
 #*****************************************************************************************************
@@ -885,6 +907,11 @@
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.leaderboard_get_player_score()`
+
+  - name: MSG_GET_EVENTS
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.event_get()`
 
 #*****************************************************************************************************
 # Status

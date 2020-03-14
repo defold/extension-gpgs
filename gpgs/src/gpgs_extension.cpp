@@ -66,10 +66,17 @@ struct GPGS_Leaderboard
     jmethodID              m_LoadCurrentPlayerScore;
 };
 
+struct GPGS_Events
+{
+    jmethodID              m_IncrementEvent;
+    jmethodID              m_LoadEvents;
+};
+
 static GPGS             g_gpgs;
 static GPGS_Disk        g_gpgs_disk;
 static GPGS_Achievement g_gpgs_achievement;
 static GPGS_Leaderboard g_gpgs_leaderboard;
+static GPGS_Events      g_gpgs_events;
 
 // generic JNI calls
 
@@ -609,6 +616,29 @@ static int GpgsLeaderboard_ShowLeaderboard(lua_State* L)
     return 0;
 }
 
+//******************************************************************************
+// GPGPS Events
+//******************************************************************************
+
+
+static int GpgsEvent_Increment(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+
+    const char* eventId = luaL_checkstring(L, 1);
+    lua_Number amount = luaL_checknumber(L, 2);
+    CallVoidMethodCharInt(g_gpgs.m_GpgsJNI, g_gpgs_events.m_IncrementEvent, eventId, amount);
+    return 0;
+}
+
+
+static int GpgsEvent_Get(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_events.m_LoadEvents);
+    return 0;
+}
+
 // Extension methods
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
@@ -664,6 +694,9 @@ static const luaL_reg Gpgs_methods[] =
     {"leaderboard_get_player_centered_scores", GpgsLeaderboard_GetPlayerCenteredScores},
     {"leaderboard_show", GpgsLeaderboard_ShowLeaderboard},
     {"leaderboard_get_player_score", GpgsLeaderboard_GetPlayerScore},
+    //events
+    {"event_increment", GpgsEvent_Increment},
+    {"event_get", GpgsEvent_Get},
     {0,0}
 };
 
@@ -701,6 +734,7 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(MSG_GET_TOP_SCORES)
     SETCONSTANT(MSG_GET_PLAYER_CENTERED_SCORES)
     SETCONSTANT(MSG_GET_PLAYER_SCORE)
+    SETCONSTANT(MSG_GET_EVENTS)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
@@ -779,6 +813,9 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
     g_gpgs_leaderboard.m_LoadCurrentPlayerScore = env->GetMethodID(cls, "loadCurrentPlayerLeaderboardScore", "(Ljava/lang/String;II)V");
+
+    g_gpgs_events.m_IncrementEvent = env->GetMethodID(cls, "incrementEvent", "(Ljava/lang/String;I)V");
+    g_gpgs_events.m_LoadEvents = env->GetMethodID(cls, "loadEvents", "()V");
 
     //private methods
     g_gpgs.m_activityResult = env->GetMethodID(cls, "activityResult", "(IILandroid/content/Intent;)V");

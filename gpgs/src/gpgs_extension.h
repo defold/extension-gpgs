@@ -69,7 +69,8 @@ enum MESSAGE_ID
     MSG_GET_ACHIEVEMENTS =              7,
     MSG_GET_TOP_SCORES =                8,
     MSG_GET_PLAYER_CENTERED_SCORES =    9,
-    MSG_GET_PLAYER_SCORE =              10
+    MSG_GET_PLAYER_SCORE =              10,
+    MSG_GET_EVENTS =                    11
 };
 
 // Internal to the extension
