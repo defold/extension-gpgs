@@ -530,7 +530,7 @@ static int GpgsAchievement_Increment(lua_State* L)
 
     const char* achievementId = luaL_checkstring(L, 1);
     int steps = luaL_checknumber(L, 2);
-    CallVoidMethodCharInt(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_UnlockAchievement, achievementId, steps);
+    CallVoidMethodCharInt(g_gpgs.m_GpgsJNI, g_gpgs_achievement.m_IncrementAchievement, achievementId, steps);
     return 0;
 }
 
