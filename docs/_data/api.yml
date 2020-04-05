@@ -731,6 +731,14 @@
       - name: leaderboardId
         type: string
 
+      - name: time_span
+        type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
+
+      - name: collection
+        type: number
+        desc: One of the gpgs.COLLECTION_ constants
+
 #*****************************************************************************************************
 
   - name: leaderboard_get_player_score
