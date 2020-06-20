@@ -1,6 +1,5 @@
 #if defined(DM_PLATFORM_IOS) || defined(DM_PLATFORM_ANDROID)
 #include "private_gpgs_callback.h"
-#include "utils/LuaUtils.h"
 #include <stdlib.h>
 
 static GPGS_callback            m_callback;
