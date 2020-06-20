@@ -899,6 +899,7 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     g_gpgs_leaderboard.m_LoadTopScores = env->GetMethodID(cls, "loadTopScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
+    g_gpgs_leaderboard.m_ShowAllLeaderboards = env->GetMethodID(cls, "showAllLeaderboards", "()V");
     g_gpgs_leaderboard.m_LoadCurrentPlayerScore = env->GetMethodID(cls, "loadCurrentPlayerLeaderboardScore", "(Ljava/lang/String;II)V");
 
     g_gpgs_events.m_IncrementEvent = env->GetMethodID(cls, "incrementEvent", "(Ljava/lang/String;I)V");
