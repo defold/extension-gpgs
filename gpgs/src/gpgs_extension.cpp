@@ -62,6 +62,7 @@ struct GPGS_Leaderboard
     jmethodID              m_LoadTopScores;
     jmethodID              m_LoadPlayerCenteredScores;
     jmethodID              m_ShowLeaderboard;
+    jmethodID              m_ShowAllLeaderboards;
     jmethodID              m_LoadCurrentPlayerScore;
 };
 
@@ -694,6 +695,13 @@ static int GpgsLeaderboard_ShowLeaderboard(lua_State* L)
     return 0;
 }
 
+static int GpgsLeaderboard_ShowAllLeaderboards(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_ShowAllLeaderboards);
+    return 0;
+}
+
 //******************************************************************************
 // GPGPS Events
 //******************************************************************************
@@ -771,6 +779,7 @@ static const luaL_reg Gpgs_methods[] =
     {"leaderboard_get_top_scores", GpgsLeaderboard_GetTopScores},
     {"leaderboard_get_player_centered_scores", GpgsLeaderboard_GetPlayerCenteredScores},
     {"leaderboard_show", GpgsLeaderboard_ShowLeaderboard},
+    {"leaderboard_list", GpgsLeaderboard_ShowAllLeaderboards},
     {"leaderboard_get_player_score", GpgsLeaderboard_GetPlayerScore},
     //events
     {"event_increment", GpgsEvent_Increment},
