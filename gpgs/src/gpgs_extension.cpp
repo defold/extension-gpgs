@@ -62,6 +62,7 @@ struct GPGS_Leaderboard
     jmethodID              m_LoadTopScores;
     jmethodID              m_LoadPlayerCenteredScores;
     jmethodID              m_ShowLeaderboard;
+    jmethodID              m_ShowAllLeaderboards;
     jmethodID              m_LoadCurrentPlayerScore;
 };
 
@@ -694,6 +695,13 @@ static int GpgsLeaderboard_ShowLeaderboard(lua_State* L)
     return 0;
 }
 
+static int GpgsLeaderboard_ShowAllLeaderboards(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_ShowAllLeaderboards);
+    return 0;
+}
+
 //******************************************************************************
 // GPGPS Events
 //******************************************************************************
@@ -771,6 +779,7 @@ static const luaL_reg Gpgs_methods[] =
     {"leaderboard_get_top_scores", GpgsLeaderboard_GetTopScores},
     {"leaderboard_get_player_centered_scores", GpgsLeaderboard_GetPlayerCenteredScores},
     {"leaderboard_show", GpgsLeaderboard_ShowLeaderboard},
+    {"leaderboard_list", GpgsLeaderboard_ShowAllLeaderboards},
     {"leaderboard_get_player_score", GpgsLeaderboard_GetPlayerScore},
     //events
     {"event_increment", GpgsEvent_Increment},
@@ -890,6 +899,7 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     g_gpgs_leaderboard.m_LoadTopScores = env->GetMethodID(cls, "loadTopScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
+    g_gpgs_leaderboard.m_ShowAllLeaderboards = env->GetMethodID(cls, "showAllLeaderboards", "()V");
     g_gpgs_leaderboard.m_LoadCurrentPlayerScore = env->GetMethodID(cls, "loadCurrentPlayerLeaderboardScore", "(Ljava/lang/String;II)V");
 
     g_gpgs_events.m_IncrementEvent = env->GetMethodID(cls, "incrementEvent", "(Ljava/lang/String;I)V");

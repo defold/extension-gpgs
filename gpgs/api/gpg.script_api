@@ -598,6 +598,103 @@
               gpgs.snapshot_resolve_conflict(self.conflictId, gpgs.SNAPSHOT_CONFLICTING)
             end
             ```
+#*****************************************************************************************************
+
+  - name: leaderboard_submit_score
+    type: function
+    desc: Submit a score to a leaderboard for the currently signed-in player.
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: score
+        type: number
+
+#*****************************************************************************************************
+
+  - name: leaderboard_get_top_scores
+    type: function
+    desc: Asynchronously gets the top page of scores for a leaderboard.
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
+
+      - name: collection
+        type: number
+        desc: One of the gpgs.COLLECTION_ constants
+
+      - name: max_results
+        type: number
+        desc: Between 1-25
+
+#*****************************************************************************************************
+
+  - name: leaderboard_get_player_centered_scores
+    type: function
+    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
+
+      - name: collection
+        type: number
+        desc: One of the gpgs.COLLECTION_ constants
+
+      - name: max_results
+        type: number
+        desc: Between 1-25
+
+#*****************************************************************************************************
+
+  - name: leaderboard_show
+    type: function
+    desc: Show a leaderboard for a game specified by a leaderboardId.
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
+
+      - name: collection
+        type: number
+        desc: One of the gpgs.COLLECTION_ constants
+
+#*****************************************************************************************************
+
+  - name: leaderboard_list
+    type: function
+    desc: Show the list of leaderboards.
+
+#*****************************************************************************************************
+  - name: leaderboard_get_player_score
+    type: function
+    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
+
+    parameters:
+      - name: leaderboardId
+        type: string
+
+      - name: time_span
+        type: number
+        desc: One of the gpgs.TIME_SPAN_ constants
+
+      - name: collection
+        type: number
+        desc: One of the gpgs.COLLECTION_ constants
 
 #*****************************************************************************************************
 

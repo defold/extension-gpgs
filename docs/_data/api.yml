@@ -741,6 +741,11 @@
 
 #*****************************************************************************************************
 
+  - name: leaderboard_list
+    type: function
+    desc: Show the list of leaderboards.
+
+#*****************************************************************************************************
   - name: leaderboard_get_player_score
     type: function
     desc: Asynchronously gets a player-centered page of scores for a leaderboard.

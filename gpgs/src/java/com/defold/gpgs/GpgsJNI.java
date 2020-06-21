@@ -64,7 +64,7 @@ public class GpgsJNI {
     // Request code for listing achievements
     private static final int RC_ACHIEVEMENT_UI = 9003;
     private static final int RC_SHOW_LEADERBOARD = 9004;
-
+    private static final int RC_SHOW_ALL_LEADERBOARDS = 9005;
 
     // duplicate of enums from gpgs_extension.h:
     private static final int MSG_SIGN_IN = 1;
@@ -715,6 +715,13 @@ public class GpgsJNI {
         if(initLeaderboards()) {
             mLeaderboardsClient.getLeaderboardIntent(leaderboardId, span, collection)
                 .addOnSuccessListener(newOnSuccessListenerForIntent(RC_SHOW_LEADERBOARD));
+        }
+    }
+
+    public void showAllLeaderboards() {
+        if(initLeaderboards()) {
+            mLeaderboardsClient.getAllLeaderboardsIntent()
+                .addOnSuccessListener(newOnSuccessListenerForIntent(RC_SHOW_ALL_LEADERBOARDS));
         }
     }
 
