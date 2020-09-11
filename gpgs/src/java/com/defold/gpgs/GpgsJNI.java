@@ -136,7 +136,7 @@ public class GpgsJNI {
             obj.put(key_1, value_1);
             message = obj.toString();
         } catch (JSONException e) {
-            message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
+            message = "{ \"error\": \"Error while converting simple message to JSON: " + e.getMessage() + "\" }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -149,7 +149,7 @@ public class GpgsJNI {
             obj.put(key_2, value_2);
             message = obj.toString();
         } catch (JSONException e) {
-            message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
+            message = "{ \"error\": \"Error while converting simple message to JSON: " + e.getMessage() + "\" }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -163,7 +163,7 @@ public class GpgsJNI {
             obj.put(key_3, value_3);
             message = obj.toString();
         } catch (JSONException e) {
-            message = "{ error:'Error while converting simple message to JSON: " + e.getMessage() + "'";
+            message = "{ \"error\": \"Error while converting simple message to JSON: " + e.getMessage() + "\" }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -397,8 +397,7 @@ public class GpgsJNI {
             addSnapshotMetadtaToJson(obj, "metadata", metadata);
             message = obj.toString();
         } catch (JSONException e) {
-            message = "{ 'error':'Error while converting a metadata message to JSON: " + e.getMessage() +
-                    "', 'status': '" + STATUS_FAILED + " }";
+            message = "{ \"error\": \"Error while converting a metadata message to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -413,8 +412,7 @@ public class GpgsJNI {
             addSnapshotMetadtaToJson(obj, "conflictMetadata", conflictMetadata);
             message = obj.toString();
         } catch (JSONException e) {
-            message = "{ 'error':'Error while converting a metadata or a conflict metadata message to JSON: " + e.getMessage() +
-                    "', 'status': '" + STATUS_FAILED + " }";
+            message = "{ \"error\": \"Error while converting a metadata or a conflict metadata message to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
         }
         gpgsAddToQueue(msg, message);
     }
@@ -650,8 +648,7 @@ public class GpgsJNI {
                         }
                         message = result.toString();
                     } catch (JSONException e) {
-                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
-                                "', 'status': '" + STATUS_FAILED + " }";
+                        message = "{ \"error\": \"Error while converting leaderboard score to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
                     }
                     buffer.release();
                     gpgsAddToQueue(MSG_GET_TOP_SCORES, message);
@@ -678,8 +675,7 @@ public class GpgsJNI {
                         }
                         message = result.toString();
                     } catch (JSONException e) {
-                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
-                                "', 'status': '" + STATUS_FAILED + " }";
+                        message = "{ \"error\": \"Error while converting leaderboard score to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
                     }
                     buffer.release();
                     gpgsAddToQueue(MSG_GET_PLAYER_CENTERED_SCORES, message);
@@ -697,12 +693,17 @@ public class GpgsJNI {
                 public void onSuccess(AnnotatedData<LeaderboardScore> data) {
                     LeaderboardScore score = data.get();
                     String message = null;
-                    try {
-                        JSONObject result = scoreToJSON(score);
-                        message = result.toString();
-                    } catch (JSONException e) {
-                        message = "{ 'error':'Error while converting leaderboard score to JSON: " + e.getMessage() +
-                                "', 'status': '" + STATUS_FAILED + " }";
+                    if (score == null) {
+                        message = "{ \"error\": \"Player has no score on leaderboard\", \"status\": " + STATUS_FAILED + " }";
+
+                    }
+                    else {
+                        try {
+                            JSONObject result = scoreToJSON(score);
+                            message = result.toString();
+                        } catch (JSONException e) {
+                            message = "{ \"error\": \"Error while converting leaderboard score to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
+                        }
                     }
                     gpgsAddToQueue(MSG_GET_PLAYER_SCORE, message);
                 }
@@ -806,8 +807,7 @@ public class GpgsJNI {
                         message = result.toString();
                         buffer.release();
                     } catch (JSONException e) {
-                        message = "{ 'error':'Error while converting achievements to JSON: " + e.getMessage() +
-                                "', 'status': '" + STATUS_FAILED + " }";
+                        message = "{ \"error\": \"Error while converting achievements to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
                     }
                     gpgsAddToQueue(MSG_ACHIEVEMENTS, message);
                 }
@@ -858,8 +858,7 @@ public class GpgsJNI {
                         message = result.toString();
                         buffer.release();
                     } catch (JSONException e) {
-                        message = "{ 'error':'Error while converting event to JSON: " + e.getMessage() +
-                                "', 'status': '" + STATUS_FAILED + " }";
+                        message = "{ \"error\": \"Error while converting event to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
                     }
                     gpgsAddToQueue(MSG_GET_EVENTS, message);
                 }
