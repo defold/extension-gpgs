@@ -611,10 +611,10 @@ public class GpgsJNI {
         return true;
     }
 
-    public void submitScore(String leaderboardId, long score) {
+    public void submitScore(String leaderboardId, double score) {
         if(initLeaderboards()) {
             Log.d(TAG, "GpgsJNI.submitScore() " + score);
-            mLeaderboardsClient.submitScore(leaderboardId, score);
+            mLeaderboardsClient.submitScore(leaderboardId, (long)score);
         }
     }
 

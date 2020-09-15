@@ -199,13 +199,13 @@ static void CallVoidMethodCharIntIntInt(jobject instance, jmethodID method, cons
     env->DeleteLocalRef(jstr);
 }
 
-// void method(char*, long)
-static void CallVoidMethodCharLong(jobject instance, jmethodID method, const char* cstr, long l)
+// void method(char*, double)
+static void CallVoidMethodCharDouble(jobject instance, jmethodID method, const char* cstr, double d)
 {
     ThreadAttacher attacher;
     JNIEnv *env = attacher.env;
     jstring jstr = env->NewStringUTF(cstr);
-    env->CallVoidMethod(instance, method, jstr, l);
+    env->CallVoidMethod(instance, method, jstr, d);
     env->DeleteLocalRef(jstr);
 }
 
@@ -646,7 +646,7 @@ static int GpgsLeaderboard_SubmitScore(lua_State* L)
     const char* leaderboardId = luaL_checkstring(L, 1);
     lua_Number score = luaL_checknumber(L, 2);
     dmLogInfo("GpgsLeaderboard_SubmitScore %s score: %f", leaderboardId, score);
-    CallVoidMethodCharLong(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_SubmitScore, leaderboardId, (long)score);
+    CallVoidMethodCharDouble(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_SubmitScore, leaderboardId, score);
     return 0;
 }
 
@@ -896,7 +896,7 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     g_gpgs_achievement.m_GetAchievements = env->GetMethodID(cls, "getAchievements", "()V");
 
     //leaderboard
-    g_gpgs_leaderboard.m_SubmitScore = env->GetMethodID(cls, "submitScore", "(Ljava/lang/String;J)V");
+    g_gpgs_leaderboard.m_SubmitScore = env->GetMethodID(cls, "submitScore", "(Ljava/lang/String;D)V");
     g_gpgs_leaderboard.m_LoadTopScores = env->GetMethodID(cls, "loadTopScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
     g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
