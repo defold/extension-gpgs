@@ -613,6 +613,7 @@ public class GpgsJNI {
 
     public void submitScore(String leaderboardId, long score) {
         if(initLeaderboards()) {
+            Log.d(TAG, "GpgsJNI.submitScore() " + score);
             mLeaderboardsClient.submitScore(leaderboardId, score);
         }
     }
