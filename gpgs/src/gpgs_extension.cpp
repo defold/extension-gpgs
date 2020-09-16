@@ -645,7 +645,6 @@ static int GpgsLeaderboard_SubmitScore(lua_State* L)
 
     const char* leaderboardId = luaL_checkstring(L, 1);
     lua_Number score = luaL_checknumber(L, 2);
-    dmLogInfo("GpgsLeaderboard_SubmitScore %s score: %f", leaderboardId, score);
     CallVoidMethodCharDouble(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_SubmitScore, leaderboardId, score);
     return 0;
 }
