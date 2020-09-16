@@ -2,7 +2,7 @@ local dirtylarry = require "dirtylarry.dirtylarry"
 local monarch = require "monarch.monarch"
 
 
-function gpgs_callback(self, message_id, message)
+local function gpgs_callback(self, message_id, message)
 	if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
 		if message.status == gpgs.STATUS_SUCCESS then
 			gui.set_text(gui.get_node("id"), gpgs.get_id())
