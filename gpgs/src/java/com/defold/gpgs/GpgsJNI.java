@@ -611,9 +611,9 @@ public class GpgsJNI {
         return true;
     }
 
-    public void submitScore(String leaderboardId, long score) {
+    public void submitScore(String leaderboardId, double score) {
         if(initLeaderboards()) {
-            mLeaderboardsClient.submitScore(leaderboardId, score);
+            mLeaderboardsClient.submitScore(leaderboardId, (long)score);
         }
     }
 
