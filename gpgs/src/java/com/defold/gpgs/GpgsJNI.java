@@ -617,8 +617,9 @@ public class GpgsJNI {
         }
     }
 
-    private static JSONObject scoreToJSON(LeaderboardScore score) throws JSONException {
+    private static JSONObject scoreToJSON(LeaderboardScore score, String leaderboardId) throws JSONException {
         JSONObject json = new JSONObject();
+        json.put("leaderboard_id", leaderboardId);
         json.put("display_rank", score.getDisplayRank());
         json.put("display_score", score.getDisplayScore());
         json.put("rank", score.getRank());
@@ -643,7 +644,7 @@ public class GpgsJNI {
                     try {
                         JSONArray result = new JSONArray();
                         for (LeaderboardScore score : buffer) {
-                            JSONObject json = scoreToJSON(score);
+                            JSONObject json = scoreToJSON(score, leaderboardId);
                             result.put(json.toString());
                         }
                         message = result.toString();
@@ -670,7 +671,7 @@ public class GpgsJNI {
                     try {
                         JSONArray result = new JSONArray();
                         for (LeaderboardScore score : buffer) {
-                            JSONObject json = scoreToJSON(score);
+                            JSONObject json = scoreToJSON(score, leaderboardId);
                             result.put(json.toString());
                         }
                         message = result.toString();
@@ -699,7 +700,7 @@ public class GpgsJNI {
                     }
                     else {
                         try {
-                            JSONObject result = scoreToJSON(score);
+                            JSONObject result = scoreToJSON(score, leaderboardId);
                             message = result.toString();
                         } catch (JSONException e) {
                             message = "{ \"error\": \"Error while converting leaderboard score to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
