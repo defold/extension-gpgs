@@ -632,7 +632,7 @@ public class GpgsJNI {
         return json;
     }
 
-    public void loadTopScores(String leaderboardId, int span, int collection, int maxResults) {
+    public void loadTopScores(final String leaderboardId, int span, int collection, int maxResults) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadTopScores(leaderboardId, span, collection, maxResults);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
@@ -659,7 +659,7 @@ public class GpgsJNI {
         }
     }
 
-    public void loadPlayerCenteredScores(String leaderboardId, int span, int collection, int maxResults) {
+    public void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
@@ -686,7 +686,7 @@ public class GpgsJNI {
         }
     }
 
-    public void loadCurrentPlayerLeaderboardScore(String leaderboardId, int span, int collection) {
+    public void loadCurrentPlayerLeaderboardScore(final String leaderboardId, int span, int collection) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardScore>> task = mLeaderboardsClient.loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardScore>>() {
