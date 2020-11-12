@@ -617,8 +617,9 @@ public class GpgsJNI {
         }
     }
 
-    private static JSONObject scoreToJSON(LeaderboardScore score) throws JSONException {
+    private static JSONObject scoreToJSON(LeaderboardScore score, String leaderboardId) throws JSONException {
         JSONObject json = new JSONObject();
+        json.put("leaderboard_id", leaderboardId);
         json.put("display_rank", score.getDisplayRank());
         json.put("display_score", score.getDisplayScore());
         json.put("rank", score.getRank());
@@ -631,7 +632,7 @@ public class GpgsJNI {
         return json;
     }
 
-    public void loadTopScores(String leaderboardId, int span, int collection, int maxResults) {
+    public void loadTopScores(final String leaderboardId, int span, int collection, int maxResults) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadTopScores(leaderboardId, span, collection, maxResults);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
@@ -643,7 +644,7 @@ public class GpgsJNI {
                     try {
                         JSONArray result = new JSONArray();
                         for (LeaderboardScore score : buffer) {
-                            JSONObject json = scoreToJSON(score);
+                            JSONObject json = scoreToJSON(score, leaderboardId);
                             result.put(json.toString());
                         }
                         message = result.toString();
@@ -658,7 +659,7 @@ public class GpgsJNI {
         }
     }
 
-    public void loadPlayerCenteredScores(String leaderboardId, int span, int collection, int maxResults) {
+    public void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardsClient.LeaderboardScores>> task = mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardsClient.LeaderboardScores>>() {
@@ -670,7 +671,7 @@ public class GpgsJNI {
                     try {
                         JSONArray result = new JSONArray();
                         for (LeaderboardScore score : buffer) {
-                            JSONObject json = scoreToJSON(score);
+                            JSONObject json = scoreToJSON(score, leaderboardId);
                             result.put(json.toString());
                         }
                         message = result.toString();
@@ -685,7 +686,7 @@ public class GpgsJNI {
         }
     }
 
-    public void loadCurrentPlayerLeaderboardScore(String leaderboardId, int span, int collection) {
+    public void loadCurrentPlayerLeaderboardScore(final String leaderboardId, int span, int collection) {
         if(initLeaderboards()) {
             Task<AnnotatedData<LeaderboardScore>> task = mLeaderboardsClient.loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection);
             task.addOnSuccessListener(new OnSuccessListener<AnnotatedData<LeaderboardScore>>() {
@@ -699,7 +700,7 @@ public class GpgsJNI {
                     }
                     else {
                         try {
-                            JSONObject result = scoreToJSON(score);
+                            JSONObject result = scoreToJSON(score, leaderboardId);
                             message = result.toString();
                         } catch (JSONException e) {
                             message = "{ \"error\": \"Error while converting leaderboard score to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
