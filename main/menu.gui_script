@@ -17,6 +17,12 @@ local popup_positions = {
 function init(self)
     msg.post(".", "acquire_input_focus")
     self.popup_pos = 3
+
+    if gpgs and gpgs.is_supported() then
+        gui.set_text(gui.get_node("support_status"), "Is Supported")
+    else
+        gui.set_text(gui.get_node("support_status"), "Not Supported")
+    end
 end
 
 

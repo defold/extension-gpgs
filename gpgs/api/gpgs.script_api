@@ -6,6 +6,25 @@
 
 #*****************************************************************************************************
 
+  - name: is_supported
+    type: function
+    desc: Check if Google Play Services are available & ready on the device.
+
+    returns:
+      - name: is_supported
+        type: boolean
+        desc: Status of Google Play Services on the device.
+
+    examples:
+      - desc: |-
+            ```lua
+            if gpgs then
+              local is_supported = gpgs.is_supported()
+            end
+            ```
+
+#*****************************************************************************************************
+
   - name: login
     type: function
     desc: Login to GPGS using a button.
