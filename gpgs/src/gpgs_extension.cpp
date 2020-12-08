@@ -28,6 +28,7 @@ struct GPGS
     jmethodID               m_getServerAuthCode;
     jmethodID               m_isLoggedIn;
     jmethodID               m_setGravityForPopups;
+    jmethodID               m_isSupported;
 };
 
 struct GPGS_Disk
@@ -315,6 +316,11 @@ static int GpgsAuth_getServerAuthCode(lua_State* L)
 static int GpgsAuth_isLoggedIn(lua_State* L)
 {
     return CallBooleanMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_isLoggedIn);
+}
+
+static int GpgsAuth_isSupported(lua_State* L)
+{
+    return CallBooleanMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_isSupported);
 }
 
 //******************************************************************************
@@ -745,6 +751,8 @@ JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env,
 
 static const luaL_reg Gpgs_methods[] =
 {
+    //general
+    {"is_supported", GpgsAuth_isSupported},
     //authorization
     {"login", GpgsAuth_Login},
     {"logout", GpgsAuth_Logout},
@@ -860,6 +868,9 @@ static void LuaInit(lua_State* L)
 
 static void InitJNIMethods(JNIEnv* env, jclass cls)
 {
+    //general
+    g_gpgs.m_isSupported = env->GetMethodID(cls, "isSupported", "()Z");
+
     //authorization
     g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
     g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
