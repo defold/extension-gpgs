@@ -41,3 +41,5 @@ include_dirs = gpgs
 [osx]
 bundle_identifier = com.defold.extension.gpgs
 
+[native_extension]
+app_manifest = /generated.appmanifest
