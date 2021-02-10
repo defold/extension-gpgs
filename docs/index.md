@@ -42,7 +42,7 @@ request_id_token = 0
 
 Where `app_id` is the 12 or 13 digit Application ID from the Google Play Console, found under Development Tools > Services & APIs and Google Play game services.</p>
 
-Where `use_saved_games` indicates if the [https://developers.google.com/games/services/common/concepts/savedgames](Game Saves service) should be used (0 is disabled, 1 is enabled).</p>
+Where `use_saved_games` indicates if the [Game Saves service](https://developers.google.com/games/services/common/concepts/savedgames) should be used (0 is disabled, 1 is enabled).</p>
 
 
 ## Usage
