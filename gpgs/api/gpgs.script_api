@@ -282,6 +282,8 @@
 
                     - `gpgs.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
 
+                    Or it can be ApiException.getStatusCode() (if ApiException was thrown)
+
             - name: metadata
               type: table
               optional: true
