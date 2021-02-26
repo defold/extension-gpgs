@@ -41,6 +41,7 @@ import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
 import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.achievement.Achievement;
 import com.google.android.gms.games.achievement.AchievementBuffer;
+import com.google.android.gms.games.GamesClientStatusCodes;
 
 import com.google.android.gms.games.EventsClient;
 import com.google.android.gms.games.event.Event;
@@ -116,9 +117,7 @@ public class GpgsJNI {
         return new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                sendSimpleMessage(messageId,
-                        "status", STATUS_FAILED,
-                        "error", message);
+                sendFailedMessage(messageId, message, e);
             }
         };
     }
@@ -171,6 +170,32 @@ public class GpgsJNI {
         gpgsAddToQueue(msg, message);
     }
 
+    private void sendFailedMessage(int msg, String error_text, Exception e) {
+        if(e != null) {
+
+            if (e instanceof ApiException) {
+                ApiException apiException = (ApiException) e;
+                Integer errorStatusCode = apiException.getStatusCode();
+                error_text += ": " + GamesClientStatusCodes.getStatusCodeString(errorStatusCode) +" ("+errorStatusCode.toString()+")";
+
+                sendSimpleMessage(msg,
+                            "status", STATUS_FAILED,
+                            "error_status", errorStatusCode,
+                            "error", error_text);
+            } else {
+                error_text += ": " + e.toString();
+
+                sendSimpleMessage(msg,
+                    "status", STATUS_FAILED,
+                    "error", error_text);
+            }
+        } else {
+
+            sendSimpleMessage(msg,
+                "status", STATUS_FAILED,
+                "error", error_text);
+        }
+    }
 
     public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, String client_id) {
         this.activity = activity;
@@ -242,8 +267,7 @@ public class GpgsJNI {
                 if (task.isSuccessful()) {
                     onConnected(task.getResult(), MSG_SIGN_IN);
                 } else {
-                    sendSimpleMessage(MSG_SIGN_IN, "status", STATUS_FAILED,
-                            "error", "Sign-in failed");
+                    sendFailedMessage(MSG_SIGN_IN, "Sign-in failed", task.getException());
                 }
             } else {
                 sendSimpleMessage(MSG_SIGN_IN, "status", STATUS_FAILED,
@@ -279,10 +303,7 @@ public class GpgsJNI {
                                     if (task.isSuccessful()) {
                                         onConnected(task.getResult(), MSG_SILENT_SIGN_IN);
                                     } else {
-                                        sendSimpleMessage(MSG_SILENT_SIGN_IN,
-                                                "status", STATUS_FAILED,
-                                                "error",
-                                                "Silent sign-in failed");
+                                        sendFailedMessage(MSG_SILENT_SIGN_IN, "Silent sign-in failed", task.getException());
                                     }
                                 }
                             });
@@ -431,18 +452,7 @@ public class GpgsJNI {
             @Override
             public void onComplete(@NonNull Task<SnapshotsClient.DataOrConflict<Snapshot>> task) {
                 if (!task.isSuccessful()) {
-                    int error_status_code = 0;
-                    Exception e = task.getException();
-                    if (e instanceof ApiException) {
-                        ApiException apiException = (ApiException) e;
-                        error_status_code = apiException.getStatusCode();
-                    }
-                    sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                            "status", STATUS_FAILED,
-                            "error_status", error_status_code,
-                            "error",
-                            "Error while opening Snapshot. " + e.toString()
-                    );
+                    sendFailedMessage(MSG_LOAD_SNAPSHOT, "Error while opening Snapshot", task.getException());
                 } else {
                     SnapshotsClient.DataOrConflict<Snapshot> result = task.getResult();
                     if (!result.isConflict()) {
@@ -451,10 +461,7 @@ public class GpgsJNI {
                             currentplayerSave = mPlayerSnapshot.getSnapshotContents().readFully();
                             sendSnapshotMetadataMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata());
                         } catch (IOException e) {
-                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                    "status", STATUS_FAILED,
-                                    "error",
-                                    "Error while reading Snapshot." + e.toString());
+                            sendFailedMessage(MSG_LOAD_SNAPSHOT, "Error while reading Snapshot", e);
                         }
                     } else {
                         SnapshotsClient.SnapshotConflict conflict = result.getConflict();
@@ -466,10 +473,7 @@ public class GpgsJNI {
                             sendConflictMessage(MSG_LOAD_SNAPSHOT, mPlayerSnapshot.getMetadata(),
                                     mConflictingSnapshot.getMetadata(), conflict.getConflictId());
                         } catch (IOException e) {
-                            sendSimpleMessage(MSG_LOAD_SNAPSHOT,
-                                    "status", STATUS_FAILED,
-                                    "error",
-                                    "Error while reading Snapshot or Conflict." + e.toString());
+                            sendFailedMessage(MSG_LOAD_SNAPSHOT, "Error while reading Snapshot or Conflict", e);
                         }
                     }
                 }
@@ -493,7 +497,7 @@ public class GpgsJNI {
 
         intentTask
             .addOnSuccessListener(newOnSuccessListenerForIntent(RC_LIST_SAVED_GAMES))
-            .addOnFailureListener(newOnFailureListener(MSG_SHOW_SNAPSHOTS, "Can't start activity for showing saved games."));
+            .addOnFailureListener(newOnFailureListener(MSG_SHOW_SNAPSHOTS, "Can't start activity for showing saved games"));
     }
 
     public void loadSnapshot(String saveName, boolean createIfNotFound, int conflictPolicy) {
@@ -545,11 +549,7 @@ public class GpgsJNI {
                             sendSimpleMessage(MSG_SAVE_SNAPSHOT,
                                     "status", STATUS_SUCCESS);
                         } else {
-                            Exception e = task.getException();
-                            sendSimpleMessage(MSG_SAVE_SNAPSHOT,
-                                    "status", STATUS_FAILED,
-                                    "error",
-                                    "Failed to save a snapshot. " + e.toString());
+                             sendFailedMessage(MSG_SAVE_SNAPSHOT, "Failed to save a snapshot", task.getException());
                         }
                     }
                 });
@@ -664,7 +664,7 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_TOP_SCORES, message);
                 }
             })
-            .addOnFailureListener(newOnFailureListener(MSG_GET_TOP_SCORES, "Unable to get top scores."));
+            .addOnFailureListener(newOnFailureListener(MSG_GET_TOP_SCORES, "Unable to get top scores"));
         }
     }
 
@@ -691,7 +691,7 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_PLAYER_CENTERED_SCORES, message);
                 }
             })
-            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_CENTERED_SCORES, "Unable to get player centered scores."));
+            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_CENTERED_SCORES, "Unable to get player centered scores"));
         }
     }
 
@@ -718,7 +718,7 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_PLAYER_SCORE, message);
                 }
             })
-            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_SCORE, "Unable to get player scores."));
+            .addOnFailureListener(newOnFailureListener(MSG_GET_PLAYER_SCORE, "Unable to get player scores"));
         }
     }
 
@@ -822,7 +822,7 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_ACHIEVEMENTS, message);
                 }
             })
-            .addOnFailureListener(newOnFailureListener(MSG_ACHIEVEMENTS, "Unable to get achievements."));
+            .addOnFailureListener(newOnFailureListener(MSG_ACHIEVEMENTS, "Unable to get achievements"));
         }
     }
 
@@ -873,7 +873,7 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_EVENTS, message);
                 }
             })
-            .addOnFailureListener(newOnFailureListener(MSG_GET_EVENTS, "Unable to get events."));
+            .addOnFailureListener(newOnFailureListener(MSG_GET_EVENTS, "Unable to get events"));
         }
     }
 
