@@ -8,8 +8,7 @@
 #if defined(DM_PLATFORM_ANDROID)
 
 #include <string.h>
-
-#include "gpgs_jni.h"
+#include <dmsdk/dlib/android.h>
 #include "gpgs_extension.h"
 #include "private_gpgs_callback.h"
 #include "com_defold_gpgs_GpgsJNI.h"
@@ -163,8 +162,8 @@ static char* luaL_checktable_string(lua_State *L, int numArg, const char* field,
 // void method(char*)
 static void CallVoidMethodChar(jobject instance, jmethodID method, const char* cstr)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr);
     env->DeleteLocalRef(jstr);
@@ -173,8 +172,8 @@ static void CallVoidMethodChar(jobject instance, jmethodID method, const char* c
 // void method(char*, int)
 static void CallVoidMethodCharInt(jobject instance, jmethodID method, const char* cstr, int i)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr, i);
     env->DeleteLocalRef(jstr);
@@ -183,8 +182,8 @@ static void CallVoidMethodCharInt(jobject instance, jmethodID method, const char
 // void method(char*, int, int)
 static void CallVoidMethodCharIntInt(jobject instance, jmethodID method, const char* cstr, int i1, int i2)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr, i1, i2);
     env->DeleteLocalRef(jstr);
@@ -193,8 +192,8 @@ static void CallVoidMethodCharIntInt(jobject instance, jmethodID method, const c
 // void method(char*, int, int, int)
 static void CallVoidMethodCharIntIntInt(jobject instance, jmethodID method, const char* cstr, int i1, int i2, int i3)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr, i1, i2, i3);
     env->DeleteLocalRef(jstr);
@@ -203,8 +202,8 @@ static void CallVoidMethodCharIntIntInt(jobject instance, jmethodID method, cons
 // void method(char*, double)
 static void CallVoidMethodCharDouble(jobject instance, jmethodID method, const char* cstr, double d)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring jstr = env->NewStringUTF(cstr);
     env->CallVoidMethod(instance, method, jstr, d);
     env->DeleteLocalRef(jstr);
@@ -213,16 +212,16 @@ static void CallVoidMethodCharDouble(jobject instance, jmethodID method, const c
 // void method(int)
 static void CallVoidMethodInt(jobject instance, jmethodID method, int i)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(instance, method, i);
 }
 
 // void method()
 static int CallVoidMethod(jobject instance, jmethodID method)
 {
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     env->CallVoidMethod(instance, method);
     return 0;
 }
@@ -231,8 +230,8 @@ static int CallVoidMethod(jobject instance, jmethodID method)
 static int CallStringMethod(lua_State* L, jobject instance, jmethodID method)
 {
     DM_LUA_STACK_CHECK(L, 1);
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jstring return_value = (jstring)env->CallObjectMethod(instance, method);
     if (return_value)
     {
@@ -252,8 +251,8 @@ static int CallStringMethod(lua_State* L, jobject instance, jmethodID method)
 static int CallBooleanMethod(lua_State* L, jobject instance, jmethodID method)
 {
     DM_LUA_STACK_CHECK(L, 1);
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     jboolean return_value = (jboolean)env->CallBooleanMethod(instance, method);
     lua_pushboolean(L, JNI_TRUE == return_value);
     return 1;
@@ -263,8 +262,8 @@ static int CallBooleanMethod(lua_State* L, jobject instance, jmethodID method)
 static int CallIntMethod(lua_State* L, jobject instance, jmethodID method)
 {
     DM_LUA_STACK_CHECK(L, 1);
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
     int return_value = (int)env->CallIntMethod(instance, method);
     lua_pushnumber(L, return_value);
     return 1;
@@ -368,8 +367,8 @@ static int GpgsDisk_SnapshotDisplaySaves(lua_State* L)
 
     DM_LUA_STACK_CHECK(L, 0);
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     const char* popupTitleDefault = "Game Saves";
     char* popupTitle = luaL_checkstringd(L, 1, popupTitleDefault);
@@ -393,8 +392,8 @@ static int GpgsDisk_SnapshotOpen(lua_State* L)
 
     DM_LUA_STACK_CHECK(L, 0);
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     const char* saveName = luaL_checkstring(L, 1);
     bool createIfNotFound = luaL_checkboold(L, 2, false);
@@ -416,8 +415,8 @@ static int GpgsDisk_SnapshotCommitAndClose(lua_State* L)
 
     DM_LUA_STACK_CHECK(L, 0);
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     long playedTime = luaL_checktable_number(L, 1, "playedTime", -1);
     long progressValue = luaL_checktable_number(L, 1, "progressValue", -1);
@@ -436,7 +435,7 @@ static int GpgsDisk_SnapshotCommitAndClose(lua_State* L)
         env->SetByteArrayRegion(jcoverImage, 0, length, (jbyte*)coverImage);
     }
 
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, (jlong)playedTime, (jlong)progressValue, jdescription, jcoverImage);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
 
     if (jdescription)
     {
@@ -453,8 +452,8 @@ static int GpgsDisk_SnapshotGetData(lua_State* L)
         return 0;
     }
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     int lenght = 0;
     jbyte* snapshot = NULL;
@@ -486,8 +485,8 @@ static int GpgsDisk_SnapshotSetData(lua_State* L)
 
     DM_LUA_STACK_CHECK(L, 2);
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     size_t bytes_lenght;
     const char* bytes = luaL_checklstring(L, 1, &bytes_lenght);
@@ -548,8 +547,8 @@ static int GpgsDisk_SnapshotGetConflictingData(lua_State* L)
         return 0;
     }
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
 
     int lenght = 0;
     jbyte* snapshot = NULL;
@@ -735,8 +734,8 @@ static int GpgsEvent_Get(lua_State* L)
 
 static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
 {
-    ThreadAttacher attacher;
-    JNIEnv *_env = attacher.env;
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* _env = threadAttacher.GetEnv();
 
     _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
@@ -941,17 +940,16 @@ static void InitializeJNI(const char* client_id, bool request_server_auth_code, 
 {
     CheckInitializationParams(client_id, request_server_auth_code > 0, request_id_token > 0);
 
-    ThreadAttacher attacher;
-    JNIEnv *env = attacher.env;
-    ClassLoader class_loader = ClassLoader(env);
-    jclass cls = class_loader.load("com.defold.gpgs.GpgsJNI");
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
+    jclass cls = dmAndroid::LoadClass(env, "com.defold.gpgs.GpgsJNI");
 
     InitJNIMethods(env, cls);
 
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;ZZZLjava/lang/String;)V");
     jstring java_client_id = env->NewStringUTF(client_id);
 
-    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, dmGraphics::GetNativeAndroidActivity(),
+    g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, threadAttacher.GetActivity()->clazz,
                                          g_gpgs_disk.is_using, request_server_auth_code, request_id_token, java_client_id));
 
     env->DeleteLocalRef(java_client_id);
