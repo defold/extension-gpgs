@@ -435,7 +435,7 @@ static int GpgsDisk_SnapshotCommitAndClose(lua_State* L)
         env->SetByteArrayRegion(jcoverImage, 0, length, (jbyte*)coverImage);
     }
 
-    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, playedTime, progressValue, jdescription, jcoverImage);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs_disk.m_commitAndCloseSnapshot, (jlong)playedTime, (jlong)progressValue, jdescription, jcoverImage);
 
     if (jdescription)
     {
