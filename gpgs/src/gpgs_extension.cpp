@@ -732,7 +732,7 @@ static int GpgsEvent_Get(lua_State* L)
 
 // Extension methods
 
-static void OnActivityResult(void *env, void* activity, int32_t request_code, int32_t result_code, void* result)
+static void OnActivityResult(JNIEnv *env, ANativeActivity* activity, int32_t request_code, int32_t result_code, void* result)
 {
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* _env = threadAttacher.GetEnv();
@@ -968,7 +968,7 @@ static dmExtension::Result InitializeGpgs(dmExtension::Params* params)
     const char* client_id = dmConfigFile::GetString(params->m_ConfigFile, "gpgs.client_id", 0);
 
     InitializeJNI(client_id, request_server_auth_code > 0, request_id_token > 0);
-    dmExtension::RegisterAndroidOnActivityResultListener(OnActivityResult);
+    dmAndroid::RegisterOnActivityResultListener(OnActivityResult);
     gpgs_callback_initialize();
     return dmExtension::RESULT_OK;
 }
@@ -987,7 +987,7 @@ static dmExtension::Result UpdateGpgs(dmExtension::Params* params)
 static dmExtension::Result FinalizeGpgs(dmExtension::Params* params)
 {
     gpgs_callback_finalize();
-    dmExtension::UnregisterAndroidOnActivityResultListener(OnActivityResult);
+    dmAndroid::UnregisterOnActivityResultListener(OnActivityResult);
     return dmExtension::RESULT_OK;
 }
 
