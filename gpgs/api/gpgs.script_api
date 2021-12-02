@@ -719,6 +719,73 @@
 
 #*****************************************************************************************************
 
+  - name: achievement_reveal
+    type: function
+    desc: Reveal achievement
+
+    parameters:
+      - name: achievementId
+        type: string
+
+#*****************************************************************************************************
+  - name: achievement_unlock
+    type: function
+    desc: Unlock achievement
+
+    parameters:
+      - name: achievementId
+        type: string
+
+#*****************************************************************************************************
+  - name: achievement_set
+    type: function
+    desc: Set achievement progress
+
+    parameters:
+      - name: achievementId
+        type: string
+
+      - name: steps
+        type: number
+
+#*****************************************************************************************************
+  - name: achievement_increment
+    type: function
+    desc: Increase achievement progress
+
+    parameters:
+      - name: achievementId
+        type: string
+
+      - name: steps
+        type: number
+
+#*****************************************************************************************************
+  - name: achievement_show
+    type: function
+    desc: Show achivements
+
+#*****************************************************************************************************
+  - name: achievement_get
+    type: function
+
+#*****************************************************************************************************
+  - name: event_increment
+    type: function
+
+    parameters:
+      - name: eventId
+        type: string
+
+      - name: amount
+        type: number
+
+#*****************************************************************************************************
+  - name: event_get
+    type: function
+
+#*****************************************************************************************************
+
   - name: POPUP_POS_TOP_LEFT
     type: number
     desc: The login popup position at the top-left corner.
