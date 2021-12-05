@@ -732,12 +732,9 @@ static int GpgsEvent_Get(lua_State* L)
 
 // Extension methods
 
-static void OnActivityResult(JNIEnv *env, ANativeActivity* activity, int32_t request_code, int32_t result_code, void* result)
+static void OnActivityResult(JNIEnv* env, jobject activity, int32_t request_code, int32_t result_code, void* result)
 {
-    dmAndroid::ThreadAttacher threadAttacher;
-    JNIEnv* _env = threadAttacher.GetEnv();
-
-    _env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
+    env->CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_activityResult, request_code, result_code, result);
 }
 
 JNIEXPORT void JNICALL Java_com_defold_gpgs_GpgsJNI_gpgsAddToQueue(JNIEnv * env, jclass cls, jint jmsg, jstring jjson)
@@ -950,7 +947,7 @@ static void InitializeJNI(const char* client_id, bool request_server_auth_code, 
     jstring java_client_id = env->NewStringUTF(client_id);
 
     g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, threadAttacher.GetActivity()->clazz,
-                                         g_gpgs_disk.is_using, request_server_auth_code, request_id_token, java_client_id));
+                                g_gpgs_disk.is_using, request_server_auth_code, request_id_token, java_client_id));
 
     env->DeleteLocalRef(java_client_id);
 }
