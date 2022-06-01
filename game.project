@@ -30,7 +30,7 @@ infoplist = /builtins/manifests/ios/Info.plist
 
 [gpgs]
 app_id = 741832396715
-#client_id = 741832396715-sl2dn4pjiqop78t1pgflb6ob4aqsvom5.apps.googleusercontent.com
+client_id = 741832396715-sl2dn4pjiqop78t1pgflb6ob4aqsvom5.apps.googleusercontent.com
 use_saved_games = 1
 request_server_auth_code = 0
 request_id_token = 0
