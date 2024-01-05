@@ -242,6 +242,8 @@
 
               - `gpgs.MSG_LOAD_SNAPSHOT`
 
+              - `gpgs.MSG_SAVE_SNAPSHOT`
+
 
           - name: message
             type: table
@@ -866,6 +868,11 @@
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.snapshot_open()`
+
+  - name: MSG_SAVE_SNAPSHOT
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.snapshot_commit_and_close()`
 
   - name: STATUS_SUCCESS
     type: number
