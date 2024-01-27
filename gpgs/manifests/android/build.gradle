@@ -1,6 +1,10 @@
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-	// https://developers.google.com/android/guides/setup#split
-	implementation 'com.google.android.gms:play-services-base:17.5.0'
-	implementation 'com.google.android.gms:play-services-auth:18.1.0'
-	implementation 'com.google.android.gms:play-services-games:20.0.1'
+    // https://developers.google.com/android/guides/setup#split
+    implementation 'com.google.android.gms:play-services-base:18.3.0'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'com.google.android.gms:play-services-games:23.1.0'
 }
