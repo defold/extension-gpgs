@@ -102,6 +102,7 @@ public class GpgsJNI {
     private boolean is_request_id_token;
     private boolean is_request_auth_code;
     private boolean is_request_email;
+    private boolean is_request_profile;
     private boolean is_supported;
 
     //--------------------------------------------------
@@ -198,13 +199,14 @@ public class GpgsJNI {
         }
     }
 
-    public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, boolean is_request_email, String client_id) {
+    public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, boolean is_request_email, boolean is_request_profile, String client_id) {
         this.activity = activity;
         this.is_disk_active = is_disk_active;
         this.client_id = client_id;
         this.is_request_auth_code = is_request_auth_code;
         this.is_request_id_token = is_request_id_token;
         this.is_request_email = is_request_email;
+        this.is_request_profile = is_request_profile;
 
         this.is_supported = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS;
 
@@ -257,13 +259,31 @@ public class GpgsJNI {
             if (is_request_email) {
                 builder.requestEmail();
             }
-            
-            builder.requestProfile();
+
+            if (is_request_profile)
+            {
+                builder.requestProfile();
+            }
 
             mSignInOptions = builder.build();
         }
 
         return mSignInOptions;
+    }
+
+    private String profileToJsonString() throws JSONException {
+        JSONObject profile = new JSONObject();
+
+        profile.put("name",mSignedInAccount.getDisplayName());
+        profile.put("given_name",mSignedInAccount.getGivenName());
+        profile.put("family_name",mSignedInAccount.getFamilyName());
+        profile.put("photo_url",mSignedInAccount.getPhotoUrl());
+        profile.put("id",mSignedInAccount.getId());
+        
+        String profileText = profile.toString();
+
+        return profileText;
+
     }
 
     public void activityResult(int requestCode, int resultCode, Intent intent) {
@@ -347,6 +367,10 @@ public class GpgsJNI {
 
     public String getEmail() {
         return isLoggedIn() ? mSignedInAccount.getEmail() : null;
+    }
+
+    public String getProfile() throws JSONException{
+        return isLoggedIn() ? profileToJsonString() : null;
     }
 
     public String getIdToken() {
