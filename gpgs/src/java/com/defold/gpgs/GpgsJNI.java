@@ -101,6 +101,7 @@ public class GpgsJNI {
     private String client_id;
     private boolean is_request_id_token;
     private boolean is_request_auth_code;
+    private boolean is_request_email;
     private boolean is_supported;
 
     //--------------------------------------------------
@@ -197,12 +198,13 @@ public class GpgsJNI {
         }
     }
 
-    public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, String client_id) {
+    public GpgsJNI(Activity activity, boolean is_disk_active, boolean is_request_auth_code, boolean is_request_id_token, boolean is_request_email, String client_id) {
         this.activity = activity;
         this.is_disk_active = is_disk_active;
         this.client_id = client_id;
         this.is_request_auth_code = is_request_auth_code;
         this.is_request_id_token = is_request_id_token;
+        this.is_request_email = is_request_email;
 
         this.is_supported = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS;
 
@@ -251,6 +253,12 @@ public class GpgsJNI {
             if (is_request_auth_code && client_id != null) {
                 builder.requestServerAuthCode(client_id);
             }
+
+            if (is_request_email) {
+                builder.requestEmail();
+            }
+            
+            builder.requestProfile();
 
             mSignInOptions = builder.build();
         }
@@ -335,6 +343,10 @@ public class GpgsJNI {
 
     public String getId() {
         return isLoggedIn() ? mPlayer.getPlayerId() : null;
+    }
+
+    public String getEmail() {
+        return isLoggedIn() ? mSignedInAccount.getEmail() : null;
     }
 
     public String getIdToken() {
