@@ -23,8 +23,8 @@ shared_state = 1
 
 [android]
 package = com.defold.extension.gpgs
-minimum_sdk_version = 16
-target_sdk_version = 28
+minimum_sdk_version = 21
+target_sdk_version = 34
 
 [ios]
 bundle_identifier = com.defold.extension.gpgs
@@ -35,7 +35,6 @@ app_id = 741832396715
 client_id = 741832396715-sl2dn4pjiqop78t1pgflb6ob4aqsvom5.apps.googleusercontent.com
 use_saved_games = 1
 request_server_auth_code = 0
-request_id_token = 0
 
 [library]
 include_dirs = gpgs

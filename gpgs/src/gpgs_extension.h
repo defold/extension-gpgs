@@ -1,19 +1,5 @@
 #pragma once
 
-// https://developer.android.com/reference/android/view/Gravity.html
-enum PopupPositions
-{
-    POPUP_POS_TOP_LEFT =           48 | 3,
-    POPUP_POS_TOP_CENTER =         48 | 1,
-    POPUP_POS_TOP_RIGHT =          48 | 5,
-    POPUP_POS_CENTER_LEFT =        16 | 3,
-    POPUP_POS_CENTER =             16 | 1,
-    POPUP_POS_CENTER_RIGHT =       16 | 5,
-    POPUP_POS_BOTTOM_LEFT =        80 | 3,
-    POPUP_POS_BOTTOM_CENTER =      80 | 1,
-    POPUP_POS_BOTTOM_RIGHT =       80 | 5
-};
-
 // https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient#RESOLUTION_POLICY_HIGHEST_PROGRESS
 enum ResolutionPolicy
 {
@@ -62,7 +48,6 @@ enum MESSAGE_ID
 {
     MSG_SIGN_IN =                       1,
     MSG_SILENT_SIGN_IN =                2,
-    MSG_SIGN_OUT =                      3,
     MSG_SHOW_SNAPSHOTS =                4,
     MSG_LOAD_SNAPSHOT =                 5,
     MSG_SAVE_SNAPSHOT =                 6,
@@ -70,7 +55,8 @@ enum MESSAGE_ID
     MSG_GET_TOP_SCORES =                8,
     MSG_GET_PLAYER_CENTERED_SCORES =    9,
     MSG_GET_PLAYER_SCORE =              10,
-    MSG_GET_EVENTS =                    11
+    MSG_GET_EVENTS =                    11,
+    MSG_GET_SERVER_TOKEN =              12
 };
 
 // Internal to the extension

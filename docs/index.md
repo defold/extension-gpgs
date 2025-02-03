@@ -37,7 +37,6 @@ Add the following section into your `game.project` file (open and edit as a text
 app_id = 1234567890
 use_saved_games = 1
 request_server_auth_code = 0
-request_id_token = 0
 ```
 
 Where `app_id` is the 12 or 13 digit Application ID from the Google Play Console, found under Development Tools > Services & APIs and Google Play game services.</p>
@@ -72,8 +71,6 @@ local function gpgs_callback(self, message_id, message)
         else
             print("Sign in error!")
         end
-    elseif message_id == gpgs.MSG_SIGN_OUT then
-        print("Signed out")
     end
 end
 

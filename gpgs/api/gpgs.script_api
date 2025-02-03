@@ -65,20 +65,6 @@
 
 #*****************************************************************************************************
 
-  - name: logout
-    type: function
-    desc: Logout from GPGS
-
-    examples:
-      - desc: |-
-            ```lua
-            if gpgs then
-              gpgs.logout()
-            end
-            ```
-
-#*****************************************************************************************************
-
   - name: get_display_name
     type: function
     desc: Get the current GPGS player display name.
@@ -112,26 +98,6 @@
             ```lua
             if gpgs then
               local id = gpgs.get_id()
-            end
-            ```
-
-#*****************************************************************************************************
-
-  - name: get_id_token
-    type: function
-    desc: Get the current GPGS player id token. Available only if "gpgs.client_id" is configured in game.project
-          and "gpgs.request_id_token = 1".
-
-    returns:
-      - name: id_token
-        type: string
-        desc: The player ID token.
-
-    examples:
-      - desc: |-
-            ```lua
-            if gpgs then
-              local id_token = gpgs.get_id_token()
             end
             ```
 
@@ -175,46 +141,6 @@
 
 #*****************************************************************************************************
 
-  - name: set_popup_position
-    type: function
-    desc: This method sets the position for the login popup.
-
-    parameters:
-      - name: position
-        type: number
-        desc: An position can be one of the predefined constants below
-
-            - `gpgs.POPUP_POS_TOP_LEFT`
-
-            - `gpgs.POPUP_POS_TOP_CENTER`
-
-            - `gpgs.POPUP_POS_TOP_RIGHT`
-
-            - `gpgs.POPUP_POS_CENTER_LEFT`
-
-            - `gpgs.POPUP_POS_CENTER`
-
-            - `gpgs.POPUP_POS_CENTER_RIGHT`
-
-            - `gpgs.POPUP_POS_BOTTOM_LEFT`
-
-            - `gpgs.POPUP_POS_BOTTOM_CENTER`
-
-            - `gpgs.POPUP_POS_BOTTOM_RIGHT`
-
-
-            Default value is `gpgs.POPUP_POS_TOP_CENTER`
-
-    examples:
-      - desc: |-
-            ```lua
-            if gpgs then
-              gpgs.set_popup_position(gpgs.POPUP_POS_BOTTOM_CENTER)
-            end
-            ```
-
-#*****************************************************************************************************
-
   - name: set_callback
     type: function
     desc: Set callback for receiving messages from GPGS.
@@ -235,8 +161,6 @@
               - `gpgs.MSG_SIGN_IN`
 
               - `gpgs.MSG_SILENT_SIGN_IN`
-
-              - `gpgs.MSG_SIGN_OUT`
 
               - `gpgs.MSG_SHOW_SNAPSHOTS`
 
@@ -309,8 +233,6 @@
                 if message.status == gpgs.STATUS_SUCCESS then
                 -- do something after login
                 end
-              elseif message_id == gpgs.MSG_SIGN_OUT then
-              -- do something after logout
               elseif message_id == gpgs.MSG_LOAD_SNAPSHOT then
               -- do something when a save was loaded
               end
@@ -788,42 +710,6 @@
 
 #*****************************************************************************************************
 
-  - name: POPUP_POS_TOP_LEFT
-    type: number
-    desc: The login popup position at the top-left corner.
-
-  - name: POPUP_POS_TOP_CENTER
-    type: number
-    desc: The login popup position at the top-center.
-
-  - name: POPUP_POS_TOP_RIGHT
-    type: number
-    desc: The login popup position at the top-right corner.
-
-  - name: POPUP_POS_CENTER_LEFT
-    type: number
-    desc: The login popup position at the center-left.
-
-  - name: POPUP_POS_CENTER
-    type: number
-    desc: The login popup position at the center of the screen.
-
-  - name: POPUP_POS_CENTER_RIGHT
-    type: number
-    desc: The login popup position at the center-right.
-
-  - name: POPUP_POS_BOTTOM_LEFT
-    type: number
-    desc: The login popup position at the bottom-left corner.
-
-  - name: POPUP_POS_BOTTOM_CENTER
-    type: number
-    desc: The login popup position at the bottom-centre.
-
-  - name: POPUP_POS_BOTTOM_RIGHT
-    type: number
-    desc: The login popup position at the bottom-right corner.
-
   - name: RESOLUTION_POLICY_MANUAL
     type: number
     desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_MANUAL) for this constant
@@ -853,11 +739,6 @@
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.silent_login()`
-
-  - name: MSG_SIGN_OUT
-    type: number
-    desc: The message type that GPGS sends when finishing the asynchronous operation
-          after calling `gpgs.logout()`
 
   - name: MSG_SHOW_SNAPSHOTS
     type: number

@@ -19,14 +19,11 @@ struct GPGS
     jobject                 m_GpgsJNI;
     jmethodID               m_silentLogin;
     jmethodID               m_login;
-    jmethodID               m_logout;
     jmethodID               m_activityResult;
     jmethodID               m_getDisplayName;
     jmethodID               m_getId;
-    jmethodID               m_getIdToken;
     jmethodID               m_getServerAuthCode;
     jmethodID               m_isLoggedIn;
-    jmethodID               m_setGravityForPopups;
     jmethodID               m_isSupported;
 };
 
@@ -280,12 +277,6 @@ static int GpgsAuth_Login(lua_State* L)
     return 0;
 }
 
-static int GpgsAuth_Logout(lua_State* L)
-{
-    CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_logout);
-    return 0;
-}
-
 static int GpgsAuth_SilentLogin(lua_State* L)
 {
     CallVoidMethod(g_gpgs.m_GpgsJNI, g_gpgs.m_silentLogin);
@@ -300,11 +291,6 @@ static int GpgsAuth_getDisplayName(lua_State* L)
 static int GpgsAuth_getId(lua_State* L)
 {
     return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getId);
-}
-
-static int GpgsAuth_getIdToken(lua_State* L)
-{
-    return CallStringMethod(L, g_gpgs.m_GpgsJNI, g_gpgs.m_getIdToken);
 }
 
 static int GpgsAuth_getServerAuthCode(lua_State* L)
@@ -325,14 +311,6 @@ static int GpgsAuth_isSupported(lua_State* L)
 //******************************************************************************
 // GPGPS misc
 //******************************************************************************
-
-static int GpgsAuth_setGravityForPopups(lua_State* L)
-{
-    DM_LUA_STACK_CHECK(L, 0);
-    int position_lua = luaL_checknumber(L, 1);
-    CallVoidMethodInt(g_gpgs.m_GpgsJNI, g_gpgs.m_setGravityForPopups, position_lua);
-    return 0;
-}
 
 static int Gpg_set_callback(lua_State* L)
 {
@@ -751,14 +729,11 @@ static const luaL_reg Gpgs_methods[] =
     {"is_supported", GpgsAuth_isSupported},
     //authorization
     {"login", GpgsAuth_Login},
-    {"logout", GpgsAuth_Logout},
     {"silent_login", GpgsAuth_SilentLogin},
     {"get_display_name", GpgsAuth_getDisplayName},
     {"get_id", GpgsAuth_getId},
-    {"get_id_token", GpgsAuth_getIdToken},
     {"get_server_auth_code", GpgsAuth_getServerAuthCode},
     {"is_logged_in", GpgsAuth_isLoggedIn},
-    {"set_popup_position", GpgsAuth_setGravityForPopups},
     {"set_callback", Gpg_set_callback},
     //disk
     {"snapshot_display_saves", GpgsDisk_SnapshotDisplaySaves},
@@ -806,19 +781,8 @@ static void LuaInit(lua_State* L)
     lua_pushnumber(L, (lua_Number) name); \
     lua_setfield(L, -2, #name); \
 
-    SETCONSTANT(POPUP_POS_TOP_LEFT)
-    SETCONSTANT(POPUP_POS_TOP_CENTER)
-    SETCONSTANT(POPUP_POS_TOP_RIGHT)
-    SETCONSTANT(POPUP_POS_CENTER_LEFT)
-    SETCONSTANT(POPUP_POS_CENTER)
-    SETCONSTANT(POPUP_POS_CENTER_RIGHT)
-    SETCONSTANT(POPUP_POS_BOTTOM_LEFT)
-    SETCONSTANT(POPUP_POS_BOTTOM_CENTER)
-    SETCONSTANT(POPUP_POS_BOTTOM_RIGHT)
-
     SETCONSTANT(MSG_SIGN_IN)
     SETCONSTANT(MSG_SILENT_SIGN_IN)
-    SETCONSTANT(MSG_SIGN_OUT)
     SETCONSTANT(MSG_SHOW_SNAPSHOTS)
     SETCONSTANT(MSG_LOAD_SNAPSHOT)
     SETCONSTANT(MSG_SAVE_SNAPSHOT)
@@ -827,6 +791,7 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(MSG_GET_PLAYER_CENTERED_SCORES)
     SETCONSTANT(MSG_GET_PLAYER_SCORE)
     SETCONSTANT(MSG_GET_EVENTS)
+    SETCONSTANT(MSG_GET_SERVER_TOKEN)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
@@ -871,13 +836,10 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     //authorization
     g_gpgs.m_silentLogin = env->GetMethodID(cls, "silentLogin", "()V");
     g_gpgs.m_login = env->GetMethodID(cls, "login", "()V");
-    g_gpgs.m_logout = env->GetMethodID(cls, "logout", "()V");
     g_gpgs.m_isLoggedIn = env->GetMethodID(cls, "isLoggedIn", "()Z");
     g_gpgs.m_getDisplayName = env->GetMethodID(cls, "getDisplayName", "()Ljava/lang/String;");
     g_gpgs.m_getId = env->GetMethodID(cls, "getId", "()Ljava/lang/String;");
-    g_gpgs.m_getIdToken = env->GetMethodID(cls, "getIdToken", "()Ljava/lang/String;");
     g_gpgs.m_getServerAuthCode = env->GetMethodID(cls, "getServerAuthCode", "()Ljava/lang/String;");
-    g_gpgs.m_setGravityForPopups = env->GetMethodID(cls, "setGravityForPopups", "(I)V");
 
     //disk
     if (g_gpgs_disk.is_using)
@@ -918,7 +880,7 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
 }
 
 
-static void CheckInitializationParams(const char* client_id, bool request_server_auth_code, bool request_id_token)
+static void CheckInitializationParams(const char* client_id, bool request_server_auth_code)
 {
     bool is_empty_client_id = client_id == 0 || strlen(client_id) == 0;
 
@@ -926,17 +888,12 @@ static void CheckInitializationParams(const char* client_id, bool request_server
     {
         dmLogError("'gpgs.client_id' must be defined to request server auth code");
     }
-
-    if (is_empty_client_id && request_id_token)
-    {
-        dmLogError("'gpgs.client_id' must be defined to request id token");
-    }
 }
 
 
-static void InitializeJNI(const char* client_id, bool request_server_auth_code, bool request_id_token)
+static void InitializeJNI(const char* client_id, bool request_server_auth_code)
 {
-    CheckInitializationParams(client_id, request_server_auth_code > 0, request_id_token > 0);
+    CheckInitializationParams(client_id, request_server_auth_code);
 
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
@@ -944,11 +901,11 @@ static void InitializeJNI(const char* client_id, bool request_server_auth_code, 
 
     InitJNIMethods(env, cls);
 
-    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;ZZZLjava/lang/String;)V");
+    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;ZZLjava/lang/String;)V");
     jstring java_client_id = env->NewStringUTF(client_id);
 
     g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, threadAttacher.GetActivity()->clazz,
-                                g_gpgs_disk.is_using, request_server_auth_code, request_id_token, java_client_id));
+                                g_gpgs_disk.is_using, request_server_auth_code, java_client_id));
 
     env->DeleteLocalRef(java_client_id);
 }
@@ -961,11 +918,9 @@ static dmExtension::Result InitializeGpgs(dmExtension::Params* params)
     g_gpgs_disk.is_using = is_using > 0;
 
     int request_server_auth_code = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.request_server_auth_code", 0);
-    int request_id_token = dmConfigFile::GetInt(params->m_ConfigFile, "gpgs.request_id_token", 0);
-
     const char* client_id = dmConfigFile::GetString(params->m_ConfigFile, "gpgs.client_id", 0);
 
-    InitializeJNI(client_id, request_server_auth_code > 0, request_id_token > 0);
+    InitializeJNI(client_id, request_server_auth_code > 0);
     dmAndroid::RegisterOnActivityResultListener(OnActivityResult);
     gpgs_callback_initialize();
     return dmExtension::RESULT_OK;
