@@ -3,13 +3,12 @@ local monarch = require "monarch.monarch"
 
 
 local function gpgs_callback(self, message_id, message)
-	pprint("-------", message_id, message)
 	if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
 		if message.status == gpgs.STATUS_SUCCESS then
 			gui.set_text(gui.get_node("id"), gpgs.get_id())
 			gui.set_text(gui.get_node("name"), gpgs.get_display_name())
 
-			if sys.get_config("gpgs.client_id") then
+			if sys.get_config_int("gpgs.request_server_auth_code") == 1 then
 				print("auth_code: ", gpgs.get_server_auth_code())
 			end
 		end

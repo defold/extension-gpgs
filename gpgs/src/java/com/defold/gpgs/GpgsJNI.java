@@ -201,7 +201,7 @@ public class GpgsJNI {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             mServerAuthCode = task.getResult();
-                            sendSimpleMessage(MSG_GET_SERVER_TOKEN, "token", mServerAuthCode);
+                            sendSimpleMessage(MSG_GET_SERVER_TOKEN, "status", STATUS_SUCCESS, "token", mServerAuthCode);
                         } else {
                             sendFailedMessage(MSG_GET_SERVER_TOKEN, "Can't get server auth token", task.getException());
                         }
