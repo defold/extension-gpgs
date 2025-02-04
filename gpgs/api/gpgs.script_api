@@ -46,13 +46,6 @@
 
           This function is trying to retrieve the currently signed-in player’s account.
 
-          [icon:attention] By default login methods request `GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN`.
-          But if you use Disk, we have to request extra scope `Drive.SCOPE_APPFOLDER`.
-          Or if you use ID token, we have to request ID token with provided client_id.
-          If so it causes the first time silent sign-in to fail, except for users who
-          have already signed in successfully on a different device. Turn off GPGS
-          features you don't want to use in `game.project`.
-
     examples:
       - desc: |-
             ```lua
@@ -107,10 +100,15 @@
     type: function
     desc: Returns a one-time server auth code to send to your web server which can be exchanged for access token
 
+          Token can be retrieved only if `gpgs.request_server_auth_code` set to 1 and `gpgs.client` is set.
+
     returns:
       - name: server_auth_code
         type: string
-        desc: The server auth code for logged in account.
+        desc: The server auth code for logged in account. Can be nil if operation is not completed yet.
+
+              Auth token is avaliable after receiving message with id `gpgs.MSG_GET_SERVER_TOKEN`
+              in callback set via `gpgs.set_callback`.
 
     examples:
       - desc: |-
@@ -645,44 +643,50 @@
 
   - name: achievement_reveal
     type: function
-    desc: Reveal achievement
+    desc: Reveals a hidden achievement to the current player. 
 
     parameters:
       - name: achievementId
         type: string
+        desc: Achievement id (from GP console)
 
 #*****************************************************************************************************
   - name: achievement_unlock
     type: function
-    desc: Unlock achievement
+    desc: Unlocks an achievement for the current player.
 
     parameters:
       - name: achievementId
         type: string
+        desc: Achievement id (from GP console)
 
 #*****************************************************************************************************
   - name: achievement_set
     type: function
-    desc: Set achievement progress
+    desc: Sets an achievement to have at least the given number of steps completed.
 
     parameters:
       - name: achievementId
         type: string
+        desc: Achievement id (from GP console)
 
       - name: steps
         type: number
+        desc: The number of steps to set the achievement to. Must be greater than 0.
 
 #*****************************************************************************************************
   - name: achievement_increment
     type: function
-    desc: Increase achievement progress
+    desc: Increments an achievement by the given number of steps.
 
     parameters:
       - name: achievementId
         type: string
+        desc: Achievement id (from GP console)
 
       - name: steps
         type: number
+        desc: The number of steps to increment by. Must be greater than 0.
 
 #*****************************************************************************************************
   - name: achievement_show
@@ -692,21 +696,64 @@
 #*****************************************************************************************************
   - name: achievement_get
     type: function
+    desc: Get information about all achievement's state asynchronously. Result return to callback previously set by
+          `gpgs.set_callback` with `message_id == gpgs.MSG_ACHIEVEMENTS`. Result is array of tables which contain
+          following fields
+          
+          - `id` - achievement id (from GP console)
+          
+          - `name` - achievement name
+          
+          - `description` - achievement description
+          
+          - `xp` - how much experience points will be added when achievement will be unlocked
+          
+          - `steps` - current step of incremental achievement
+          
+          - `total_steps` - total amount of steps of incremental achievement
+          
+          - `unlocked` - set to `true` if achievement is unlocked. Otherwise field is missed.
+          
+          - `hidden` - set to `true if achievement is hidden. Otherwise field is missed.
+          
+          - `revealed` - set to `true` if achievement is revealed. Otherwise field is missed.
+
 
 #*****************************************************************************************************
   - name: event_increment
     type: function
+    desc: Increments an event specified by `eventId` by the given number of steps
 
     parameters:
       - name: eventId
         type: string
+        desc: Event id (from GP console)
 
       - name: amount
         type: number
+        desc: The amount increment by. Must be greater than or equal to 0
 
 #*****************************************************************************************************
   - name: event_get
     type: function
+    desc: Get information about all events asynchronously. Result returns to callback previously set by
+          `gpgs.set_callback` with `message_id == gpgs.MSG_GET_EVENTS`. Result is array of tables which contain
+          following fields
+
+          - `id` - event id
+          
+          - `formatted_value` - sum of all increments have been made to this event
+          
+          - `value` - the number of increments this user has made to this event
+          
+          - `description` - event's description
+          
+          - `image` - URI that can be used to load the event's image icon
+          
+          - `name` - event's name
+          
+          - `visible` - whether the event should be displayed to the user in any event related UIs
+
 
 #*****************************************************************************************************
 
@@ -754,6 +801,11 @@
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.snapshot_commit_and_close()`
+
+  - name: MSG_GET_SERVER_TOKEN
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          of server token retrieval
 
   - name: STATUS_SUCCESS
     type: number

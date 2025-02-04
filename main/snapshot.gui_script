@@ -2,9 +2,9 @@ local dirtylarry = require "dirtylarry.dirtylarry"
 local monarch = require "monarch.monarch"
 
 
-local use_saved_games = sys.get_config("gpgs.use_saved_games") == "1"
+local use_saved_games = sys.get_config_int("gpgs.use_saved_games") == 1
 
-function gpgs_callback(self, message_id, message)
+local function gpgs_callback(self, message_id, message)
     if message_id == gpgs.MSG_LOAD_SNAPSHOT then
         if message.status == gpgs.STATUS_CONFLICT then
             self.conflictId = message.conflictId

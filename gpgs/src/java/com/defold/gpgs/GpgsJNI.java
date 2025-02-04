@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import com.google.android.gms.games.PlayGames;
 import com.google.android.gms.games.GamesSignInClient;
@@ -199,7 +200,8 @@ public class GpgsJNI {
             mSignInClient.requestServerSideAccess(mWebClientToken, false)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            mWebClientToken = task.getResult();
+                            mServerAuthCode = task.getResult();
+                            sendSimpleMessage(MSG_GET_SERVER_TOKEN, "token", mServerAuthCode);
                         } else {
                             sendFailedMessage(MSG_GET_SERVER_TOKEN, "Can't get server auth token", task.getException());
                         }
@@ -233,17 +235,15 @@ public class GpgsJNI {
     }
 
     public void silentLogin() {
-        this.activity.runOnUiThread(() -> {
-            mSignInClient.isAuthenticated().addOnCompleteListener(isAuthenticatedTask -> {
-                boolean isAuthenticated =
-                        (isAuthenticatedTask.isSuccessful() &&
-                                isAuthenticatedTask.getResult().isAuthenticated());
-                if (isAuthenticated) {
-                    onConnected(MSG_SILENT_SIGN_IN);
-                } else {
-                    sendFailedMessage(MSG_SILENT_SIGN_IN, "Silent sign-in failed", isAuthenticatedTask.getException());
-                }
-            });
+        mSignInClient.isAuthenticated().addOnCompleteListener(isAuthenticatedTask -> {
+            boolean isAuthenticated =
+                    (isAuthenticatedTask.isSuccessful() &&
+                            isAuthenticatedTask.getResult().isAuthenticated());
+            if (isAuthenticated) {
+                onConnected(MSG_SILENT_SIGN_IN);
+            } else {
+                sendFailedMessage(MSG_SILENT_SIGN_IN, "Silent sign-in failed", isAuthenticatedTask.getException());
+            }
         });
     }
 
