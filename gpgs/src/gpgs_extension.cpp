@@ -941,6 +941,10 @@ static dmExtension::Result FinalizeGpgs(dmExtension::Params* params)
 {
     gpgs_callback_finalize();
     dmAndroid::UnregisterOnActivityResultListener(OnActivityResult);
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
+    env->DeleteGlobalRef(g_gpgs.m_GpgsJNI);
+
     return dmExtension::RESULT_OK;
 }
 
