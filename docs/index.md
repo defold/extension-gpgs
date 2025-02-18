@@ -39,7 +39,7 @@ use_saved_games = 1
 request_server_auth_code = 0
 ```
 
-Where `app_id` is the 12 or 13 digit Application ID from the Google Play Console, found under Development Tools > Services & APIs and Google Play game services.
+Where `app_id` is the 12 or 13 digit Project ID from the Google Play Console. The Project ID can be found under "Grow users" > "Play Games Services" > "Setup and management" > "Configuration".
 
 Where `use_saved_games` indicates if the [Game Saves service](https://developers.google.com/games/services/common/concepts/savedgames) should be used (0 is disabled, 1 is enabled).
 
