@@ -4,7 +4,7 @@ repositories {
 
 dependencies {
     // https://developers.google.com/android/guides/setup#split
-    implementation 'com.google.android.gms:play-services-base:18.3.0'
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
-    implementation 'com.google.android.gms:play-services-games:23.1.0'
+    implementation 'com.google.android.gms:play-services-base:18.5.0'
+    implementation 'com.google.android.gms:play-services-auth:21.3.0'
+    implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
 }
