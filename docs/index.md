@@ -177,6 +177,3 @@ gpgs.leaderboard_show("CgkIq5-gxcsVEAIQAg", gpgs.TIME_SPAN_ALL_TIME, gpgs.COLLEC
 ## Source code
 
 The source code is available on [GitHub](https://github.com/defold/extension-gpgs)
-
-
-## API reference
