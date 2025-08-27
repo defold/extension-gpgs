@@ -3,6 +3,6 @@
 	package="{{android.package}}">
 	<uses-sdk android:minSdkVersion="{{android.minimum_sdk_version}}" android:targetSdkVersion="{{android.target_sdk_version}}" />
 	<application>
-		<meta-data android:name="com.google.android.gms.games.APP_ID" android:value="\{{gpgs.app_id}}" />
+		<meta-data android:name="com.google.android.gms.games.APP_ID" android:value="{{gpgs.app_id}}" />
 	</application>
 </manifest>
