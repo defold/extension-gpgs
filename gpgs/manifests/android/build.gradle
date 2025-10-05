@@ -6,5 +6,5 @@ dependencies {
     // https://developers.google.com/android/guides/setup#split
     implementation 'com.google.android.gms:play-services-base:18.5.0'
     implementation 'com.google.android.gms:play-services-auth:21.3.0'
-    implementation 'com.google.android.gms:play-services-games-v2:20.1.2'
+    implementation 'com.google.android.gms:play-services-games-v2:21.0.0'
 }
