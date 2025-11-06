@@ -186,6 +186,16 @@ static void CallVoidMethodCharIntInt(jobject instance, jmethodID method, const c
     env->DeleteLocalRef(jstr);
 }
 
+// void method(char*, int, int, int, bool)
+static void CallVoidMethodCharIntIntIntBool(jobject instance, jmethodID method, const char* cstr, int i1, int i2, int i3, bool b1)
+{
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
+    jstring jstr = env->NewStringUTF(cstr);
+    env->CallVoidMethod(instance, method, jstr, i1, i2, i3, b1);
+    env->DeleteLocalRef(jstr);
+}
+
 // void method(char*, int, int, int)
 static void CallVoidMethodCharIntIntInt(jobject instance, jmethodID method, const char* cstr, int i1, int i2, int i3)
 {
@@ -652,7 +662,8 @@ static int GpgsLeaderboard_GetPlayerCenteredScores(lua_State* L)
     lua_Number span = luaL_checknumber(L, 2);
     lua_Number collection = luaL_checknumber(L, 3);
     lua_Number maxResults = luaL_checknumber(L, 4);
-    CallVoidMethodCharIntIntInt(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_LoadPlayerCenteredScores, leaderboardId, span, collection, maxResults);
+    bool forceReload = lua_toboolean(L, 5);
+    CallVoidMethodCharIntIntIntBool(g_gpgs.m_GpgsJNI, g_gpgs_leaderboard.m_LoadPlayerCenteredScores, leaderboardId, span, collection, maxResults, forceReload);
     return 0;
 }
 
@@ -867,7 +878,7 @@ static void InitJNIMethods(JNIEnv* env, jclass cls)
     //leaderboard
     g_gpgs_leaderboard.m_SubmitScore = env->GetMethodID(cls, "submitScore", "(Ljava/lang/String;D)V");
     g_gpgs_leaderboard.m_LoadTopScores = env->GetMethodID(cls, "loadTopScores", "(Ljava/lang/String;III)V");
-    g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;III)V");
+    g_gpgs_leaderboard.m_LoadPlayerCenteredScores = env->GetMethodID(cls, "loadPlayerCenteredScores", "(Ljava/lang/String;IIIZ)V");
     g_gpgs_leaderboard.m_ShowLeaderboard = env->GetMethodID(cls, "showLeaderboard", "(Ljava/lang/String;II)V");
     g_gpgs_leaderboard.m_ShowAllLeaderboards = env->GetMethodID(cls, "showAllLeaderboards", "()V");
     g_gpgs_leaderboard.m_LoadCurrentPlayerScore = env->GetMethodID(cls, "loadCurrentPlayerLeaderboardScore", "(Ljava/lang/String;II)V");

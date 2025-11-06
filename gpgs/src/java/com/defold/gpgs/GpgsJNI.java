@@ -560,8 +560,8 @@ public class GpgsJNI {
             });
     }
 
-    public void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults) {
-        mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults)
+    public void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults, boolean forceReload) {
+        mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults, forceReload)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     LeaderboardsClient.LeaderboardScores scores = task.getResult().get();

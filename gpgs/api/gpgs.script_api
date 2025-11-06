@@ -598,6 +598,10 @@
         type: number
         desc: Between 1-25
 
+      - name: force_reload
+        type: boolean
+        desc: If true, this call will clear any locally cached data and attempt to fetch the latest data from the server
+
 #*****************************************************************************************************
 
   - name: leaderboard_show
