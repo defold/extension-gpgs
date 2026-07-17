@@ -23,7 +23,7 @@ shared_state = 1
 
 [android]
 package = com.defold.extension.gpgs
-minimum_sdk_version = 21
+minimum_sdk_version = 23
 target_sdk_version = 34
 
 [ios]
