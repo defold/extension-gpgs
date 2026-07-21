@@ -29,10 +29,10 @@ enum LeaderboardTimeSpan
     TIME_SPAN_ALL_TIME = 2
 };
 
-// https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#public-static-final-int-collection_public
+// https://developers.google.com/android/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant#COLLECTION_PUBLIC
 enum LeaderboardCollection {
     COLLECTION_PUBLIC = 0,
-    COLLECTION_SOCIAL = 1
+    COLLECTION_FRIENDS = 3
 };
 
 
@@ -56,7 +56,7 @@ enum MESSAGE_ID
     MSG_GET_PLAYER_CENTERED_SCORES =    9,
     MSG_GET_PLAYER_SCORE =              10,
     MSG_GET_EVENTS =                    11,
-    MSG_GET_SERVER_TOKEN =              12
+    MSG_GET_SERVER_AUTH_CODE =          12
 };
 
 // Internal to the extension

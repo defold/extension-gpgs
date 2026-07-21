@@ -1,11 +1,11 @@
 ---
-title: Defold Google Play Game Services documentation
-brief: This manual covers how to setup and use Google Play Game Services in Defold.
+title: Defold Google Play Games Services documentation
+brief: This manual covers how to setup and use Google Play Games Services in Defold.
 ---
 
-# Defold Google Play Game Services documentation
+# Defold Google Play Games Services documentation
 
-This extension provides functions for interacting with Google Play Game Services. Supported on Android. The extension supports the following services:
+This extension provides functions for interacting with Google Play Games Services v2. Supported on Android. The extension supports the following services:
 
 * Achievements
 * Authentication
@@ -23,9 +23,9 @@ We recommend using a link to a zip file of a [specific release](https://github.c
 
 
 ## Google App Setup
-In order to use Google Play Game Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [the official documentation](https://support.google.com/googleplay/android-developer/answer/6112435).
+In order to use Google Play Games Services your application needs to be added to the Google Play store. It doesn't have to be published but it must be registered. Read more about how to sign up for and use the Google Play store in [the official documentation](https://support.google.com/googleplay/android-developer/answer/6112435).
 
-Once the application is registered you also need to enable Google Play Game Services for the application. Follow the official documentation to [enable Google Play Game Services](https://developers.google.com/games/services/console/enabling).
+Once the application is registered you also need to enable Google Play Games Services for the application. Follow the official documentation to [enable Google Play Games Services](https://developers.google.com/games/services/console/enabling).
 
 
 ## Defold Setup
@@ -45,11 +45,18 @@ Where `app_id` is the 12 or 13 digit Project ID from the Google Play Console. Th
 
 Where `use_saved_games` indicates if the [Game Saves service](https://developers.google.com/games/services/common/concepts/savedgames) should be used (0 is disabled, 1 is enabled).
 
-If you want to retrieve server auth code set `gpgs.request_server_auth_code` to 1 and provide `gpgs.client_token`. Client token should be configured to Web application.
+If you want to retrieve a server auth code, add these keys to the same `[gpgs]` section. The client ID must belong to a Web application OAuth credential:
+
+```
+request_server_auth_code = 1
+client_id = 1234567890-example.apps.googleusercontent.com
+```
+
+Authentication uses the GPGS v2 flow. Google Play Games automatically attempts authentication when the game starts; call `gpgs.silent_login()` to check that state or `gpgs.login()` to start the explicit sign-in flow. GPGS v2 does not support signing out from the game.
 
 ## Usage
 
-The API uses a callback based system where events and data coming from Google Play Game Services are passed to the game client through a callback function. The kind of event coming from Google Play Game Services is identified by a pre-defined event id. Example:
+The API uses a callback based system where events and data coming from Google Play Games Services are passed to the game client through a callback function. The kind of event coming from Google Play Games Services is identified by a pre-defined event id. Example:
 
 ```Lua
 local function gpgs_callback(self, message_id, message)

@@ -802,7 +802,7 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(MSG_GET_PLAYER_CENTERED_SCORES)
     SETCONSTANT(MSG_GET_PLAYER_SCORE)
     SETCONSTANT(MSG_GET_EVENTS)
-    SETCONSTANT(MSG_GET_SERVER_TOKEN)
+    SETCONSTANT(MSG_GET_SERVER_AUTH_CODE)
 
     SETCONSTANT(STATUS_SUCCESS)
     SETCONSTANT(STATUS_FAILED)
@@ -830,7 +830,7 @@ static void LuaInit(lua_State* L)
     SETCONSTANT(TIME_SPAN_ALL_TIME)
 
     SETCONSTANT(COLLECTION_PUBLIC)
-    SETCONSTANT(COLLECTION_SOCIAL)
+    SETCONSTANT(COLLECTION_FRIENDS)
 
 
 #undef SETCONSTANT
@@ -913,12 +913,15 @@ static void InitializeJNI(const char* client_id, bool request_server_auth_code)
     InitJNIMethods(env, cls);
 
     jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;ZZLjava/lang/String;)V");
-    jstring java_client_id = env->NewStringUTF(client_id);
+    jstring java_client_id = client_id == 0 ? 0 : env->NewStringUTF(client_id);
 
     g_gpgs.m_GpgsJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, threadAttacher.GetActivity()->clazz,
                                 g_gpgs_disk.is_using, request_server_auth_code, java_client_id));
 
-    env->DeleteLocalRef(java_client_id);
+    if (java_client_id != 0)
+    {
+        env->DeleteLocalRef(java_client_id);
+    }
 }
 
 static dmExtension::Result InitializeGpgs(dmExtension::Params* params)

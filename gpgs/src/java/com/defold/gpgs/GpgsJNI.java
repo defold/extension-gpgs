@@ -2,12 +2,14 @@ package com.defold.gpgs;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.google.android.gms.games.PlayGames;
+import com.google.android.gms.games.FriendsResolutionRequiredException;
 import com.google.android.gms.games.GamesSignInClient;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.ConnectionResult;
@@ -57,6 +59,7 @@ public class GpgsJNI {
     private static final int RC_ACHIEVEMENT_UI = 9003;
     private static final int RC_SHOW_LEADERBOARD = 9004;
     private static final int RC_SHOW_ALL_LEADERBOARDS = 9005;
+    private static final int RC_FRIENDS_RESOLUTION = 9006;
 
     // duplicate of enums from gpgs_extension.h:
     private static final int MSG_SIGN_IN = 1;
@@ -64,12 +67,12 @@ public class GpgsJNI {
     private static final int MSG_SHOW_SNAPSHOTS = 4;
     private static final int MSG_LOAD_SNAPSHOT = 5;
     private static final int MSG_SAVE_SNAPSHOT = 6;
-    private static final int MSG_ACHIEVEMENTS = 7;
+    private static final int MSG_GET_ACHIEVEMENTS = 7;
     private static final int MSG_GET_TOP_SCORES = 8;
     private static final int MSG_GET_PLAYER_CENTERED_SCORES = 9;
     private static final int MSG_GET_PLAYER_SCORE = 10;
     private static final int MSG_GET_EVENTS = 11;
-    private static final int MSG_GET_SERVER_TOKEN = 12;
+    private static final int MSG_GET_SERVER_AUTH_CODE = 12;
 
     // duplicate of enums from gpgs_extension.h:
     private static final int STATUS_SUCCESS = 1;
@@ -89,8 +92,12 @@ public class GpgsJNI {
     private boolean isDiskActive;
     private boolean isRequestAuthCode;
     private boolean isSupported;
-    private String mWebClientToken = null; // need for server auth token request
+    private String mWebClientId = null; // needed for server auth code requests
     private String mServerAuthCode = null; // can be non-null if isRequestAuthCode == true
+    private Runnable mFriendsResolutionRetry = null;
+    private int mFriendsResolutionMessageId = 0;
+    private String mFriendsResolutionError = null;
+    private Exception mFriendsResolutionException = null;
 
     //--------------------------------------------------
     // Authorization
@@ -172,12 +179,12 @@ public class GpgsJNI {
         }
     }
 
-    public GpgsJNI(Activity activity, boolean isDiskActive, boolean isRequestAuthCode, String oauthToken) {
+    public GpgsJNI(Activity activity, boolean isDiskActive, boolean isRequestAuthCode, String webClientId) {
         this.activity = activity;
         this.isDiskActive = isDiskActive;
         this.isRequestAuthCode = isRequestAuthCode;
         if (isRequestAuthCode) {
-            this.mWebClientToken = oauthToken;
+            this.mWebClientId = webClientId;
         }
 
         this.isSupported = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS;
@@ -191,35 +198,92 @@ public class GpgsJNI {
         mEventsClient = PlayGames.getEventsClient(activity);
     }
 
-    private void onConnected(final int msg) {
-        // until we get player information
-        mPlayer = null;
-        onAccountChangedDisk();
-        PlayersClient playersClient = PlayGames.getPlayersClient(activity);
-        if (this.isRequestAuthCode) {
-            mSignInClient.requestServerSideAccess(mWebClientToken, false)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            mServerAuthCode = task.getResult();
-                            sendSimpleMessage(MSG_GET_SERVER_TOKEN, "status", STATUS_SUCCESS, "token", mServerAuthCode);
-                        } else {
-                            sendFailedMessage(MSG_GET_SERVER_TOKEN, "Can't get server auth token", task.getException());
-                        }
-                    });
+    private void requestServerAuthCode() {
+        if (!isRequestAuthCode) {
+            return;
         }
-        playersClient.getCurrentPlayer()
+        if (mWebClientId == null || mWebClientId.isEmpty()) {
+            sendFailedMessage(MSG_GET_SERVER_AUTH_CODE, "Can't get server auth code: gpgs.client_id is not configured", null);
+            return;
+        }
+        mSignInClient.requestServerSideAccess(mWebClientId, false)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        mPlayer = task.getResult();
-                        sendSimpleMessage(msg, "status", STATUS_SUCCESS);
+                        mServerAuthCode = task.getResult();
+                        sendSimpleMessage(MSG_GET_SERVER_AUTH_CODE, "status", STATUS_SUCCESS, "code", mServerAuthCode);
                     } else {
-                        sendFailedMessage(MSG_SIGN_IN, "There was a problem getting the player id!", task.getException());
+                        sendFailedMessage(MSG_GET_SERVER_AUTH_CODE, "Can't get server auth code", task.getException());
                     }
                 });
     }
 
+    private void onConnected(final int msg) {
+        // Until we get player information.
+        mPlayer = null;
+        mServerAuthCode = null;
+        onAccountChangedDisk();
+        PlayGames.getPlayersClient(activity)
+                .getCurrentPlayer()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        mPlayer = task.getResult();
+                        sendSimpleMessage(msg, "status", STATUS_SUCCESS);
+                        requestServerAuthCode();
+                    } else {
+                        sendFailedMessage(msg, "There was a problem getting the player id!", task.getException());
+                    }
+                });
+    }
+
+    private void clearFriendsResolution() {
+        mFriendsResolutionRetry = null;
+        mFriendsResolutionMessageId = 0;
+        mFriendsResolutionError = null;
+        mFriendsResolutionException = null;
+    }
+
+    private boolean startFriendsResolution(Exception exception, int messageId, String error, Runnable retry) {
+        if (!(exception instanceof FriendsResolutionRequiredException)) {
+            return false;
+        }
+        if (mFriendsResolutionRetry != null) {
+            sendFailedMessage(messageId, error + ": another friends access request is already in progress", exception);
+            return true;
+        }
+
+        mFriendsResolutionRetry = retry;
+        mFriendsResolutionMessageId = messageId;
+        mFriendsResolutionError = error;
+        mFriendsResolutionException = exception;
+        try {
+            ((FriendsResolutionRequiredException) exception)
+                    .startResolutionForResult(activity, RC_FRIENDS_RESOLUTION);
+        } catch (IntentSender.SendIntentException e) {
+            clearFriendsResolution();
+            sendFailedMessage(messageId, error + ": unable to request friends access", e);
+        }
+        return true;
+    }
+
     public void activityResult(int requestCode, int resultCode, Intent intent) {
-         if (requestCode == RC_LIST_SAVED_GAMES) {
+        if (requestCode == RC_FRIENDS_RESOLUTION) {
+            Runnable retry = mFriendsResolutionRetry;
+            int messageId = mFriendsResolutionMessageId;
+            String error = mFriendsResolutionError;
+            Exception exception = mFriendsResolutionException;
+            clearFriendsResolution();
+            if (retry == null) {
+                return;
+            }
+            if (resultCode == Activity.RESULT_OK) {
+                retry.run();
+            } else {
+                sendFailedMessage(messageId, error + ": friends access was not granted", exception);
+            }
+            return;
+        }
+
+        if (requestCode == RC_LIST_SAVED_GAMES) {
             if (intent != null) {
                 if (intent.hasExtra(SnapshotsClient.EXTRA_SNAPSHOT_METADATA)) {
                     SnapshotMetadata snapshotMetadata =
@@ -536,6 +600,10 @@ public class GpgsJNI {
     }
 
     public void loadTopScores(final String leaderboardId, int span, int collection, int maxResults) {
+        loadTopScores(leaderboardId, span, collection, maxResults, true);
+    }
+
+    private void loadTopScores(final String leaderboardId, int span, int collection, int maxResults, boolean mayResolve) {
         mLeaderboardsClient.loadTopScores(leaderboardId, span, collection, maxResults)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -555,12 +623,21 @@ public class GpgsJNI {
                     buffer.release();
                     gpgsAddToQueue(MSG_GET_TOP_SCORES, message);
                 } else {
-                    sendFailedMessage(MSG_GET_TOP_SCORES, "Unable to get top scores", task.getException());
+                    Exception exception = task.getException();
+                    String error = "Unable to get top scores";
+                    if (!mayResolve || !startFriendsResolution(exception, MSG_GET_TOP_SCORES, error,
+                            () -> loadTopScores(leaderboardId, span, collection, maxResults, false))) {
+                        sendFailedMessage(MSG_GET_TOP_SCORES, error, exception);
+                    }
                 }
             });
     }
 
     public void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults, boolean forceReload) {
+        loadPlayerCenteredScores(leaderboardId, span, collection, maxResults, forceReload, true);
+    }
+
+    private void loadPlayerCenteredScores(final String leaderboardId, int span, int collection, int maxResults, boolean forceReload, boolean mayResolve) {
         mLeaderboardsClient.loadPlayerCenteredScores(leaderboardId, span, collection, maxResults, forceReload)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -581,12 +658,20 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_PLAYER_CENTERED_SCORES, message);
                 } else {
                     Exception exception = task.getException();
-                    sendFailedMessage(MSG_GET_PLAYER_CENTERED_SCORES, "Unable to get player centered scores", exception);
+                    String error = "Unable to get player centered scores";
+                    if (!mayResolve || !startFriendsResolution(exception, MSG_GET_PLAYER_CENTERED_SCORES, error,
+                            () -> loadPlayerCenteredScores(leaderboardId, span, collection, maxResults, forceReload, false))) {
+                        sendFailedMessage(MSG_GET_PLAYER_CENTERED_SCORES, error, exception);
+                    }
                 }
             });
     }
 
     public void loadCurrentPlayerLeaderboardScore(final String leaderboardId, int span, int collection) {
+        loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection, true);
+    }
+
+    private void loadCurrentPlayerLeaderboardScore(final String leaderboardId, int span, int collection, boolean mayResolve) {
         mLeaderboardsClient.loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection)
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -607,7 +692,11 @@ public class GpgsJNI {
                     gpgsAddToQueue(MSG_GET_PLAYER_SCORE, message);
                 } else {
                     Exception exception = task.getException();
-                    sendFailedMessage(MSG_GET_PLAYER_SCORE, "Unable to get player scores", exception);
+                    String error = "Unable to get player score";
+                    if (!mayResolve || !startFriendsResolution(exception, MSG_GET_PLAYER_SCORE, error,
+                            () -> loadCurrentPlayerLeaderboardScore(leaderboardId, span, collection, false))) {
+                        sendFailedMessage(MSG_GET_PLAYER_SCORE, error, exception);
+                    }
                 }
             });
     }
@@ -684,10 +773,10 @@ public class GpgsJNI {
                         } catch (JSONException e) {
                             message = "{ \"error\": \"Error while converting achievements to JSON: " + e.getMessage() + "\", \"status\": " + STATUS_FAILED + " }";
                         }
-                        gpgsAddToQueue(MSG_ACHIEVEMENTS, message);
+                        gpgsAddToQueue(MSG_GET_ACHIEVEMENTS, message);
                     } else {
                         Exception exception = task.getException();
-                        sendFailedMessage(MSG_ACHIEVEMENTS, "Unable to get achievements", exception);
+                        sendFailedMessage(MSG_GET_ACHIEVEMENTS, "Unable to get achievements", exception);
                     }
                 });
     }
