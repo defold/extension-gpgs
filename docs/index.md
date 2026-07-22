@@ -13,6 +13,8 @@ This extension provides functions for interacting with Google Play Games Service
 * Events
 * Leaderboards
 
+Upgrading an existing project? Follow the [GPGS v1 to v2 migration guide](https://github.com/defold/extension-gpgs/blob/master/V1-TO-V2-MIGRATION.md).
+
 
 ## Installation
 To use this library in your Defold project, add the following URL to your `game.project` dependencies:
