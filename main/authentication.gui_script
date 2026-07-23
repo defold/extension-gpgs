@@ -2,13 +2,45 @@ local dirtylarry = require "dirtylarry.dirtylarry"
 local monarch = require "monarch.monarch"
 
 
-local function gpgs_callback(self, message_id, message)
-	if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
-		if message.status == gpgs.STATUS_SUCCESS then
-			gui.set_text(gui.get_node("id"), gpgs.get_id())
-			gui.set_text(gui.get_node("name"), gpgs.get_display_name())
+local function message_name(message_id)
+	if message_id == gpgs.MSG_SIGN_IN then
+		return "MSG_SIGN_IN"
+	elseif message_id == gpgs.MSG_SILENT_SIGN_IN then
+		return "MSG_SILENT_SIGN_IN"
+	elseif message_id == gpgs.MSG_GET_SERVER_AUTH_CODE then
+		return "MSG_GET_SERVER_AUTH_CODE"
+	end
+	return "UNKNOWN"
+end
 
-		end
+local function update_login_state()
+	local is_logged_in = gpgs and gpgs.is_logged_in()
+	gui.set_text(gui.get_node("authorized"), "is_logged_in: " .. tostring(is_logged_in))
+
+	if is_logged_in then
+		gui.set_text(gui.get_node("id"), "Player ID: " .. tostring(gpgs.get_id()))
+		gui.set_text(gui.get_node("name"), "Display name: " .. tostring(gpgs.get_display_name()))
+	else
+		gui.set_text(gui.get_node("id"), "Player ID: -")
+		gui.set_text(gui.get_node("name"), "Display name: -")
+	end
+end
+
+local function gpgs_callback(self, message_id, message)
+	print(("GPGS callback: message=%s (%s), status=%s"):format(
+		message_name(message_id),
+		tostring(message_id),
+		tostring(message.status)
+	))
+	if message.error_status then
+		print("GPGS error status: " .. tostring(message.error_status))
+	end
+	if message.error then
+		print("GPGS error: " .. tostring(message.error))
+	end
+
+	if message_id == gpgs.MSG_SIGN_IN or message_id == gpgs.MSG_SILENT_SIGN_IN then
+		update_login_state()
 	elseif message_id == gpgs.MSG_GET_SERVER_AUTH_CODE then
 		if message.status == gpgs.STATUS_SUCCESS then
 			print("auth_code: ", message.code)
@@ -16,20 +48,21 @@ local function gpgs_callback(self, message_id, message)
 			print("auth_code error: ", message.error)
 		end
 	end
-	gui.set_text(gui.get_node("authorized"), "is_logged_in: " .. tostring(gpgs.is_logged_in()))
 end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	if gpgs then
 		gpgs.set_callback(gpgs_callback)
+		update_login_state()
+		print("GPGS silent login requested")
 		gpgs.silent_login()
 	end
 end
 
 function on_input(self, action_id, action)
 	dirtylarry:button("login", action_id, action, function ()
-		print("LOGIN was pressed")
+		print("GPGS explicit login requested")
 		if gpgs then
 			gpgs.login()
 		end
