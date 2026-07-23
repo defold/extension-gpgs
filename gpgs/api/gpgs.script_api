@@ -1,6 +1,6 @@
 - name: gpgs
   type: table
-  desc: Functions and constants for interacting with Google Play Game Services (GPGS) APIs
+  desc: Functions and constants for interacting with Google Play Games Services (GPGS) APIs
 
   members:
 
@@ -100,14 +100,14 @@
     type: function
     desc: Returns a one-time server auth code to send to your web server which can be exchanged for access token
 
-          Token can be retrieved only if `gpgs.request_server_auth_code` set to 1 and `gpgs.client` is set.
+          A code can be retrieved only if `gpgs.request_server_auth_code` is set to 1 and `gpgs.client_id` is set.
 
     returns:
       - name: server_auth_code
-        type: string
+        type: string|nil
         desc: The server auth code for logged in account. Can be nil if operation is not completed yet.
 
-              Auth token is avaliable after receiving message with id `gpgs.MSG_GET_SERVER_TOKEN`
+              The auth code is available after receiving a message with id `gpgs.MSG_GET_SERVER_AUTH_CODE`
               in callback set via `gpgs.set_callback`.
 
     examples:
@@ -166,13 +166,28 @@
 
               - `gpgs.MSG_SAVE_SNAPSHOT`
 
+              - `gpgs.MSG_GET_ACHIEVEMENTS`
+
+              - `gpgs.MSG_GET_TOP_SCORES`
+
+              - `gpgs.MSG_GET_PLAYER_CENTERED_SCORES`
+
+              - `gpgs.MSG_GET_PLAYER_SCORE`
+
+              - `gpgs.MSG_GET_EVENTS`
+
+              - `gpgs.MSG_GET_SERVER_AUTH_CODE`
+
 
           - name: message
             type: table
-            desc: Contains information that depends on message_id.
+            desc: Contains information that depends on message_id. Successful achievement, event, top-score, and
+                  player-centered-score queries return arrays of JSON strings. Decode each string with `json.decode()`.
+                  A successful player-score query returns the score fields directly. Other operations include `status`.
             members:
             - name: status
               type: number
+              optional: true
               desc: Status of the current operation. It can be one of the predefined constants below
 
                     - `gpgs.STATUS_SUCCESS`
@@ -207,6 +222,12 @@
                     - `gpgs.ERROR_STATUS_SNAPSHOT_NOT_FOUND`
 
                     Or it can be ApiException.getStatusCode() (if ApiException was thrown)
+
+            - name: code
+              type: string
+              optional: true
+              desc: The one-time server auth code. Available only when `message_id` is
+                    `gpgs.MSG_GET_SERVER_AUTH_CODE` and `status` is `gpgs.STATUS_SUCCESS`.
 
             - name: metadata
               type: table
@@ -558,7 +579,8 @@
 
   - name: leaderboard_get_top_scores
     type: function
-    desc: Asynchronously gets the top page of scores for a leaderboard.
+    desc: Asynchronously gets the top page of scores for a leaderboard. The callback receives an array of JSON
+          strings with score data; decode each string with `json.decode()`.
 
     parameters:
       - name: leaderboardId
@@ -580,7 +602,8 @@
 
   - name: leaderboard_get_player_centered_scores
     type: function
-    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
+    desc: Asynchronously gets a player-centered page of scores for a leaderboard. The callback receives an array of
+          JSON strings with score data; decode each string with `json.decode()`.
 
     parameters:
       - name: leaderboardId
@@ -629,7 +652,8 @@
 #*****************************************************************************************************
   - name: leaderboard_get_player_score
     type: function
-    desc: Asynchronously gets a player-centered page of scores for a leaderboard.
+    desc: Asynchronously gets the current player's score for a leaderboard. The callback receives the score fields
+          directly in the message table.
 
     parameters:
       - name: leaderboardId
@@ -701,8 +725,8 @@
   - name: achievement_get
     type: function
     desc: Get information about all achievement's state asynchronously. Result return to callback previously set by
-          `gpgs.set_callback` with `message_id == gpgs.MSG_ACHIEVEMENTS`. Result is array of tables which contain
-          following fields
+          `gpgs.set_callback` with `message_id == gpgs.MSG_GET_ACHIEVEMENTS`. Result is an array of JSON strings.
+          Decode each string with `json.decode()` to get a table containing the following fields
           
           - `id` - achievement id (from GP console)
           
@@ -741,8 +765,8 @@
   - name: event_get
     type: function
     desc: Get information about all events asynchronously. Result returns to callback previously set by
-          `gpgs.set_callback` with `message_id == gpgs.MSG_GET_EVENTS`. Result is array of tables which contain
-          following fields
+          `gpgs.set_callback` with `message_id == gpgs.MSG_GET_EVENTS`. Result is an array of JSON strings. Decode
+          each string with `json.decode()` to get a table containing the following fields
 
           - `id` - event id
           
@@ -781,6 +805,27 @@
     type: number
     desc: Official [GPGS documentation](https://developers.google.com/android/reference/com/google/android/gms/games/SnapshotsClient.html#RESOLUTION_POLICY_HIGHEST_PROGRESS) for this constant
 
+  - name: TIME_SPAN_DAILY
+    type: number
+    desc: Select leaderboard scores from the current day.
+
+  - name: TIME_SPAN_WEEKLY
+    type: number
+    desc: Select leaderboard scores from the current week.
+
+  - name: TIME_SPAN_ALL_TIME
+    type: number
+    desc: Select leaderboard scores from all time.
+
+  - name: COLLECTION_PUBLIC
+    type: number
+    desc: Select scores from players who share their gameplay activity publicly.
+
+  - name: COLLECTION_FRIENDS
+    type: number
+    desc: Select scores from players in the current player's friends list. A score query may show a Google Play
+          consent dialog the first time this collection is used.
+
   - name: MSG_SIGN_IN
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
@@ -806,10 +851,35 @@
     desc: The message type that GPGS sends when finishing the asynchronous operation
           after calling `gpgs.snapshot_commit_and_close()`
 
-  - name: MSG_GET_SERVER_TOKEN
+  - name: MSG_GET_ACHIEVEMENTS
     type: number
     desc: The message type that GPGS sends when finishing the asynchronous operation
-          of server token retrieval
+          after calling `gpgs.achievement_get()`
+
+  - name: MSG_GET_TOP_SCORES
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_top_scores()`
+
+  - name: MSG_GET_PLAYER_CENTERED_SCORES
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_player_centered_scores()`
+
+  - name: MSG_GET_PLAYER_SCORE
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.leaderboard_get_player_score()`
+
+  - name: MSG_GET_EVENTS
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          after calling `gpgs.event_get()`
+
+  - name: MSG_GET_SERVER_AUTH_CODE
+    type: number
+    desc: The message type that GPGS sends when finishing the asynchronous operation
+          of server auth code retrieval
 
   - name: STATUS_SUCCESS
     type: number
