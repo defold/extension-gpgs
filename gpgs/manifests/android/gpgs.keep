@@ -1,0 +1,2 @@
+# Native code loads the GPGS bridge and invokes its methods by name.
+-keep,allowoptimization class com.defold.gpgs.** { *; }
